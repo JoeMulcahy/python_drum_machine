@@ -1,0 +1,39 @@
+pattern builder
+    - build in pattern builder
+    - select sequence of patterns and number of steps per pattern
+    arrange pattern in a sequence by dragging from stepper or pattern select
+
+playable drum pads
+
+realtime clip recording (mic input)
+
+waveform mode
+
+################################################################
+To Do
+
+Pattern Select
+- save global patterns (shelf)
+- load global pattern
+- banks?
+
+Stepper
+- clear pattern
+- random pattern
+- playback control
+    - immediate change on pattern select
+    - wait for stepper sequence to complete before play back of next pattern
+    - play new pattern from the very beginning
+
+Transport
+- tempo
+
+################################################################
+
+Behaviours
+
+each channel has a pattern associated with it
+    - when a channel is selected the pattern is the stepper will change (not the entire sequencer module)
+    - each channel will have a list which represents on and off values
+    - selecting a channel will select list representing on . off value
+
