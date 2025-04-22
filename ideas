@@ -32,8 +32,9 @@ Transport
 
 Behaviours
 
-each channel has a pattern associated with it
-    - when a channel is selected the pattern is the stepper will change (not the entire sequencer module)
-    - each channel will have a list which represents on and off values
-    - selecting a channel will select list representing on . off value
+when i select a global pattern
+- get the index of the pattern button
+- select the global pattern from global patterns dict() using the index
+- this will be a list of patterns for each channel
+- display the pattern for the currently select channel
 

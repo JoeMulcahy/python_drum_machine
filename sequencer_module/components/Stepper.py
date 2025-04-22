@@ -23,14 +23,24 @@ class Stepper(QWidget):
 
         # stepper buttons
         for i in range(self.__number_of_steps):
+            step_indicator = QLabel(f".")
+            step_indicator.setStyleSheet(
+                """
+                    QLabel {
+                        font-size: 40px;       /* Resize text */
+                        color: #12ff12;        /* Change text color */
+                    }
+                """
+            )
             button = QPushButton()
             button.setProperty("id", i)
             button.setFixedSize(50, 50)
             button.setStyleSheet(self.default_color)  # set color
             label = QLabel(f"{i + 1}")
             self.__stepper_buttons_list.append(button)
-            self.stepper_layout.addWidget(button, 0, int(i), alignment=Qt.AlignmentFlag.AlignBottom)
-            self.stepper_layout.addWidget(label, 1, int(i), alignment=Qt.AlignmentFlag.AlignHCenter)
+            self.stepper_layout.addWidget(step_indicator, 0, int(i), alignment=Qt.AlignmentFlag.AlignHCenter)
+            self.stepper_layout.addWidget(button, 1, int(i), alignment=Qt.AlignmentFlag.AlignBottom)
+            self.stepper_layout.addWidget(label, 2, int(i), alignment=Qt.AlignmentFlag.AlignHCenter)
             self.stepper_layout.setRowStretch(0, 5)
             self.stepper_layout.setRowStretch(1, 1)
 
@@ -45,7 +55,6 @@ class Stepper(QWidget):
         self.setLayout(main_layout)
 
     def __button_toggle(self, btn_id):
-        print(f"button {btn_id} toggle")
         self.__update_stepper_buttons_list(int(btn_id))
 
     def __update_stepper_buttons_list(self, index):
@@ -53,7 +62,7 @@ class Stepper(QWidget):
             self.__current_stepper_buttons_selected[index] = 1
         else:
             self.__current_stepper_buttons_selected[index] = 0
-        print(self.__current_stepper_buttons_selected)
+        #print(self.__current_stepper_buttons_selected)
         self.__update_stepper_button_pattern_visually()
 
     def __update_stepper_button_pattern_visually(self):

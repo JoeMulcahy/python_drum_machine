@@ -41,6 +41,10 @@ class PatternSelect(QWidget):
         self.__update_pattern_select_buttons_visually(self.__selected_button_index)
 
     @property
+    def buttons_list(self):
+        return self.__buttons_list
+
+    @property
     def selected_button_index(self):
         return self.__selected_button_index
 

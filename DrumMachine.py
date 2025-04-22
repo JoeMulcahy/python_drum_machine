@@ -1,21 +1,35 @@
+import random
+
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout, QMainWindow, QVBoxLayout
 
 from Channel import Channel
 from sequencer_module.SequencerModule import SequencerModule
+from timer.ApplicationTimer import ApplicationTimer
 from transport_module.Transport import Transport
 
 
 class DrumMachine(QWidget):
     def __init__(self):
         super().__init__()
-        drum_machine_layout = QGridLayout()  # layout for various modules in drum machine
-        self.__init_number_of_steps = 16  # initial number of steps in stepper
-        self.__current_global_pattern = 1  # pattern select (PatternSelect.py)
+        drum_machine_layout = QGridLayout()     # layout for various modules in drum machine
+        self.__init_number_of_steps = 16        # initial number of steps in stepper
+        self.__current_global_pattern = list()  # pattern select (PatternSelect.py)
 
-        self.__channels_list = list()  # list of channel modules
+        self.__channels_list = list()                       # list of channel modules
         self.__stepper_patterns_for_channels_list = list()  # list of stepper patterns for each channel
-        self.__global_stepper_patterns_dict = dict()  # dictionary of global patterns
+        self.__global_stepper_patterns_dict = dict()        # dictionary of global patterns
+        self.__current_pattern_button_index = 0
+        self.__current_selected_channel_index = 0
+
+        self.__tempo = 120
+        self.__beats_per_bar = 4
+        self.__meter = 4
+
+        self.__timing_resolution = self.create_timing_resolution_dict()
+
+        # initialise application timer
+        self.__app_timer = ApplicationTimer(120, 4, 4)
 
         # layout for the step sequencer's audio channels
         channels_layout = QGridLayout()
@@ -27,7 +41,7 @@ class DrumMachine(QWidget):
         controls_layout.setSpacing(15)
         controls_layout.setContentsMargins(10, 10, 10, 10)
 
-        # create 8 channels and to layout
+        # create 8 channels and add to layout
         # initialise stepper patterns for each channel and add to stepper_patterns_for_channels_list
         # add channel to channels layout
         for i in range(8):
@@ -36,15 +50,19 @@ class DrumMachine(QWidget):
             self.__stepper_patterns_for_channels_list.append([0 for i in range(self.__init_number_of_steps)])
             channels_layout.addWidget(channel, 0, i)
 
-        self.__current_pattern = self.__stepper_patterns_for_channels_list[0]
-
         # new Transport and SequencerModule
         self.__transport = Transport()
         self.__sequencer_module = SequencerModule(self.__init_number_of_steps)
 
         # create dictionary of global stepper patterns from all channels
         for i in range(self.__sequencer_module.pattern_select.number_of_buttons):
-            self.__global_stepper_patterns_dict[i] = self.__stepper_patterns_for_channels_list
+            self.__global_stepper_patterns_dict[i] = self.initialise_pattern()
+
+        self.__current_global_pattern = self.__global_stepper_patterns_dict[self.__current_pattern_button_index]
+        self.__current_pattern = self.__current_global_pattern[0]
+
+        # select first channel as default
+        self.select_channel(self.__current_selected_channel_index)
 
         # add transport and sequencerModule to layout controls layout
         controls_layout.addWidget(self.__transport, 0, 0, alignment=Qt.AlignmentFlag.AlignLeft)
@@ -66,13 +84,80 @@ class DrumMachine(QWidget):
             select_button = channel.select_button
             select_button.clicked.connect((lambda checked, b=select_button: self.select_channel(b.property("id"))))
 
+        # Listener for (global) pattern select
+        for btn in self.__sequencer_module.pattern_select.buttons_list:
+            btn.clicked.connect(lambda checked, b=btn: self.__update_global_pattern(int(b.text())))
+
+        # Listeners for Transport module
+        self.__transport.btn_play.clicked.connect(lambda: self.start_playback())
+        self.__transport.btn_stop.clicked.connect(lambda: self.stop_playback())
+        self.__transport.tempo_spinbox.valueChanged.connect(lambda value: self.set_tempo(value))
+
+        # Listener for Timing resolution module
+        self.__sequencer_module.timing_resolution_select.\
+            timing_select_dial.valueChanged.connect(lambda index: self.set_timing_resolution(index))
+
+    # start playback
+    def start_playback(self):
+        self.__app_timer.start_counter()
+
+    # stop playback
+    def stop_playback(self):
+        self.__app_timer.stop_counter()
+
+    def set_tempo(self, value):
+        print(f"debug: setting tempo {int(value)}")
+        self.__app_timer.set_tempo(int(value))
+
+    def set_time_resolution(self, bpb, meter):
+        self.__app_timer.set_timing_resolution(bpb, meter)
+
+    def set_timing_resolution(self, index):
+        index = index - 1
+        self.set_time_resolution(self.__timing_resolution[index][0], self.__timing_resolution[index][1])
+
     # highlight channel upon selection
     # select pattern associated with selected channel and update pattern on the stepper
     def select_channel(self, btn_id):
+        self.__current_selected_channel_index = int(btn_id)
         for channel in self.__channels_list:
             channel.unselect_channel()
 
-        channel = self.__channels_list[int(btn_id)]
+        channel = self.__channels_list[self.__current_selected_channel_index]
         channel.select_channel()
-        self.__current_pattern = self.__stepper_patterns_for_channels_list[int(btn_id)]
+
+        self.__current_pattern = self.__global_stepper_patterns_dict[self.__current_pattern_button_index][
+            self.__current_selected_channel_index]
         self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
+
+    def __update_global_pattern(self, index):
+        self.__current_global_pattern = self.__global_stepper_patterns_dict[index - 1]
+        self.__current_pattern = self.__current_global_pattern[self.__current_selected_channel_index]
+        self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
+
+        print("Debug")
+        print(f"index: {index - 1}")
+        print(f"channel index: {self.__current_selected_channel_index}")
+        print(f"")
+
+    def initialise_pattern(self):
+        patterns_list = list()
+
+        for i in range(self.__sequencer_module.pattern_select.number_of_buttons):
+            patterns_list.append([0 for i in range(self.__init_number_of_steps)])
+
+        return patterns_list
+
+    def create_timing_resolution_dict(self):
+        d = dict()
+        d[0] = [4, 2]
+        d[1] = [4, 4]
+        d[2] = [8, 4]
+        d[3] = [8, 3]
+        d[4] = [16, 4]
+        d[5] = [16, 3]
+        d[6] = [32, 4]
+        d[7] = [64, 4]
+
+        return d
+

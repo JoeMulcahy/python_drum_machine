@@ -1,7 +1,7 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout, QPushButton, QGroupBox, QVBoxLayout, QLabel, QDial, QSpinBox
 
-from sequencer_module.components.TimingSelector import TimingSelector
+from sequencer_module.components.TimingResolutionSelector import TimingSelector
 
 
 class Stepper(QWidget):
