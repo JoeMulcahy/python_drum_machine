@@ -14,16 +14,28 @@ class ApplicationTimer(threading.Thread):
         self.__meter = meter
         self.__interval = 60 / self.__tempo * (self.__beats_per_bar / self.__meter)
 
+        self.__pulse_callback = None
+
     def app_counter(self):
         while not self.stop_event.is_set():
             if self.__is_counting:
-                print(f"tick - {self.__counter}")
+                self.pulse()
                 time.sleep(self.__interval)
                 self.__counter += 1
             else:
                 time.sleep(0.1)
 
+    def set_pulse_callback(self, callback):
+        self.__pulse_callback = callback
+
+    def pulse(self):
+        if self.__pulse_callback:
+            self.__pulse_callback(self.__counter)
+
     def start_counter(self):
+        if self.__is_counting:
+            self.stop_counter()
+
         self.stop_event = threading.Event()
         self.reset_counter()
         self.__is_counting = True
@@ -31,11 +43,12 @@ class ApplicationTimer(threading.Thread):
         self.thread.start()
 
     def stop_counter(self):
-        self.__is_counting = False
-        self.stop_event.set()
-        if self.thread is not None:
-            self.thread.join()  # waits for thread to fully stop
-        self.reset_counter()
+        if self.__is_counting:
+            self.__is_counting = False
+            self.stop_event.set()
+            if self.thread is not None:
+                self.thread.join()  # waits for thread to fully stop
+            self.reset_counter()
 
     def reset_counter(self):
         self.__counter = 0

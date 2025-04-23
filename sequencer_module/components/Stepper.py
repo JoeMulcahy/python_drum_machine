@@ -11,9 +11,9 @@ class Stepper(QWidget):
         self.__current_stepper_buttons_selected = [0 for x in range(number_of_steps)]
         self.__number_of_steps = number_of_steps
         self.__number_of_steps_playable = self.__number_of_steps
+        self.__step_indicator_list = list()                         # list of stepper indicator (above stepper buttons)
 
         self.group_box_stepper = QGroupBox("Stepper")
-
         self.stepper_layout = QGridLayout()
 
         # button colors
@@ -21,21 +21,24 @@ class Stepper(QWidget):
         self.toggle_on_color = "background-color: #ef9912; color: white;"
         self.play_color = "background-color: #12ff12; color: white;"
 
-        # stepper buttons
+        # stepper buttons, indicators and stepper button numbers
+        self.__green_indicator = "#12ff12"
+        self.__red_indicator = "#ff1212"
+
+        self.__green_indicator = "QLabel {font-size: 40px; color: #12ff12;}"
+        self.__red_indicator = "QLabel {font-size: 45px; color: #ff1212;}"
+        self.__orange_indicator = "QLabel {font-size: 45px; color: #ffff12;}"
+
         for i in range(self.__number_of_steps):
             step_indicator = QLabel(f".")
-            step_indicator.setStyleSheet(
-                """
-                    QLabel {
-                        font-size: 40px;       /* Resize text */
-                        color: #12ff12;        /* Change text color */
-                    }
-                """
-            )
+            step_indicator.setStyleSheet(self.__orange_indicator)
+            self.__step_indicator_list.append(step_indicator)
+
             button = QPushButton()
             button.setProperty("id", i)
             button.setFixedSize(50, 50)
             button.setStyleSheet(self.default_color)  # set color
+
             label = QLabel(f"{i + 1}")
             self.__stepper_buttons_list.append(button)
             self.stepper_layout.addWidget(step_indicator, 0, int(i), alignment=Qt.AlignmentFlag.AlignHCenter)
@@ -102,10 +105,24 @@ class Stepper(QWidget):
     def number_of_steps(self, value):
         self.__number_of_steps = value
 
-    def __play_step_color(self, index):
-        previous_index = (index - 1) % self.__number_of_steps
+    def play_step_color(self, index):
+        print(index)
+        index = index % self.__number_of_steps
+        previous_index = (index - 1) % self.__number_of_steps  # ensures wrap-around
+
         self.__stepper_buttons_list[index].setStyleSheet(self.play_color)
+
         if self.__current_stepper_buttons_selected[previous_index] == 1:
             self.__stepper_buttons_list[previous_index].setStyleSheet(self.toggle_on_color)
-        elif self.__current_stepper_buttons_selected[index] == 0:
+        else:
             self.__stepper_buttons_list[previous_index].setStyleSheet(self.default_color)
+
+    def stepper_indicators_on_play(self, counter):
+        counter = counter % self.__number_of_steps
+        self.__step_indicator_list[counter - 1].setStyleSheet(self.__green_indicator)
+        self.__step_indicator_list[counter].setStyleSheet(self.__red_indicator)
+
+    def reset_stepper_indicators(self):
+        for indicator in self.__step_indicator_list:
+            indicator.setStyleSheet(self.__green_indicator)
+

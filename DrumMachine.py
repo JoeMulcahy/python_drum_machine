@@ -5,6 +5,8 @@ from PyQt6.QtWidgets import QWidget, QGridLayout, QMainWindow, QVBoxLayout
 
 from Channel import Channel
 from sequencer_module.SequencerModule import SequencerModule
+from sound_engine.SoundWave import SoundWave, SinWave
+
 from timer.ApplicationTimer import ApplicationTimer
 from transport_module.Transport import Transport
 
@@ -12,9 +14,9 @@ from transport_module.Transport import Transport
 class DrumMachine(QWidget):
     def __init__(self):
         super().__init__()
-        drum_machine_layout = QGridLayout()     # layout for various modules in drum machine
-        self.__init_number_of_steps = 16        # initial number of steps in stepper
-        self.__current_global_pattern = list()  # pattern select (PatternSelect.py)
+        drum_machine_layout = QGridLayout()                 # layout for various modules in drum machine
+        self.__init_number_of_steps = 16                    # initial number of steps in stepper
+        self.__current_global_pattern = list()              # pattern select (PatternSelect.py)
 
         self.__channels_list = list()                       # list of channel modules
         self.__stepper_patterns_for_channels_list = list()  # list of stepper patterns for each channel
@@ -26,10 +28,15 @@ class DrumMachine(QWidget):
         self.__beats_per_bar = 4
         self.__meter = 4
 
-        self.__timing_resolution = self.create_timing_resolution_dict()
+        self.__timing_resolution_dict = self.create_timing_resolution_dict()    # dictionary of [bpm, meter] timings
+
+        self.__metronome_on = False                                             # metronome on/off flag
+
+        self.__metronome_hi_pitch = SinWave("hi", 200, 1, 1, 44100)
 
         # initialise application timer
         self.__app_timer = ApplicationTimer(120, 4, 4)
+        self.__app_timer.set_pulse_callback(self.on_pulse)                      # receive a 'pulse' from app_timer
 
         # layout for the step sequencer's audio channels
         channels_layout = QGridLayout()
@@ -92,10 +99,27 @@ class DrumMachine(QWidget):
         self.__transport.btn_play.clicked.connect(lambda: self.start_playback())
         self.__transport.btn_stop.clicked.connect(lambda: self.stop_playback())
         self.__transport.tempo_spinbox.valueChanged.connect(lambda value: self.set_tempo(value))
+        self.__transport.metronome_checkbox.clicked.connect(
+            lambda checked: self.set_metronome_on_off(checked)
+        )
 
         # Listener for Timing resolution module
-        self.__sequencer_module.timing_resolution_select.\
+        self.__sequencer_module.timing_resolution_select. \
             timing_select_dial.valueChanged.connect(lambda index: self.set_timing_resolution(index))
+
+    ########################################################################
+    # Take action upon receiving pulse from app_timer
+    ########################################################################
+    def on_pulse(self, count):
+        print(f"DrumMachine received pulse {count}")
+        # Trigger sound playback or other logic here
+        self.__sequencer_module.stepper.play_step_color(count)
+        self.__sequencer_module.stepper.stepper_indicators_on_play(count)
+
+        print(self.__current_pattern)
+        if self.__current_pattern[count % 16] == 1:
+            self.__channels_list[self.__current_selected_channel_index].play_sample()
+
 
     # start playback
     def start_playback(self):
@@ -104,17 +128,22 @@ class DrumMachine(QWidget):
     # stop playback
     def stop_playback(self):
         self.__app_timer.stop_counter()
+        self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
+        self.__sequencer_module.stepper.reset_stepper_indicators()
 
     def set_tempo(self, value):
-        print(f"debug: setting tempo {int(value)}")
         self.__app_timer.set_tempo(int(value))
+
+    def set_metronome_on_off(self, is_on):
+        self.__metronome_on = is_on
+        print(f"metronome: {self.__metronome_on}")
 
     def set_time_resolution(self, bpb, meter):
         self.__app_timer.set_timing_resolution(bpb, meter)
 
     def set_timing_resolution(self, index):
         index = index - 1
-        self.set_time_resolution(self.__timing_resolution[index][0], self.__timing_resolution[index][1])
+        self.set_time_resolution(self.__timing_resolution_dict[index][0], self.__timing_resolution_dict[index][1])
 
     # highlight channel upon selection
     # select pattern associated with selected channel and update pattern on the stepper
@@ -142,7 +171,6 @@ class DrumMachine(QWidget):
 
     def initialise_pattern(self):
         patterns_list = list()
-
         for i in range(self.__sequencer_module.pattern_select.number_of_buttons):
             patterns_list.append([0 for i in range(self.__init_number_of_steps)])
 
@@ -150,7 +178,7 @@ class DrumMachine(QWidget):
 
     def create_timing_resolution_dict(self):
         d = dict()
-        d[0] = [4, 2]
+        d[0] = [2, 4]
         d[1] = [4, 4]
         d[2] = [8, 4]
         d[3] = [8, 3]
@@ -160,4 +188,3 @@ class DrumMachine(QWidget):
         d[7] = [64, 4]
 
         return d
-

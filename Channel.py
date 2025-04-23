@@ -47,9 +47,9 @@ class Channel(QWidget):
     def __init__(self, channel_index):
         super().__init__()
 
-        self.audio_samples_list = get_audio_samples_list()  # create list of audio samples:
-        audio_sample_names = [file.name for file in self.audio_samples_list]  # create list of audio sample names: str
-        self.currently_selected_audio_file = self.audio_samples_list[0]  # set current sample from 1st in list
+        self.audio_samples_list = get_audio_samples_list()                      # create list of audio samples:
+        audio_sample_names = [file.name for file in self.audio_samples_list]    # create list of audio sample names: str
+        self.currently_selected_audio_file = self.audio_samples_list[0]         # set current sample to 1st in list
         self.set_current_selected_audio_file(0)
 
         self.__channel_index = channel_index
@@ -103,7 +103,7 @@ class Channel(QWidget):
         self.lbl_volume_text.mouseDoubleClickEvent = lambda event: self.dial_volume.setValue(50)
         self.lbl_pan_text.mouseDoubleClickEvent = lambda event: self.dial_pan.setValue(50)
         self.lbl_pitch_text.mouseDoubleClickEvent = lambda event: self.dial_pitch.setValue(50)
-        self.lbl_length_text.mouseDoubleClickEvent = lambda event: self.dial_length.setValue(50)
+        self.lbl_length_text.mouseDoubleClickEvent = lambda event: self.dial_length.setValue(100)
         self.lbl_duration_text.mouseDoubleClickEvent = lambda event: self.dial_duration.setValue(50)
 
         self.sound_selection_combo_box.currentIndexChanged.connect(
