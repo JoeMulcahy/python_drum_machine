@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
 
 from enum import Enum
 
-from sound_engine.SoundPlayer import AudioFile
+from sound_engine.AudioFile import AudioFile
 
 
 class ChannelType(Enum):
@@ -30,55 +30,53 @@ class ChannelType(Enum):
     EXTRA_4 = 16,
 
 
-####################################################
-## Create a list of sounds from dir
-####################################################
-def get_audio_samples_list():
-    audio_list = list()
-    directory = Path(r"C:\Users\josep\Desktop\Step Seq\audio")
-    for file in directory.iterdir():
-        if file.is_file():
-            audio_list.append(file)
-
-    return audio_list
+# TODO create a name field that allows the user to name a channel, default name is name of audio file selected
+# TODO switch between .wav and digital waveform mode. Will require 2 channel types and channel super class
 
 
-class Channel(QWidget):
+class DrumMachineChannel(QWidget):
     def __init__(self, channel_index):
         super().__init__()
-
-        self.audio_samples_list = get_audio_samples_list()                      # create list of audio samples:
-        audio_sample_names = [file.name for file in self.audio_samples_list]    # create list of audio sample names: str
-        self.currently_selected_audio_file = self.audio_samples_list[0]         # set current sample to 1st in list
+        self.samples_dir = r"C:\Users\josep\Desktop\Step Seq\audio"
+        self.audio_samples_list = self.get_audio_samples_list()  # create list of audio samples:
+        audio_sample_names = [file.name for file in self.audio_samples_list]  # create list of audio sample names: str
+        self.currently_selected_audio_file = self.audio_samples_list[0]  # set current sample to 1st in list
         self.set_current_selected_audio_file(0)
 
         self.__channel_index = channel_index
         self.lbl_current_sound = QLabel("Sound: ")
 
+        # channel colors: default, selected
         self.default_channel_color = "QGroupBox { background-color: blue; border: 1px solid gray; }"
         self.channel_select_color = "QGroupBox { background-color: light-gray; border: 1px solid gray; }"
 
+        # groupbox
         self.group_box = QGroupBox(f"Channel: {self.__channel_index}")
         self.group_box.setStyleSheet(self.default_channel_color)
 
+        # combobox with audio file names
         self.sound_selection_combo_box = QComboBox()
         self.sound_selection_combo_box.addItems(audio_sample_names)
         self.sound_selection_combo_box.setCurrentIndex(0)
 
+        # sound preview button
         self.btn_preview_sound = QPushButton("Play")
 
+        # labels for channel controls
         self.lbl_volume = QLabel('Volume')
         self.lbl_pan = QLabel('Pan')
         self.lbl_pitch = QLabel('Pitch')
         self.lbl_length = QLabel('Length')
         self.lbl_duration = QLabel('Duration')
 
+        # labels for channel control amounts
         self.lbl_volume_text = QLabel("50%")
         self.lbl_pan_text = QLabel("50%")
         self.lbl_pitch_text = QLabel("50%")
         self.lbl_length_text = QLabel("50%")
         self.lbl_duration_text = QLabel('50%')
 
+        # channel controls
         self.dial_volume = QDial()
         self.dial_pan = QDial()
         self.dial_pitch = QDial()
@@ -86,7 +84,7 @@ class Channel(QWidget):
         self.dial_duration = QDial()
 
         self.select_channel_button = QPushButton("Select")
-        self.select_channel_button.setProperty("id", channel_index)
+        self.select_channel_button.setProperty("id", channel_index)  # channel identifier
 
         self.init_components()
 
@@ -106,15 +104,14 @@ class Channel(QWidget):
         self.lbl_length_text.mouseDoubleClickEvent = lambda event: self.dial_length.setValue(100)
         self.lbl_duration_text.mouseDoubleClickEvent = lambda event: self.dial_duration.setValue(50)
 
+        # sets currently select audio file to selected combo box index
         self.sound_selection_combo_box.currentIndexChanged.connect(
             lambda: self.set_current_selected_audio_file(self.sound_selection_combo_box.currentIndex()))
 
         self.btn_preview_sound.pressed.connect(lambda: self.play_sample())
-        #self.select_channel_button.pressed.connect(lambda: self.select_channel(self.channel_name))
 
     def init_components(self):
         layout = QGridLayout()
-        # group_box = QGroupBox(f"Channel: {self.channel_name}")
 
         layout.addWidget(self.lbl_current_sound, 0, 0)
         layout.addWidget(self.sound_selection_combo_box, 0, 1)
@@ -197,11 +194,13 @@ class Channel(QWidget):
         if self.currently_selected_audio_file is not None:
             self.currently_selected_audio_file.set_sample_duration(float(self.dial_duration.value()) / 100)
 
+    # Set current audio file for drum machine channel
+    # TODO create a string variable for the file path
     def set_current_selected_audio_file(self, index):
         self.currently_selected_audio_file = self.audio_samples_list[index]
         self.currently_selected_audio_file = AudioFile(
             self.currently_selected_audio_file.name,
-            r"C:\Users\josep\Desktop\Step Seq\audio" + f"\\{self.currently_selected_audio_file.name}"
+            self.samples_dir + f"\\{self.currently_selected_audio_file.name}"
         )
 
     def play_sample(self):
@@ -214,3 +213,15 @@ class Channel(QWidget):
 
     def unselect_channel(self):
         self.group_box.setStyleSheet(self.default_channel_color)
+
+    ####################################################
+    ## Create a list of sounds from dir
+    ####################################################
+    def get_audio_samples_list(self):
+        audio_list = list()
+        directory = Path(self.samples_dir)
+        for file in directory.iterdir():
+            if file.is_file():
+                audio_list.append(file)
+
+        return audio_list

@@ -3,7 +3,7 @@ import random
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout, QMainWindow, QVBoxLayout
 
-from Drum_Machine_Channel import Channel
+from Drum_Machine_Channel import DrumMachineChannel
 from sequencer_module.SequencerModule import SequencerModule
 from sound_engine.SoundWave import SoundWave, SinWave
 
@@ -52,7 +52,7 @@ class DrumMachine(QWidget):
         # initialise stepper patterns for each channel and add to stepper_patterns_for_channels_list
         # add channel to channels layout
         for i in range(8):
-            channel = Channel(i)
+            channel = DrumMachineChannel(i)
             self.__channels_list.append(channel)
             self.__stepper_patterns_for_channels_list.append([0 for i in range(self.__init_number_of_steps)])
             channels_layout.addWidget(channel, 0, i)
