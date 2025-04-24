@@ -1,10 +1,13 @@
 import random
+from zipfile import Path
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout, QMainWindow, QVBoxLayout
 
 from Drum_Machine_Channel import DrumMachineChannel
 from sequencer_module.SequencerModule import SequencerModule
+from sound_engine import AudioVoice, Channel
+from sound_engine.SoundEngine import SoundEngine
 from sound_engine.SoundWave import SoundWave, SinWave
 
 from timer.ApplicationTimer import ApplicationTimer
@@ -32,7 +35,11 @@ class DrumMachine(QWidget):
 
         self.__metronome_on = False                                             # metronome on/off flag
 
-        self.__metronome_hi_pitch = SinWave("hi", 200, 1, 1, 44100)
+        audio_engine = SoundEngine()
+        self.samples_dir = r"C:\Users\josep\Desktop\Step Seq\audio"
+        self.audio_samples_list = self.get_audio_samples_list()
+        self.audio_sample_names = [file.name for file in self.audio_samples_list]
+
 
         # initialise application timer
         self.__app_timer = ApplicationTimer(120, 4, 4)
@@ -48,14 +55,18 @@ class DrumMachine(QWidget):
         controls_layout.setSpacing(15)
         controls_layout.setContentsMargins(10, 10, 10, 10)
 
-        # create 8 channels and add to layout
+        # create 8 drum machine channels and add to layout
+        # create 8 audio channels, 1 for each drum machine channel. Add each to engine
         # initialise stepper patterns for each channel and add to stepper_patterns_for_channels_list
         # add channel to channels layout
         for i in range(8):
-            channel = DrumMachineChannel(i)
-            self.__channels_list.append(channel)
+            dm_channel = DrumMachineChannel(i)
+            audio_voice = AudioVoice(self.samples_dir + f"\\{self.audio_samples_list[0].name}")
+            audio_channel = Channel(audio_voice, volume=0.5, pan=0.5)
+            audio_engine.add_channel(audio_channel)
+            self.__channels_list.append(dm_channel)
             self.__stepper_patterns_for_channels_list.append([0 for i in range(self.__init_number_of_steps)])
-            channels_layout.addWidget(channel, 0, i)
+            channels_layout.addWidget(dm_channel, 0, i)
 
         # new Transport and SequencerModule
         self.__transport = Transport()
@@ -188,3 +199,15 @@ class DrumMachine(QWidget):
         d[7] = [64, 4]
 
         return d
+
+    ####################################################
+    ## Create a list of sounds from dir
+    ####################################################
+    def get_audio_samples_list(self):
+        audio_list = list()
+        directory = Path(self.samples_dir)
+        for file in directory.iterdir():
+            if file.is_file():
+                audio_list.append(file)
+
+        return audio_list
