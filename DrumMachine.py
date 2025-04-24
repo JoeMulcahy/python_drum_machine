@@ -3,7 +3,7 @@ import random
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout, QMainWindow, QVBoxLayout
 
-from Channel import Channel
+from Drum_Machine_Channel import Channel
 from sequencer_module.SequencerModule import SequencerModule
 from sound_engine.SoundWave import SoundWave, SinWave
 

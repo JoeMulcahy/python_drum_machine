@@ -32,9 +32,10 @@ Transport
 
 Behaviours
 
-when i select a global pattern
-- get the index of the pattern button
-- select the global pattern from global patterns dict() using the index
-- this will be a list of patterns for each channel
-- display the pattern for the currently select channel
+################################################################
+
+SoundEngine
+
+- every time a channel changes: volume, waveform
+    -> SoundEngine.mix_sound()
 
