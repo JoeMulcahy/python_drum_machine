@@ -3,7 +3,7 @@ import sounddevice as sd
 import soundfile as sf
 import threading
 
-from sound_engine import Channel
+from sound_engine import AudioChannel
 
 
 class SoundEngine:
@@ -27,7 +27,7 @@ class SoundEngine:
             # Clip to avoid overflow
             np.clip(mix, -1.0, 1.0, out=outdata)
 
-    def add_channel(self, channel: Channel):
+    def add_channel(self, channel: AudioChannel):
         with self.lock:
             self.channels.append(channel)
 

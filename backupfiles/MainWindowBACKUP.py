@@ -1,7 +1,7 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import *
 
-from Drum_Machine_Channel import DrumMachineChannel
+from DrumMachineChannel import DrumMachineChannel
 from sequencer_module.SequencerModule import SequencerModule
 from transport_module.Transport import Transport
 
