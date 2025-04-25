@@ -22,9 +22,6 @@ class Stepper(QWidget):
         self.play_color = "background-color: #12ff12; color: white;"
 
         # stepper buttons, indicators and stepper button numbers
-        self.__green_indicator = "#12ff12"
-        self.__red_indicator = "#ff1212"
-
         self.__green_indicator = "QLabel {font-size: 40px; color: #12ff12;}"
         self.__red_indicator = "QLabel {font-size: 45px; color: #ff1212;}"
         self.__orange_indicator = "QLabel {font-size: 45px; color: #ffff12;}"

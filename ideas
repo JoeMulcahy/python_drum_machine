@@ -1,3 +1,5 @@
+Add On ideas
+
 pattern builder
     - build in pattern builder
     - select sequence of patterns and number of steps per pattern
@@ -12,6 +14,11 @@ waveform mode
 ################################################################
 To Do
 
+Integrate Pattern Manager
+- retrieve [bank][global][channel] index from pattern manager
+- update pattern manager update step pattern update
+-- ?? will pattern manager control visible patters in stepper
+
 Pattern Select
 - save global patterns (shelf)
 - load global pattern
@@ -25,9 +32,6 @@ Stepper
     - immediate change on pattern select
     - wait for stepper sequence to complete before play back of next pattern
     - play new pattern from the very beginning
-
-Transport
-- tempo
 
 Drum Machine Channel
     -button to preview original sound (done)

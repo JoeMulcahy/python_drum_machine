@@ -13,7 +13,7 @@ class SequencerModule(QWidget):
 
         self.__timing_resolution_select = TimingSelector()
         self.__stepper = Stepper(1, initial_number_of_steps)
-        self.__pattern_select = PatternSelect(9)
+        self.__pattern_select = PatternSelect(8, 4)
         self.__number_of_steps_select = NumberOfStepsSelect(self.__stepper.number_of_steps)
 
         stepper_module_layout = QGridLayout()

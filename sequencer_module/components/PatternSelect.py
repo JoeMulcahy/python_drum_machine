@@ -2,19 +2,27 @@ from PyQt6.QtWidgets import QWidget, QGridLayout, QGroupBox, QPushButton
 
 
 class PatternSelect(QWidget):
-    def __init__(self, number_of_buttons):
+    def __init__(self, number_of_buttons, number_of_banks):
         super().__init__()
 
         self.__buttons_list = list()
+        self.__bank_buttons_list = list()
         self.__selected_button_index = 0
+        self.__selected_bank_index = 0
         self.__number_of_button = number_of_buttons
+        self.__number_of_banks = number_of_banks
+        bank_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
         self.pattern_select_layout = QGridLayout()
         self.group_box_pattern_select = QGroupBox("Pattern")
+        self.group_box_bank = QGroupBox("Bank")
 
         # colors
         self.default_color = "background-color: #3498db; color: white;"
         self.toggle_on_color = "background-color: #9999ef; color: white;"
+
+        self.default_color_bank = "background-color: #6698db; color: white;"
+        self.toggle_on_color_bank = "background-color: #ff99ef; color: white;"
 
         # pattern select buttons
         for i in range(number_of_buttons):
@@ -22,13 +30,25 @@ class PatternSelect(QWidget):
             button.setFixedSize(30, 30)
             button.setStyleSheet(self.default_color)
             self.__buttons_list.append(button)
-
-            self.pattern_select_layout.addWidget(button, int(i / 3), i % 3)
+            self.pattern_select_layout.addWidget(button, int(i / 4), i % 4)
             self.__buttons_list[0].setStyleSheet(self.toggle_on_color)
 
-        # Listener
+        for i in range(self.__number_of_banks):
+            button = QPushButton(f"{bank_letters[i]}")
+            button.setFixedSize(30, 30)
+            button.setStyleSheet(self.default_color_bank)
+            self.__bank_buttons_list.append(button)
+            self.pattern_select_layout.addWidget(button, 2, i)
+            self.__buttons_list[0].setStyleSheet(self.toggle_on_color_bank)
+
+        # Listener to set selected pattern button index and to highlight selected button
         for btn in self.__buttons_list:
             btn.clicked.connect(lambda checked, b=btn: self.set_button_index(b.text()))
+
+        # Listener to set selected bank button index and to highlight selected bank button
+        for i in range(self.__number_of_banks):
+            btn = self.__bank_buttons_list[i]
+            btn.clicked.connect(lambda checked, index=i: self.set_bank_index(index))
 
         self.group_box_pattern_select.setLayout(self.pattern_select_layout)
 
@@ -40,13 +60,26 @@ class PatternSelect(QWidget):
         self.__selected_button_index = int(value) - 1
         self.__update_pattern_select_buttons_visually(self.__selected_button_index)
 
+    def set_bank_index(self, index):
+        print(f'debug: bank index: {index}')
+        self.__selected_bank_index = index
+        self.__update_bank_select_buttons_visually(index)
+
     @property
     def buttons_list(self):
         return self.__buttons_list
 
     @property
+    def bank_buttons_list(self):
+        return self.__bank_buttons_list
+
+    @property
     def selected_button_index(self):
         return self.__selected_button_index
+
+    @property
+    def selected_bank_index(self):
+        return self.__selected_bank_index
 
     @property
     def number_of_buttons(self):
@@ -57,10 +90,21 @@ class PatternSelect(QWidget):
         self.__selected_button_index = value
         self.__update_pattern_select_buttons_visually(value)
 
+    @selected_bank_index.setter
+    def selected_bank_index(self, value):
+        self.__selected_bank_index = value
+        self.__update_bank_select_buttons_visually(value)
+
     def __update_pattern_select_buttons_visually(self, index):
         for x in range(self.__number_of_button):
             self.__buttons_list[x].setStyleSheet(self.default_color)
             if self.__selected_button_index == index:
                 self.__buttons_list[index].setStyleSheet(self.toggle_on_color)
+
+    def __update_bank_select_buttons_visually(self, index):
+        for x in range(self.__number_of_banks):
+            self.__bank_buttons_list[x].setStyleSheet(self.default_color_bank)
+            if self.__selected_bank_index == index:
+                self.__bank_buttons_list[index].setStyleSheet(self.toggle_on_color_bank)
 
 

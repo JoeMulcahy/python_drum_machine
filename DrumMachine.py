@@ -96,7 +96,7 @@ class DrumMachine(QWidget):
             self.__audio_channels_list.append(audio_channel)
             audio_engine.add_channel(audio_channel)
             self.__drum_machine_channels_list.append(dm_channel)
-            self.__stepper_patterns_for_channels_list.append([0 for i in range(self.__init_number_of_steps)])
+            self.__stepper_patterns_for_channels_list.append([0 for i in range(self.__init_number_of_steps)])  #TODO needs changing
             channels_layout.addWidget(dm_channel, 0, i)
 
         # Transport and SequencerModule
@@ -104,6 +104,7 @@ class DrumMachine(QWidget):
         self.__sequencer_module = SequencerModule(self.__init_number_of_steps)
 
         # create dictionary of global stepper patterns from all channels
+        # TODO integrate Pattern Manager
         for i in range(self.__sequencer_module.pattern_select.number_of_buttons):
             self.__global_stepper_patterns_dict[i] = self.initialise_pattern()
 
@@ -132,7 +133,7 @@ class DrumMachine(QWidget):
         ########################## Listeners for drum machine channel module ################################
         #####################################################################################################
 
-        # Listeners for drum machine channel select
+        # Listeners for drum machine channel select buttons
         for channel in self.__drum_machine_channels_list:
             select_button = channel.select_button
             select_button.clicked.connect((lambda checked, b=select_button: self.select_channel(b.property("id"))))
@@ -145,6 +146,7 @@ class DrumMachine(QWidget):
             cb.currentIndexChanged.connect(
                 lambda index, dmc_i=dmc_index: self.__set_voice_for_drum_machine_channels(index, dmc_i))
 
+        # Listeners for drum machine channel dials [volume, pan, length, pitch, duration]
         for i in range(len(self.__drum_machine_channels_list)):
             self.__drum_machine_channels_list[i].volume_dial.valueChanged \
                 .connect(lambda val: self.__set_channel_volume(i, val))
@@ -167,6 +169,13 @@ class DrumMachine(QWidget):
         # Listener for (global) pattern select
         for btn in self.__sequencer_module.pattern_select.buttons_list:
             btn.clicked.connect(lambda checked, b=btn: self.__update_global_pattern(int(b.text())))
+
+        # Listener for bank select
+        temp_counter = 0
+        for btn in self.__sequencer_module.pattern_select.bank_buttons_list:
+            btn.clicked.connect(lambda checked, index=temp_counter: self.__update_bank_index(index))
+            temp_counter = temp_counter + 1
+
 
         # Listeners for Transport module
         self.__transport.btn_play.clicked.connect(lambda: self.start_playback())
@@ -241,6 +250,10 @@ class DrumMachine(QWidget):
         print(f"index: {index - 1}")
         print(f"channel index: {self.__current_selected_drum_machine_channel_index}")
         print(f"")
+
+    def __update_bank_index(self, index):
+        print(f"bank index: {index}")
+        self.__bank_index = index
 
     def initialise_pattern(self):
         patterns_list = list()
