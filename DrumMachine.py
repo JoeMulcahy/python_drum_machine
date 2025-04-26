@@ -34,12 +34,9 @@ class DrumMachine(QWidget):
         super().__init__()
 
         self.__init_number_of_steps = 16  # initial number of steps in stepper
-        self.__current_global_pattern = list()  # pattern select (PatternSelect.py)
+        # self.__current_global_pattern = list()  # pattern select (PatternSelect.py)
 
         self.__drum_machine_channels_list = list()  # list of channel modules
-        self.__stepper_patterns_for_channels_list = list()  # list of stepper patterns for each channel
-        self.__global_stepper_patterns_dict = dict()  # dictionary of global patterns
-        self.__current_pattern_button_index = 0
         self.__current_selected_drum_machine_channel_index = 0
 
         self.__tempo = 120
@@ -56,8 +53,11 @@ class DrumMachine(QWidget):
         # pattern manager
         self.__pattern_manager = PatternManager()
         self.__bank_index = 0
+        self.__global_pattern_bank_index = 0
         self.__global_pattern_index = 0
         self.__channel_pattern_index = 0
+
+        # self.__update_current_pattern()
 
         self.__audio_channels_list = list()  # list of AudioChannel
         self.__samples_dir = r"C:\Users\josep\Desktop\Step Seq\audio"  # samples location
@@ -84,7 +84,6 @@ class DrumMachine(QWidget):
 
         # create 8 drum machine channels and add to layout
         # create 8 audio channels, 1 for each drum machine channel. Add each to engine
-        # initialise stepper patterns for each channel and add to stepper_patterns_for_channels_list
         # add drum_machine_channels to channels layout
         # TODO might have to create list of created channels in audio engine??
         for i in range(self.__number_of_drum_machine_channels):
@@ -96,24 +95,14 @@ class DrumMachine(QWidget):
             self.__audio_channels_list.append(audio_channel)
             audio_engine.add_channel(audio_channel)
             self.__drum_machine_channels_list.append(dm_channel)
-            self.__stepper_patterns_for_channels_list.append(
-                [0 for i in range(self.__init_number_of_steps)])  # TODO needs changing
             channels_layout.addWidget(dm_channel, 0, i)
 
         # Transport and SequencerModule
         self.__transport = Transport()
         self.__sequencer_module = SequencerModule(self.__init_number_of_steps)
 
-        # create dictionary of global stepper patterns from all channels
-        # TODO integrate Pattern Manager
-        for i in range(self.__sequencer_module.pattern_select.number_of_buttons):
-            self.__global_stepper_patterns_dict[i] = self.initialise_pattern()
-
-        self.__current_global_pattern = self.__global_stepper_patterns_dict[self.__current_pattern_button_index]
-        self.__current_pattern = self.__current_global_pattern[0]
-
         # select first channel as default
-        self.select_channel(self.__current_selected_drum_machine_channel_index)
+        self.__update_select_channel(self.__current_selected_drum_machine_channel_index)
 
         # add transport and sequencerModule to layout controls layout
         controls_layout.addWidget(self.__transport, 0, 0, alignment=Qt.AlignmentFlag.AlignLeft)
@@ -137,7 +126,8 @@ class DrumMachine(QWidget):
         # Listeners for drum machine channel select buttons
         for channel in self.__drum_machine_channels_list:
             select_button = channel.select_button
-            select_button.clicked.connect((lambda checked, b=select_button: self.select_channel(b.property("id"))))
+            select_button.clicked.connect(
+                (lambda checked, b=select_button: self.__update_select_channel(b.property("id"))))
 
         # Listeners for drum machine samples combo box
         for i in range(self.__number_of_drum_machine_channels):
@@ -167,15 +157,23 @@ class DrumMachine(QWidget):
             btn = dmc.preview_button
             btn.released.connect(lambda dmc_i=dmc_index: self.__play_preview(dmc_i))
 
+        #####################################################################################################
+        ########################## Listeners for pattern selection ################################
+        #####################################################################################################
+
         # Listener for (global) pattern select
         for btn in self.__sequencer_module.pattern_select.buttons_list:
-            btn.clicked.connect(lambda checked, b=btn: self.__update_global_pattern(int(b.text())))
+            btn.clicked.connect(lambda checked, b=btn: self.__update_global_pattern_index(int(b.text())))
 
         # Listener for bank select
         temp_counter = 0
         for btn in self.__sequencer_module.pattern_select.bank_buttons_list:
             btn.clicked.connect(lambda checked, index=temp_counter: self.__update_bank_index(index))
             temp_counter = temp_counter + 1
+
+        #####################################################################################################
+        ########################## Listeners for Transport module ################################
+        #####################################################################################################
 
         # Listeners for Transport module
         self.__transport.btn_play.clicked.connect(lambda: self.start_playback())
@@ -184,6 +182,10 @@ class DrumMachine(QWidget):
         self.__transport.metronome_checkbox.clicked.connect(
             lambda checked: self.set_metronome_on_off(checked)
         )
+
+        #####################################################################################################
+        ########################## Listeners for Timing resolution module ################################
+        #####################################################################################################
 
         # Listener for Timing resolution module
         self.__sequencer_module.timing_resolution_select. \
@@ -198,10 +200,7 @@ class DrumMachine(QWidget):
         self.__sequencer_module.stepper.play_step_color(count)
         self.__sequencer_module.stepper.stepper_indicators_on_play(count)
 
-        print(self.__current_pattern)
-        if self.__current_pattern[count % 16] == 1:
-            pass
-            # self.__drum_machine_channels_list[self.__current_selected_drum_machine_channel_index].play_sample()
+        # self.__drum_machine_channels_list[self.__current_selected_drum_machine_channel_index].play_sample()
 
     # start playback
     def start_playback(self):
@@ -227,40 +226,38 @@ class DrumMachine(QWidget):
         index = index - 1
         self.set_time_resolution(self.__timing_resolution_dict[index][0], self.__timing_resolution_dict[index][1])
 
+    def __update_bank_index(self, index):
+        self.__bank_index = index
+        self.__global_pattern_bank_index = self.__bank_index
+        self.__update_current_pattern()
+
+    def __update_global_pattern_index(self, index):
+        self.__global_pattern_index = index - 1
+        self.__update_current_pattern()
+
     # highlight channel upon selection
     # select pattern associated with selected channel and update pattern on the stepper
-    def select_channel(self, btn_id):
-        self.__current_selected_drum_machine_channel_index = int(btn_id)
+    def __update_select_channel(self, btn_id):
+        index = int(btn_id)
         for channel in self.__drum_machine_channels_list:
             channel.unselect_channel()
 
-        channel = self.__drum_machine_channels_list[self.__current_selected_drum_machine_channel_index]
+        channel = self.__drum_machine_channels_list[index]
         channel.select_channel()
 
-        self.__current_pattern = self.__global_stepper_patterns_dict[self.__current_pattern_button_index][
-            self.__current_selected_drum_machine_channel_index]
-        self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
+        self.__channel_pattern_index = index
+        self.__update_current_pattern()
 
-    def __update_global_pattern(self, index):
-        self.__current_global_pattern = self.__global_stepper_patterns_dict[index - 1]
-        self.__current_pattern = self.__current_global_pattern[self.__current_selected_drum_machine_channel_index]
-        self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
+    def __update_current_pattern(self):
+        self.__current_pattern = self.__pattern_manager.bank_dict[self.__bank_index][self.__global_pattern_bank_index][
+            self.__channel_pattern_index]
+        self.__update_stepper_display()
 
-        print("Debug")
-        print(f"index: {index - 1}")
-        print(f"channel index: {self.__current_selected_drum_machine_channel_index}")
-        print(f"")
-
-    def __update_bank_index(self, index):
-        print(f"bank index: {index}")
-        self.__bank_index = index
-
-    def initialise_pattern(self):
-        patterns_list = list()
-        for i in range(self.__sequencer_module.pattern_select.number_of_buttons):
-            patterns_list.append([0 for i in range(self.__init_number_of_steps)])
-
-        return patterns_list
+    def __update_stepper_display(self):
+        print(f'{self.__global_pattern_bank_index}{self.__global_pattern_index}{self.__channel_pattern_index}')
+        self.__sequencer_module.stepper.current_stepper_buttons_selected(
+            self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
+                self.__channel_pattern_index])
 
     def __play_preview(self, index):
         print(f"preview {index}")

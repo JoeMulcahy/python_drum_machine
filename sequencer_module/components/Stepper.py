@@ -72,10 +72,6 @@ class Stepper(QWidget):
             elif self.__current_stepper_buttons_selected[i] == 0:
                 self.__stepper_buttons_list[i].setStyleSheet(self.default_color)
 
-    @property
-    def current_stepper_buttons_selected(self):
-        return self.__current_stepper_buttons_selected
-
     def current_stepper_buttons_selected(self, values_array):
         self.__current_stepper_buttons_selected = values_array
         self.__update_stepper_button_pattern_visually()

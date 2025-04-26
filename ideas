@@ -11,6 +11,10 @@ realtime clip recording (mic input)
 
 waveform mode
 
+associate each pattern to have:
+    - it's own number of steps
+    - it's own timing resolution
+
 ################################################################
 To Do
 
