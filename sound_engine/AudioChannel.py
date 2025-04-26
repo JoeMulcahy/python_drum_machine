@@ -3,7 +3,7 @@ import numpy as np
 from sound_engine import Voice
 
 
-class Channel:
+class AudioChannel:
     def __init__(self, channel_id, voice: Voice, volume=1.0, pan=0.0):
         self.__id = channel_id
         self.__voice = voice

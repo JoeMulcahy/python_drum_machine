@@ -1,0 +1,81 @@
+
+################################################################################################
+    To Do
+################################################################################################
+
+Sound playback:
+-   Make stepper patterns trigger sounds
+-   Get volume, pan etc dials working with new audio engine
+
+Metronome:
+-   Get it working
+    -   volume
+    -   beat/meter emphasis (could use digital waveforms from audio engine)
+    -   improve gui look
+
+Steps module:
+    -   get it working with the stepper
+    -   gray out stepper buttons not used
+
+Drum Machine Channel:
+    -   Add editable channel names
+
+Master Controls:
+    - Master volume
+
+GUI:
+    - General improvement of looks
+
+################################################################################################
+    Nice to haves
+################################################################################################
+
+Pattern Select
+-   Highlight bank and pattern select buttons with pattern in them
+
+Pattern Select
+-   save global patterns (shelve)
+-   load global pattern
+
+Stepper
+-   clear pattern
+-   random pattern
+-   list of common pattern (maybe a dropdown list) -> specific to individual channels
+-   drum pattern matrix
+    - 16 x 8 matrix to program drums on
+
+- playback control
+-   immediate change on pattern select
+-   wait for stepper sequence to complete before play back of next pattern
+-   play new pattern from the very beginning
+
+Drum Machine Channel
+-   button to preview original sound (done)
+-   button to preview sound after vol, panning, pitch etc
+    -   could be in the form of a pre/post button
+-   each channel has can load a sample from disk
+-   waveform mode where each channel has a speciality
+    - ch1: kick, ch2: snare etc
+
+
+
+
+
+###############################################################
+    Add On ideas
+###############################################################
+pattern builder
+    - build in pattern builder
+    - select sequence of patterns and number of steps per pattern
+    arrange pattern in a sequence by dragging from stepper or pattern select
+
+-   playable drum pads
+
+-   realtime clip recording (mic input)
+
+-   waveform mode
+
+-   associate each pattern to have:
+    - it's own number of steps
+    - it's own timing resolution
+

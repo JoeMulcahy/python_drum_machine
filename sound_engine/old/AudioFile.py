@@ -8,7 +8,7 @@ import scipy
 from pydub import AudioSegment
 
 from app_enums.SoundType import SoundType
-from sound_engine.SoundPlayer import SoundPlayer
+from sound_engine.old.SoundPlayer import SoundPlayer
 
 
 class AudioFile(SoundPlayer):

@@ -9,7 +9,7 @@ from DrumMachineChannel import DrumMachineChannel
 from pattern.Pattern_Manger import PatternManager
 from sequencer_module.SequencerModule import SequencerModule
 from sound_engine.AudioVoice import AudioVoice
-from sound_engine.AudioChannel import Channel
+from sound_engine.AudioChannel import AudioChannel
 from sound_engine.SoundEngine import SoundEngine
 from timer.ApplicationTimer import ApplicationTimer
 from transport_module.Transport import Transport
@@ -47,8 +47,8 @@ class DrumMachine(QWidget):
 
         self.__metronome_on = False  # metronome on/off flag
 
-        # initialise SoundEngin
-        audio_engine = SoundEngine()
+        # initialise SoundEngine
+        self.__audio_engine = SoundEngine()
 
         # pattern manager
         self.__pattern_manager = PatternManager()
@@ -91,9 +91,9 @@ class DrumMachine(QWidget):
             dm_channel.sound_selection_combobox.addItems(
                 [file.name for file in self.__audio_samples_list])  # popular combobox with sample names
             audio_voice = AudioVoice(self.__samples_dir + f"\\{self.__audio_samples_list[0].name}")
-            audio_channel = Channel(i, audio_voice, volume=0.5, pan=0.5)
+            audio_channel = AudioChannel(i, audio_voice, volume=0.5, pan=0.5)
             self.__audio_channels_list.append(audio_channel)
-            audio_engine.add_channel(audio_channel)
+            self.__audio_engine.add_channel(audio_channel)
             self.__drum_machine_channels_list.append(dm_channel)
             channels_layout.addWidget(dm_channel, 0, i)
 
@@ -200,17 +200,31 @@ class DrumMachine(QWidget):
         self.__sequencer_module.stepper.play_step_color(count)
         self.__sequencer_module.stepper.stepper_indicators_on_play(count)
 
-        # self.__drum_machine_channels_list[self.__current_selected_drum_machine_channel_index].play_sample()
+        self.trigger_audio(count)
+
+    def trigger_audio(self, count):
+        global_pattern = self.__pattern_manager.bank_dict[self.__bank_index][self.__global_pattern_bank_index]
+        pattern_to_play = []
+        for i in range(len(global_pattern)):
+            pattern_to_play.append(global_pattern[i][count % self.__init_number_of_steps])
+
+        for i in range(len(self.__audio_channels_list)):
+            if pattern_to_play[i] == 1:
+                self.__audio_channels_list[i].voice.preview()
+
+        print(f"play: {pattern_to_play}")
 
     # start playback
     def start_playback(self):
         self.__app_timer.start_counter()
+        self.__audio_engine.play()
 
     # stop playback
     def stop_playback(self):
         self.__app_timer.stop_counter()
         self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
         self.__sequencer_module.stepper.reset_stepper_indicators()
+        self.__audio_engine.stop()
 
     def set_tempo(self, value):
         self.__app_timer.set_tempo(int(value))

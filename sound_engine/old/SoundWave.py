@@ -8,7 +8,7 @@
 import numpy as np
 
 from app_enums.SoundType import SoundType
-from sound_engine.SoundPlayer import SoundPlayer
+from sound_engine.old.SoundPlayer import SoundPlayer
 
 
 class SoundWave(SoundPlayer):
