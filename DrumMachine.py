@@ -96,7 +96,8 @@ class DrumMachine(QWidget):
             self.__audio_channels_list.append(audio_channel)
             audio_engine.add_channel(audio_channel)
             self.__drum_machine_channels_list.append(dm_channel)
-            self.__stepper_patterns_for_channels_list.append([0 for i in range(self.__init_number_of_steps)])  #TODO needs changing
+            self.__stepper_patterns_for_channels_list.append(
+                [0 for i in range(self.__init_number_of_steps)])  # TODO needs changing
             channels_layout.addWidget(dm_channel, 0, i)
 
         # Transport and SequencerModule
@@ -175,7 +176,6 @@ class DrumMachine(QWidget):
         for btn in self.__sequencer_module.pattern_select.bank_buttons_list:
             btn.clicked.connect(lambda checked, index=temp_counter: self.__update_bank_index(index))
             temp_counter = temp_counter + 1
-
 
         # Listeners for Transport module
         self.__transport.btn_play.clicked.connect(lambda: self.start_playback())
