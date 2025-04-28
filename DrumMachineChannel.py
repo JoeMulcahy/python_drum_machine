@@ -18,8 +18,8 @@ class DrumMachineChannel(QWidget):
         self.lbl_current_sound = QLabel("Sound: ")
 
         # channel colors: default, selected
-        self.default_channel_color = "QGroupBox { background-color: blue; border: 1px}"
-        self.channel_select_color = "QGroupBox { background-color: light-gray; border: 1px}"
+        self.default_channel_color = "QGroupBox { background-color: blue; border: 1px solid gray}"
+        self.channel_select_color = "QGroupBox { background-color: light-gray; border: 1px solid gray}"
 
         # button colors
         self.button_color = "QPushButton {background-color: #ef1212; color: white;}"

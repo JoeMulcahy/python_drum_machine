@@ -7,7 +7,7 @@ import numpy as np
 class Voice:
     def __init__(self, data: np.ndarray, samplerate: int):
         self.__data = data
-        self.__data_copy = data
+        self.__data_manipulated = data
         self.__original_data = data
         self.__samplerate = samplerate
         self.__original_sample_rate = samplerate
@@ -48,9 +48,9 @@ class Voice:
 
         try:
             # Perform the resampling using librosa
-            self.__data_copy = librosa.resample(self.__data, orig_sr=self.__samplerate, target_sr=new_samplerate)
+            self.__data_manipulated = librosa.resample(self.__data, orig_sr=self.__samplerate, target_sr=new_samplerate)
             self.__samplerate = new_samplerate  # Update the samplerate
-            self.__data = self.__data_copy
+            self.__data = self.__data_manipulated
         except Exception as e:
             print(f"Error during resampling: {e}")
             raise
@@ -72,13 +72,13 @@ class Voice:
 
         # Handle mono or stereo safely
         if temp_data.ndim == 1:  # Mono
-            self.__data_copy = temp_data[:target_duration_samples]
+            self.__data_manipulated = temp_data[:target_duration_samples]
         elif temp_data.ndim == 2:  # Stereo (or more channels)
-            self.__data_copy = temp_data[:target_duration_samples, :]
+            self.__data_manipulated = temp_data[:target_duration_samples, :]
         else:
             raise ValueError("Unsupported audio data shape: expected 1D or 2D array.")
 
-        self.__data = self.__data_copy
+        self.__data = self.__data_manipulated
         self.reset_position()  # Important to reset playback!
 
     def set_time_stretch(self, duration_scale):
@@ -108,30 +108,30 @@ class Voice:
         if temp_data.ndim == 1:
             # MONO audio
             stretched = librosa.effects.time_stretch(temp_data, rate=stretch_ratio)
-            self.__data_copy = stretched
+            self.__data_manipulated = stretched
         elif temp_data.ndim == 2:
             # STEREO audio
             # Stretch each channel separately
             left = librosa.effects.time_stretch(temp_data[:, 0], rate=stretch_ratio)
             right = librosa.effects.time_stretch(temp_data[:, 1], rate=stretch_ratio)
-            self.__data_copy = np.stack((left, right), axis=-1)
+            self.__data_manipulated = np.stack((left, right), axis=-1)
         else:
             raise ValueError("Unsupported audio shape. Expected 1D (mono) or 2D (stereo) array.")
 
-        self.__data = self.__data_copy
+        self.__data = self.__data_manipulated
         self.reset_position()
 
     def next_chunk(self, frames: int) -> np.ndarray:
         """Return the next chunk of audio data."""
         if not self.__active:
-            return np.zeros((frames, self.__data_copy.shape[1] if self.__data_copy.ndim > 1 else 1), dtype=np.float32)
+            return np.zeros((frames, self.__data_manipulated.shape[1] if self.__data_manipulated.ndim > 1 else 1), dtype=np.float32)
 
-        if self.__position >= len(self.__data_copy):
+        if self.__position >= len(self.__data_manipulated):
             self.__active = False
-            return np.zeros((frames, self.__data_copy.shape[1] if self.__data_copy.ndim > 1 else 1), dtype=np.float32)
+            return np.zeros((frames, self.__data_manipulated.shape[1] if self.__data_manipulated.ndim > 1 else 1), dtype=np.float32)
 
         end = self.__position + frames
-        chunk = self.__data_copy[self.__position:end]
+        chunk = self.__data_manipulated[self.__position:end]
 
         # Ensure chunk is 2D
         if chunk.ndim == 1:
@@ -143,7 +143,7 @@ class Voice:
 
         # Pad with zeros if end of audio
         if len(chunk) < frames:
-            padding = np.zeros((frames - len(chunk), self.__data_copy.shape[1] if self.__data_copy.ndim > 1 else 1),
+            padding = np.zeros((frames - len(chunk), self.__data_manipulated.shape[1] if self.__data_manipulated.ndim > 1 else 1),
                                dtype=np.float32)
             chunk = np.concatenate((chunk, padding), axis=0)
 
@@ -160,7 +160,7 @@ class Voice:
 
     def __play_audio(self):
         try:
-            sd.play(self.__data_copy, self.__samplerate)
+            sd.play(self.__data_manipulated, self.__samplerate)
             # sd.wait()  # Uncomment if you want to wait for the audio to finish before moving on
         except Exception as e:
             print(f"Error during playback of sound: {e}")

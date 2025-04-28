@@ -52,10 +52,15 @@ class DrumMachine(QWidget):
 
         # pattern manager
         self.__pattern_manager = PatternManager()
-        self.__bank_index = 0
+        self.__pattern_manager.bank_dict = PatternManager.generate_random_banks()
         self.__global_pattern_bank_index = 0
         self.__global_pattern_index = 0
         self.__channel_pattern_index = 0
+
+        self.__global_pattern_for_playback = self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][
+            self.__global_pattern_index]
+
+        self.__pattern_manager.visualise_global_pattern_bank()
 
         # self.__update_current_pattern()
 
@@ -90,7 +95,8 @@ class DrumMachine(QWidget):
             dm_channel = DrumMachineChannel(i)
             dm_channel.sound_selection_combobox.addItems(
                 [file.name for file in self.__audio_samples_list])  # popular combobox with sample names
-            audio_voice = AudioVoice(self.__samples_dir + f"\\{self.__audio_samples_list[0].name}")
+            dm_channel.sound_selection_combobox.setCurrentIndex(i)
+            audio_voice = AudioVoice(self.__samples_dir + f"\\{self.__audio_samples_list[i].name}")
             audio_channel = AudioChannel(i, audio_voice, volume=0.5, pan=0.5)
             self.__audio_channels_list.append(audio_channel)
             self.__audio_engine.add_channel(audio_channel)
@@ -214,10 +220,9 @@ class DrumMachine(QWidget):
         self.trigger_audio(pulse_counter)
 
     def trigger_audio(self, count):
-        global_pattern = self.__pattern_manager.bank_dict[self.__bank_index][self.__global_pattern_bank_index]
         pattern_to_play = []
-        for i in range(len(global_pattern)):
-            pattern_to_play.append(global_pattern[i][count % self.__init_number_of_steps])
+        for i in range(len(self.__global_pattern_for_playback)):
+            pattern_to_play.append(self.__global_pattern_for_playback[i][count % self.__init_number_of_steps])
 
         # Calculate the time at which the sound should be triggered.
         trigger_time = count * (60.0 / self.__tempo)  # Convert count to time based on BPM
@@ -255,8 +260,7 @@ class DrumMachine(QWidget):
         self.set_time_resolution(self.__timing_resolution_dict[index][0], self.__timing_resolution_dict[index][1])
 
     def __update_bank_index(self, index):
-        self.__bank_index = index
-        self.__global_pattern_bank_index = self.__bank_index
+        self.__global_pattern_bank_index = index
         self.__update_current_pattern()
 
     def __update_global_pattern_index(self, index):
@@ -277,15 +281,13 @@ class DrumMachine(QWidget):
         self.__update_current_pattern()
 
     def __update_current_pattern(self):
-        self.__current_pattern = self.__pattern_manager.bank_dict[self.__bank_index][self.__global_pattern_bank_index][
-            self.__channel_pattern_index]
+        self.__current_pattern = self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][self.__channel_pattern_index]
+        self.__global_pattern_for_playback = self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index]
         self.__update_stepper_display()
 
     def __update_stepper_display(self):
         print(f'{self.__global_pattern_bank_index}{self.__global_pattern_index}{self.__channel_pattern_index}')
-        self.__sequencer_module.stepper.current_stepper_buttons_selected(
-            self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
-                self.__channel_pattern_index])
+        self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
 
     def __play_preview(self, index):
         print(f"preview {index}")

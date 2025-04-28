@@ -85,6 +85,13 @@ class PatternManager:
                 for k in range(len(dic[i][j])):
                     print(f'\t\tchannel pattern {k} {dic[i][j][k]}')
 
+    def visualise_global_pattern_bank(self):
+        dic = self.__bank_dict
+        for i in range(len(dic)):
+            print(f"bank: {i} --->>")
+            for j in range(len(dic[i])):
+                print(f'\tglobal bank {j}:{dic[i][j]}')
+
     @staticmethod
     def generate_random_banks(number_of_banks=4, number_of_global_patterns=8, number_of_channels=8, pattern_length=16):
         banks = dict()

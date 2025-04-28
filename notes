@@ -12,7 +12,8 @@ Pattern Manager
 Drum Machine channel
 -   Altering voice using pitch, length, stretch
         - individually they work but using a combination of these dials doesn't have the desired
-          behaviour. Might need some kind of temp_data that is shared between functions
+          behaviour. Might need some kind of temp_data that is shared between functions.
+        - will all have to be recalculated? ie if stretch change -> recalculated length, pitch??
 
 Timing Select dial
 -   need to double check if triplet timings are calculated properly
