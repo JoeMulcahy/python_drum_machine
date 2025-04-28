@@ -6,7 +6,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout
 
 from DrumMachineChannel import DrumMachineChannel
-from pattern.Pattern_Manger import PatternManager
+from pattern.PatternManger import PatternManager
 from sequencer_module.SequencerModule import SequencerModule
 from sound_engine.AudioVoice import AudioVoice
 from sound_engine.AudioChannel import AudioChannel
@@ -176,8 +176,8 @@ class DrumMachine(QWidget):
         #####################################################################################################
 
         # Listeners for Transport module
-        self.__transport.btn_play.clicked.connect(lambda: self.start_playback())
-        self.__transport.btn_stop.clicked.connect(lambda: self.stop_playback())
+        self.__transport.btn_play.clicked.connect(lambda: self.start_engine())
+        self.__transport.btn_stop.clicked.connect(lambda: self.stop_engine())
         self.__transport.tempo_spinbox.valueChanged.connect(lambda value: self.set_tempo(value))
         self.__transport.metronome_checkbox.clicked.connect(
             lambda checked: self.set_metronome_on_off(checked)
@@ -194,13 +194,13 @@ class DrumMachine(QWidget):
     ########################################################################
     # Take action upon receiving pulse from app_timer
     ########################################################################
-    def on_pulse(self, count):
-        print(f"DrumMachine received pulse {count}")
+    def on_pulse(self, pulse_counter):
+        print(f"DrumMachine received pulse {pulse_counter}")
         # Trigger sound playback or other logic here
-        self.__sequencer_module.stepper.play_step_color(count)
-        self.__sequencer_module.stepper.stepper_indicators_on_play(count)
+        self.__sequencer_module.stepper.play_step_color(pulse_counter)
+        self.__sequencer_module.stepper.stepper_indicators_on_play(pulse_counter)
 
-        self.trigger_audio(count)
+        self.trigger_audio(pulse_counter)
 
     def trigger_audio(self, count):
         global_pattern = self.__pattern_manager.bank_dict[self.__bank_index][self.__global_pattern_bank_index]
@@ -208,23 +208,26 @@ class DrumMachine(QWidget):
         for i in range(len(global_pattern)):
             pattern_to_play.append(global_pattern[i][count % self.__init_number_of_steps])
 
+        # Calculate the time at which the sound should be triggered.
+        trigger_time = count * (60.0 / self.__tempo)  # Convert count to time based on BPM
+        current_time = self.__audio_engine.get_current_time()
+
         for i in range(len(self.__audio_channels_list)):
             if pattern_to_play[i] == 1:
-                self.__audio_channels_list[i].voice.preview()
+                # Trigger the channel to play its sound.
+                self.__audio_channels_list[i].trigger(trigger_time)
 
         print(f"play: {pattern_to_play}")
 
-    # start playback
-    def start_playback(self):
-        self.__app_timer.start_counter()
+    def start_engine(self):
         self.__audio_engine.play()
+        self.__app_timer.start_counter()
 
-    # stop playback
-    def stop_playback(self):
-        self.__app_timer.stop_counter()
+    def stop_engine(self):
+        self.__audio_engine.stop()
         self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
         self.__sequencer_module.stepper.reset_stepper_indicators()
-        self.__audio_engine.stop()
+        self.__app_timer.stop_counter()
 
     def set_tempo(self, value):
         self.__app_timer.set_tempo(int(value))

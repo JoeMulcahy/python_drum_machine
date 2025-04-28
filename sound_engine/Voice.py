@@ -16,25 +16,36 @@ class Voice:
         self._playback_thread = None  # To keep track of the playback thread
 
     def next_chunk(self, frames: int) -> np.ndarray:
-        if not self.__active or self.__position >= len(self.data):
+        if not self.__active:
+            return np.zeros((frames, self.__data.shape[1] if self.__data.ndim > 1 else 1), dtype=np.float32)
+
+        if self.__position >= len(self.__data):
             self.__active = False
-            return np.zeros(frames, dtype=np.float32)
+            return np.zeros((frames, self.__data.shape[1] if self.__data.ndim > 1 else 1), dtype=np.float32)
 
         end = self.__position + frames
         chunk = self.__data[self.__position:end]
+
+        # Ensure chunk is 2D
+        if chunk.ndim == 1:
+            chunk = chunk[:, np.newaxis]  # Add a channel dimension
+        elif chunk.ndim > 2:
+            chunk = chunk.squeeze(axis=1)
+
         self.__position = end
 
         # Pad with zeros if end of audio
         if len(chunk) < frames:
-            chunk = np.pad(chunk, (0, frames - len(chunk)))
+            padding = np.zeros((frames - len(chunk), self.__data.shape[1] if self.__data.ndim > 1 else 1),
+                               dtype=np.float32)
+            chunk = np.concatenate((chunk, padding), axis=0)
 
         return chunk
 
     def preview_voice(self):
         if self._playback_thread and self._playback_thread.is_alive():
             print(f"Warning: sound is already playing.")
-            self._playback_thread = threading.Thread(target=self.__play_audio)
-            return
+            return  # Important: Return, don't start a new thread
 
         self._playback_thread = threading.Thread(target=self.__play_audio)
         self._playback_thread.start()
@@ -43,11 +54,24 @@ class Voice:
     def __play_audio(self):
         try:
             sd.play(self.__data_copy, self.sample_rate)
-            #sd.wait()
+            sd.wait()  # changed to sd.wait
         except Exception as e:
             print(f"Error during playback of sound: {e}")
         finally:
             self._playback_thread = None  # Reset the thread
+
+    def reset_position(self):
+        """Reset the playback position to the beginning of the sound."""
+        self.__position = 0
+        self.__active = True  # Make sure the voice is active when it is reset
+
+    @property
+    def active(self):
+        return self.__active
+
+    @active.setter
+    def active(self, value):
+        self.__active = value
 
     @property
     def sample_rate(self):
@@ -96,7 +120,7 @@ class Voice:
         desired_num_samples = int(desired_duration_seconds * self.__samplerate)
 
         if desired_num_samples <= 0:
-            self.sound = np.zeros_like(self.__data_copy)
+            self.__data = np.zeros_like(self.__data_copy)
             return
 
         # Time stretch using librosa
@@ -115,6 +139,7 @@ class Voice:
             self.__data = stereo_stretched
         else:
             self.__data = stretched  # Keep it mono if the original was mono
+
 
 
 

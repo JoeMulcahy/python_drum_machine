@@ -54,6 +54,14 @@ class ApplicationTimer(threading.Thread):
         self.__counter = 0
 
     @property
+    def interval(self):
+        return self.__interval
+
+    @interval.setter
+    def interval(self, value):
+        self.__interval = value
+
+    @property
     def counter(self):
         return self.__counter
 
