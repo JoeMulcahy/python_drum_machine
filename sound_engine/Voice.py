@@ -53,8 +53,8 @@ class Voice:
 
     def __play_audio(self):
         try:
-            sd.play(self.__data_copy, self.sample_rate)
-            sd.wait()  # changed to sd.wait
+            sd.play(self.__data_copy, self.__samplerate)
+            # sd.wait()  # changed to sd.wait
         except Exception as e:
             print(f"Error during playback of sound: {e}")
         finally:
@@ -105,9 +105,9 @@ class Voice:
 
         self.__data = sound
 
-    def set_sample_duration(self, duration: float):
-        duration = np.clip(duration, 0.0, 1.0)  # Input between 0.0 to 1.0 from gui dial
-        duration = duration * 3
+    def set_sample_duration(self, duration_multiplier: float):
+        duration_multiplier = np.clip(duration_multiplier, 0.0, 1.0)  # Input between 0.0 to 1.0 from gui dial
+        duration = duration_multiplier * 3
         self.__data = self.__data_copy.copy()  # Reset to the original sound data
         current_duration_samples = self.__data.shape[0]  # Get the number of samples in the original sound
         if duration <= 0:  # Avoid division by zero

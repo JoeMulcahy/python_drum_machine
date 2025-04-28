@@ -55,7 +55,7 @@ class AudioFile(SoundPlayer):
         audio = audio.set_frame_rate(44100).set_channels(2).set_sample_width(2)  # Optional normalization
 
         # Convert to NumPy array
-        self.sound = np.array(audio.get_array_of_samples()).reshape((-1, audio.channels))
+        self.sound = np.array(audio.get_array_of_samples()).reshape((-1, audio.__channels))
 
         # Normalize to float32 (-1.0 to 1.0) if needed
         self.sound = self.sound.astype(np.float32) / (2 ** 15)

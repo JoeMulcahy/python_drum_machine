@@ -140,15 +140,15 @@ class DrumMachine(QWidget):
         # Listeners for drum machine channel dials [volume, pan, length, pitch, duration]
         for i in range(len(self.__drum_machine_channels_list)):
             self.__drum_machine_channels_list[i].volume_dial.valueChanged \
-                .connect(lambda val: self.__set_channel_volume(i, val))
+                .connect(lambda val, index=i: self.__set_channel_volume(index, val))
             self.__drum_machine_channels_list[i].pan_dial.valueChanged \
-                .connect(lambda val: self.__set_channel_pan(i, val))
+                .connect(lambda val, index=i: self.__set_channel_pan(index, val))
             self.__drum_machine_channels_list[i].length_dial.valueChanged \
-                .connect(lambda val: self.__set_sample_length(i, val))
+                .connect(lambda val, index=i: self.__set_sample_length(index, val))
             self.__drum_machine_channels_list[i].duration_dial.valueChanged \
-                .connect(lambda val: self.__set_sample_duration(i, val))
+                .connect(lambda val, index=i: self.__set_sample_duration(index, val))
             self.__drum_machine_channels_list[i].pitch_dial.valueChanged \
-                .connect(lambda val: self.__set_sample_pitch(i, val))
+                .connect(lambda val, index=i: self.__set_sample_pitch(index, val))
 
         # Listener for drum machine preview button
         for i in range(self.__number_of_drum_machine_channels):
@@ -195,7 +195,7 @@ class DrumMachine(QWidget):
     # Take action upon receiving pulse from app_timer
     ########################################################################
     def on_pulse(self, pulse_counter):
-        print(f"DrumMachine received pulse {pulse_counter}")
+        # print(f"DrumMachine received pulse {pulse_counter}")
         # Trigger sound playback or other logic here
         self.__sequencer_module.stepper.play_step_color(pulse_counter)
         self.__sequencer_module.stepper.stepper_indicators_on_play(pulse_counter)
@@ -217,7 +217,7 @@ class DrumMachine(QWidget):
                 # Trigger the channel to play its sound.
                 self.__audio_channels_list[i].trigger(trigger_time)
 
-        print(f"play: {pattern_to_play}")
+        # print(f"play: {pattern_to_play}")
 
     def start_engine(self):
         self.__audio_engine.play()
@@ -286,21 +286,22 @@ class DrumMachine(QWidget):
         print(f'voice: {voice} for channel: {dmc_index}')
 
     def __set_channel_volume(self, index, value):
+        print(f'volume debug\n: vol: {value} chan: {index}')
         self.__audio_channels_list[index].volume = value / 100
 
     def __set_channel_pan(self, index, value):
         self.__audio_channels_list[index].pan = value / 100
 
     def __set_sample_length(self, index, value):
-        print(f"{self.__audio_channels_list[index]} : value")
+        print(f"{self.__audio_channels_list[index]} : {value}")
         self.__audio_channels_list[index].voice.set_sample_length(value)
 
     def __set_sample_pitch(self, index, value):
-        print(f"{self.__audio_channels_list[index]} : value")
+        print(f"{self.__audio_channels_list[index]} : {value}")
         self.__audio_channels_list[index].voice.modify_sample_rate(value)
 
     def __set_sample_duration(self, index, value):
-        print(f"{self.__audio_channels_list[index]} : value")
+        print(f"{self.__audio_channels_list[index]} : {value}")
         self.__audio_channels_list[index].voice.set_sample_duration(value)
 
     ####################################################
