@@ -1,6 +1,5 @@
 import threading
 import sounddevice as sd
-
 import librosa
 import numpy as np
 
@@ -9,22 +8,130 @@ class Voice:
     def __init__(self, data: np.ndarray, samplerate: int):
         self.__data = data
         self.__data_copy = data
+        self.__original_data = data
         self.__samplerate = samplerate
         self.__original_sample_rate = samplerate
+        self.__original_voice_length = self.__original_data.shape[0]
         self.__position = 0  # Current playback index
         self.__active = True
         self._playback_thread = None  # To keep track of the playback thread
+        self.__pitch_factor = 0.5  # Default pitch factor (1.0 means no change)
+
+    ############################################################################
+    ## Alter pitch of voice using resampling
+    ############################################################################
+    def set_pitch(self, pitch_factor):
+        """Alter the pitch by adjusting the pitch factor."""
+        self.__pitch_factor = pitch_factor * 2
+        self.__resample_audio()
+
+    def __resample_audio(self):
+        new_samplerate = self.__original_sample_rate * (1 / self.__pitch_factor)
+        if new_samplerate <= self.__original_sample_rate / 4:
+            new_samplerate = self.__original_sample_rate / 4
+
+        if new_samplerate >= self.__original_sample_rate * 4:
+            new_samplerate = self.__original_sample_rate * 4
+
+        print(f"Resampling audio from {self.__samplerate}Hz to {new_samplerate}Hz.")
+        # Check if self.__data is a numpy array
+        if not isinstance(self.__data, np.ndarray):
+            raise TypeError(f"Expected self.__data to be a numpy array, but got {type(self.__data)}")
+
+        # Check if self.__data is 1D or 2D
+        if self.__data.ndim > 2:
+            raise ValueError(f"Expected self.__data to be 1D or 2D, but got {self.__data.ndim}D")
+
+        # Ensure the data type is float32 or float64
+        if self.__data.dtype not in [np.float32, np.float64]:
+            raise TypeError(f"Expected self.__data to be of dtype float32 or float64, but got {self.__data.dtype}")
+
+        try:
+            # Perform the resampling using librosa
+            self.__data_copy = librosa.resample(self.__data, orig_sr=self.__samplerate, target_sr=new_samplerate)
+            self.__samplerate = new_samplerate  # Update the samplerate
+            self.__data = self.__data_copy
+        except Exception as e:
+            print(f"Error during resampling: {e}")
+            raise
+
+    ############################################################################
+    ## Alter voice duration
+    ############################################################################
+    def set_voice_length(self, scaled_duration):
+        scaled_duration = np.clip(scaled_duration, 0.0, 1.0)  # ensure duration scale is between 0.0 and 1.0 (from UI)
+        temp_data = self.__original_data
+
+        # Calculate the desired number of samples from voice for playback
+        target_duration_samples = int(self.__original_voice_length * scaled_duration)
+
+        print(f"debug: Voice.set_voice_duration")
+        print(f"scaled duration (0.0 - 1.0): {scaled_duration}")
+        print(f"current_duration_samples: {self.__original_voice_length}")
+        print(f"target_duration_samples: {target_duration_samples}")
+
+        # Handle mono or stereo safely
+        if temp_data.ndim == 1:  # Mono
+            self.__data_copy = temp_data[:target_duration_samples]
+        elif temp_data.ndim == 2:  # Stereo (or more channels)
+            self.__data_copy = temp_data[:target_duration_samples, :]
+        else:
+            raise ValueError("Unsupported audio data shape: expected 1D or 2D array.")
+
+        self.__data = self.__data_copy
+        self.reset_position()  # Important to reset playback!
+
+    def set_time_stretch(self, duration_scale):
+        print(f"debug: Voice.set_time_stretch")
+        duration_scale = duration_scale * 3  # (optional: clip first)
+
+        if duration_scale <= 0:
+            self.__data = np.zeros_like(self.__original_data)
+            return
+
+        temp_data = self.__original_data
+        current_duration_samples = temp_data.shape[0]
+
+        desired_duration_seconds = duration_scale * (current_duration_samples / self.__samplerate)
+        desired_num_samples = int(desired_duration_seconds * self.__samplerate)
+
+        if desired_num_samples <= 0:
+            self.__data = np.zeros_like(self.__original_data)
+            return
+
+        stretch_ratio = current_duration_samples / desired_num_samples
+        print(f"debug: Voice.set_time_stretch")
+        print(f"scaled duration (0.0 - 1.0): {duration_scale}")
+        print(f"desired_duration_seconds: {desired_duration_seconds}")
+        print(f"Stretch ratio: {stretch_ratio}")
+
+        if temp_data.ndim == 1:
+            # MONO audio
+            stretched = librosa.effects.time_stretch(temp_data, rate=stretch_ratio)
+            self.__data_copy = stretched
+        elif temp_data.ndim == 2:
+            # STEREO audio
+            # Stretch each channel separately
+            left = librosa.effects.time_stretch(temp_data[:, 0], rate=stretch_ratio)
+            right = librosa.effects.time_stretch(temp_data[:, 1], rate=stretch_ratio)
+            self.__data_copy = np.stack((left, right), axis=-1)
+        else:
+            raise ValueError("Unsupported audio shape. Expected 1D (mono) or 2D (stereo) array.")
+
+        self.__data = self.__data_copy
+        self.reset_position()
 
     def next_chunk(self, frames: int) -> np.ndarray:
+        """Return the next chunk of audio data."""
         if not self.__active:
-            return np.zeros((frames, self.__data.shape[1] if self.__data.ndim > 1 else 1), dtype=np.float32)
+            return np.zeros((frames, self.__data_copy.shape[1] if self.__data_copy.ndim > 1 else 1), dtype=np.float32)
 
-        if self.__position >= len(self.__data):
+        if self.__position >= len(self.__data_copy):
             self.__active = False
-            return np.zeros((frames, self.__data.shape[1] if self.__data.ndim > 1 else 1), dtype=np.float32)
+            return np.zeros((frames, self.__data_copy.shape[1] if self.__data_copy.ndim > 1 else 1), dtype=np.float32)
 
         end = self.__position + frames
-        chunk = self.__data[self.__position:end]
+        chunk = self.__data_copy[self.__position:end]
 
         # Ensure chunk is 2D
         if chunk.ndim == 1:
@@ -36,7 +143,7 @@ class Voice:
 
         # Pad with zeros if end of audio
         if len(chunk) < frames:
-            padding = np.zeros((frames - len(chunk), self.__data.shape[1] if self.__data.ndim > 1 else 1),
+            padding = np.zeros((frames - len(chunk), self.__data_copy.shape[1] if self.__data_copy.ndim > 1 else 1),
                                dtype=np.float32)
             chunk = np.concatenate((chunk, padding), axis=0)
 
@@ -54,7 +161,7 @@ class Voice:
     def __play_audio(self):
         try:
             sd.play(self.__data_copy, self.__samplerate)
-            # sd.wait()  # changed to sd.wait
+            # sd.wait()  # Uncomment if you want to wait for the audio to finish before moving on
         except Exception as e:
             print(f"Error during playback of sound: {e}")
         finally:
@@ -81,66 +188,6 @@ class Voice:
     def sample_rate(self, value):
         self.__samplerate = value
 
-    def modify_sample_rate(self, value: float):
-        """Change the sample rate for playback (scales the current rate)."""
-        scaled_value = np.clip(value, 0.0125, 1.0) * 2
-        self.__samplerate = self.__original_sample_rate * scaled_value
-
-    def set_sample_length(self, desired_duration: float):
-        """Set playback length in seconds using original_sound as base."""
-        samples_needed = int(desired_duration * self.sample_rate)
-        sound = self.__data_copy.copy()
-
-        # Convert mono to stereo if needed
-        if sound.ndim == 1:
-            sound = np.stack([sound, sound], axis=-1)
-
-        current_samples = sound.shape[0]
-
-        if current_samples > samples_needed:
-            sound = sound[:samples_needed, :]
-        elif current_samples < samples_needed:
-            padding = np.zeros((samples_needed - current_samples, sound.shape[1]), dtype=sound.dtype)
-            sound = np.vstack((sound, padding))
-
-        self.__data = sound
-
-    def set_sample_duration(self, duration_multiplier: float):
-        duration_multiplier = np.clip(duration_multiplier, 0.0, 1.0)  # Input between 0.0 to 1.0 from gui dial
-        duration = duration_multiplier * 3
-        self.__data = self.__data_copy.copy()  # Reset to the original sound data
-        current_duration_samples = self.__data.shape[0]  # Get the number of samples in the original sound
-        if duration <= 0:  # Avoid division by zero
-            self.__data = np.zeros_like(self.__data)  # Or handle this case differently
-            return
-
-        # Calculate the desired duration in seconds based on the 0.0-1.0 UI input
-        # Assuming the UI's 0.0-1.0 represents a multiplier of the original duration
-        desired_duration_seconds = duration * (current_duration_samples / self.__samplerate)
-        desired_num_samples = int(desired_duration_seconds * self.__samplerate)
-
-        if desired_num_samples <= 0:
-            self.__data = np.zeros_like(self.__data_copy)
-            return
-
-        # Time stretch using librosa
-        temp_sound = self.__data.copy()
-        if temp_sound.ndim == 2:
-            temp_sound = librosa.to_mono(temp_sound.T)
-
-        # Calculate the stretch ratio based on the desired number of samples
-        stretch_ratio = current_duration_samples / desired_num_samples
-
-        stretched = librosa.effects.time_stretch(temp_sound, rate=stretch_ratio)
-
-        # Convert back to stereo
-        if self.__data_copy.ndim == 2:
-            stereo_stretched = np.stack([stretched, stretched], axis=-1)
-            self.__data = stereo_stretched
-        else:
-            self.__data = stretched  # Keep it mono if the original was mono
-
-
-
-
-
+    def reset_voice(self):
+        self.__data = self.__original_data
+        self.__samplerate = self.__original_sample_rate

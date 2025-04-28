@@ -1,11 +1,27 @@
+################################################################################################
+    Known Bugs and behaviours
+################################################################################################
+Stepper
+-   play indicator(green) gets stuck on step buttons when switch channels
+        - seems random
+
+Pattern Manager
+-   switching between patterns using global pattern select suddenly doesn't work but bank
+       switching is working?
+
+Drum Machine channel
+-   Altering voice using pitch, length, stretch
+        - individually they work but using a combination of these dials doesn't have the desired
+          behaviour. Might need some kind of temp_data that is shared between functions
+
+Timing Select dial
+-   need to double check if triplet timings are calculated properly
+
+
 
 ################################################################################################
     To Do
 ################################################################################################
-
-Sound playback:
--   Make stepper patterns trigger sounds
--   Get volume, pan etc dials working with new audio engine
 
 Metronome:
 -   Get it working
@@ -56,6 +72,7 @@ Drum Machine Channel
 -   each channel has can load a sample from disk
 -   waveform mode where each channel has a speciality
     - ch1: kick, ch2: snare etc
+-   duration control -> start - end sample
 
 
 

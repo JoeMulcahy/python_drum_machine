@@ -62,7 +62,7 @@ class Stepper(QWidget):
             self.__current_stepper_buttons_selected[index] = 1
         else:
             self.__current_stepper_buttons_selected[index] = 0
-        #print(self.__current_stepper_buttons_selected)
+
         self.__update_stepper_button_pattern_visually()
 
     def __update_stepper_button_pattern_visually(self):

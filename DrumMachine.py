@@ -141,21 +141,32 @@ class DrumMachine(QWidget):
         for i in range(len(self.__drum_machine_channels_list)):
             self.__drum_machine_channels_list[i].volume_dial.valueChanged \
                 .connect(lambda val, index=i: self.__set_channel_volume(index, val))
+
             self.__drum_machine_channels_list[i].pan_dial.valueChanged \
                 .connect(lambda val, index=i: self.__set_channel_pan(index, val))
+
             self.__drum_machine_channels_list[i].length_dial.valueChanged \
-                .connect(lambda val, index=i: self.__set_sample_length(index, val))
+                .connect(lambda val, index=i: self.__set_voice_length(index, val))
+
             self.__drum_machine_channels_list[i].duration_dial.valueChanged \
-                .connect(lambda val, index=i: self.__set_sample_duration(index, val))
+                .connect(lambda val, index=i: self.__set_time_stretch(index, val))
+
             self.__drum_machine_channels_list[i].pitch_dial.valueChanged \
                 .connect(lambda val, index=i: self.__set_sample_pitch(index, val))
 
-        # Listener for drum machine preview button
+        # Listener for drum machine channel reset button
         for i in range(self.__number_of_drum_machine_channels):
             dmc = self.__drum_machine_channels_list[i]
             dmc_index = dmc.channel_id
             btn = dmc.preview_button
             btn.released.connect(lambda dmc_i=dmc_index: self.__play_preview(dmc_i))
+
+        # Listener for drum machine channel preview button
+        for i in range(self.__number_of_drum_machine_channels):
+            dmc = self.__drum_machine_channels_list[i]
+            dmc_index = dmc.channel_id
+            btn = dmc.reset_button
+            btn.released.connect(lambda dmc_i=dmc_index: self.__reset_channel(dmc_i))
 
         #####################################################################################################
         ########################## Listeners for pattern selection ################################
@@ -292,17 +303,22 @@ class DrumMachine(QWidget):
     def __set_channel_pan(self, index, value):
         self.__audio_channels_list[index].pan = value / 100
 
-    def __set_sample_length(self, index, value):
-        print(f"{self.__audio_channels_list[index]} : {value}")
-        self.__audio_channels_list[index].voice.set_sample_length(value)
+    def __set_voice_length(self, index, value):
+        print(f"{self.__audio_channels_list[index]} : {value / 100}")
+        self.__audio_channels_list[index].voice.set_voice_length(value / 100)
 
     def __set_sample_pitch(self, index, value):
-        print(f"{self.__audio_channels_list[index]} : {value}")
-        self.__audio_channels_list[index].voice.modify_sample_rate(value)
+        print(f"channel: {index} : {value / 100}")
+        self.__audio_channels_list[index].voice.set_pitch(value / 100)
 
-    def __set_sample_duration(self, index, value):
-        print(f"{self.__audio_channels_list[index]} : {value}")
-        self.__audio_channels_list[index].voice.set_sample_duration(value)
+    def __set_time_stretch(self, index, value):
+        print(f"channel: {index} : {value / 100}")
+        self.__audio_channels_list[index].voice.set_time_stretch(value / 100)
+
+    def __reset_channel(self, index):
+        print(f" resetting channel: {index} ")
+        self.__audio_channels_list[index].voice.reset_voice()
+        self.__drum_machine_channels_list[index].reset_channel()
 
     ####################################################
     ## Create a list of sounds from dir
