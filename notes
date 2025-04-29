@@ -5,10 +5,6 @@ Stepper
 -   play indicator(green) gets stuck on step buttons when switch channels
         - seems random
 
-Pattern Manager
--   switching between patterns using global pattern select suddenly doesn't work but bank
-       switching is working?
-
 Drum Machine channel
 -   Altering voice using pitch, length, stretch
         - individually they work but using a combination of these dials doesn't have the desired
@@ -24,12 +20,7 @@ Timing Select dial
     To Do
 ################################################################################################
 Drum Machine Channel:
-    -   Add editable channel names
-    -   solo, mute buttons
     -   post/pre preview
-    -   gui update
-        -channel colors
-        -fixed component sizes
     -   tone control
 
 Master Controls:
@@ -42,15 +33,26 @@ Metronome:
     -   improve gui look
 
 Steps module:
-    -   get it working with the stepper
     -   gray out stepper buttons not used
+
+Files
+    -   implement way to add more files to combobox in DrumMachine channel
+    -   file extension check and better error handling
 
 GUI:
     - General improvement of looks
 
+Optimisations:
+    - Drum Machine
+        - combine listeners into one for loop
+
 ################################################################################################
     Nice to haves
 ################################################################################################
+Opening files
+-   Option to select a folder and make them available across all channels
+-   Have multi directories for audio files, each a type od drum sound
+        - open each type of separate channels
 
 Pattern Select
 -   Highlight bank and pattern select buttons with pattern in them

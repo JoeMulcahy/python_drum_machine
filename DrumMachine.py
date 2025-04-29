@@ -7,12 +7,16 @@ from PyQt6.QtWidgets import QWidget, QGridLayout
 
 from DrumMachineChannel import DrumMachineChannel
 from pattern.PatternManger import PatternManager
-from sequencer_module.SequencerModule import SequencerModule
+from sequencer_module.sequencer_module import SequencerModule
 from sound_engine.AudioVoice import AudioVoice
 from sound_engine.AudioChannel import AudioChannel
 from sound_engine.SoundEngine import SoundEngine
 from timer.ApplicationTimer import ApplicationTimer
 from transport_module.Transport import Transport
+#from master_controls.master_controls import MasterControls
+
+import tkinter as tk
+from tkinter import filedialog
 
 
 def create_timing_resolution_dict():
@@ -96,11 +100,6 @@ class DrumMachine(QWidget):
             self.__drum_machine_channels_list.append(dm_channel)
             channels_layout.addWidget(dm_channel, 0, i)
 
-        # layout for transport, step sequencer modules
-        controls_layout = QGridLayout()
-        controls_layout.setSpacing(15)
-        controls_layout.setContentsMargins(10, 10, 10, 10)
-
         # Transport and SequencerModule
         self.__transport = Transport()
         self.__sequencer_module = SequencerModule(self.__number_of_steps)
@@ -108,7 +107,13 @@ class DrumMachine(QWidget):
         # select first channel as default
         self.__update_select_channel(self.__current_selected_drum_machine_channel_index)
 
+        # Master Control module
+        #master_controls = MasterControls()
+
         # add transport and sequencerModule to layout controls layout
+        controls_layout = QGridLayout()
+        controls_layout.setSpacing(15)
+        controls_layout.setContentsMargins(10, 10, 10, 10)
         controls_layout.addWidget(self.__transport, 0, 0, alignment=Qt.AlignmentFlag.AlignLeft)
         controls_layout.addWidget(self.__sequencer_module, 0, 1, alignment=Qt.AlignmentFlag.AlignLeft)
         controls_layout.setColumnStretch(0, 2)
@@ -188,6 +193,13 @@ class DrumMachine(QWidget):
             dmc_index = dmc.channel_id
             btn = dmc.mute_button
             btn.released.connect(lambda dmc_i=dmc_index: self.__mute_channels(dmc_i))
+
+        # Listener for opening file directory
+        for i in range(self.__number_of_drum_machine_channels):
+            dmc = self.__drum_machine_channels_list[i]
+            dmc_index = dmc.channel_id
+            btn = dmc.open_file_button
+            btn.released.connect(lambda dmc_i=dmc_index: self.__open_files(dmc_i))
 
         #####################################################################################################
         ########################## Listeners for pattern selection ################################
@@ -355,7 +367,6 @@ class DrumMachine(QWidget):
             self.__channel_solo_list[index] = False
             self.__drum_machine_channels_list[index].set_solo_on(False)
 
-        print(f'soloed: {self.__channel_solo_list}')
         self.__mute_audio_channels()
 
     def __mute_channels(self, index):
@@ -370,9 +381,9 @@ class DrumMachine(QWidget):
             self.__channel_mute_list[index] = False
             self.__drum_machine_channels_list[index].set_mute_on(False)
 
-        print(f'muted: {self.__channel_mute_list}')
         self.__mute_audio_channels()
 
+    # used by solo and mute buttons
     def __mute_audio_channels(self):
         # check if solo list has a True value before inversion
         # inversion mutes any channel that hasn't been soloed
@@ -391,6 +402,51 @@ class DrumMachine(QWidget):
                 self.__audio_channels_list[i].is_muted = True
             else:
                 self.__audio_channels_list[i].is_muted = False
+
+    def __open_files(self, index):
+        root = tk.Tk()
+        root.withdraw()  # Hide main window
+
+        filepath = filedialog.askopenfilenames(initialdir=r"C:\Users\josep\Desktop\Step Seq\audio",
+                                               title="Select .wav file to add",
+                                               defaultextension=".wav", multiple=True)
+
+        if filepath:
+            try:
+                with open(filepath, 'r') as file:
+                    contents = file.read()
+                    filenames = [file.name for _ in file]
+                    for i in range(len(filenames)):
+                        filename = filenames[i]
+                        if filename[filename.find('.'):] == '.wav':
+                            print("wav found")
+                    print(f"File contains: {contents}")
+                    # check if file is .wav then add to combobox
+            except FileNotFoundError:
+                print(f'File not found at {filepath}')
+            except Exception as e:
+                print(f'An error occurred: \n{e}')
+        else:
+            print("No file selected")
+
+    def __open_files_in_directory(self, index):
+        root = tk.Tk()
+        root.withdraw()  # Hide main window
+
+        folder_path = filedialog.askdirectory(initialdir=r"C:\Users\josep\Desktop\Step Seq\audio",
+                                              title="Choose .wav files in directory")
+
+        if folder_path:
+            import os
+            try:
+                contents = os.listdir(folder_path)
+                print(contents)
+            except FileNotFoundError:
+                print(f'Folder not found at {folder_path}')
+            except Exception as e:
+                print('Error: {e}')
+        else:
+            print("No folder selected")
 
     ####################################################
     ## Create a list of sounds from dir
