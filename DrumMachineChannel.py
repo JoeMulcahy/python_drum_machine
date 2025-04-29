@@ -38,7 +38,7 @@ class DrumMachineChannel(QWidget):
         self.__lbl_pitch = QLabel('Pitch')
         self.__lbl_length = QLabel('Length')
         self.__lbl_duration = QLabel('Stretch')
-        self.__lbl_tone = QLabel('Stretch')
+        self.__lbl_tone = QLabel('Tone')
         self.__lbl_preview = QLabel('Preview')
 
         # labels for channel control amounts
@@ -77,13 +77,14 @@ class DrumMachineChannel(QWidget):
         self.select_channel_button.setProperty("id", channel_index)  # channel identifier
 
         # channel colors: default, selected
-        self.__default_channel_color = "QGroupBox { background-color: #5957ba; border: 1px solid gray}"
-        self.__channel_select_color = "QGroupBox { background-color: #23224a; border: 1px solid gray}"
+        self.__default_channel_color = "QGroupBox { background-color: #23224a; border: 1px solid gray}"
+        self.__channel_select_color = "QGroupBox { background-color: #5957ba; border: 1px solid gray}"
 
         # button colors
-        self.__reset_button_color = "QPushButton {background-color: #c41431; color: white;}"
-        self.__solo_button_color = "QPushButton {background-color: #14c443; color: white;}"
-        self.__mute_button_color = "QPushButton {background-color: #bbc414; color: white;}"
+        self.__reset_button_color = "QPushButton {font-size: 10px;  font-weight: bold; background-color: #c41431; color: white;}"
+        self.__default_button_color = "QPushButton {font-size: 10px;  font-weight: bold; background-color: #1f2e23; color: white;}"
+        self.__solo_button_color_on = "QPushButton {font-size: 10px;  font-weight: bold; background-color: #14c443; color: white;}"
+        self.__mute_button_color_on = "QPushButton {font-size: 10px;  font-weight: bold; background-color: #bbc414; color: white;}"
 
         self.init_components()
 
@@ -111,6 +112,7 @@ class DrumMachineChannel(QWidget):
 
     def init_components(self):
         layout = QGridLayout()
+        layout.setSpacing(5)
 
         #####################################################
         layout.addWidget(self.__name_textbox, 0, 0, 1, 3)
@@ -119,28 +121,28 @@ class DrumMachineChannel(QWidget):
 
         #####################################################
         layout.addWidget(self.__lbl_volume, 2, 0, 1, 1)
-        layout.addWidget(self.__dial_volume, 3, 0, 1, 1)
+        layout.addWidget(self.__dial_volume, 3, 0, 1, 1, Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.__lbl_volume_text, 4, 0, 1, 1)
 
         layout.addWidget(self.__lbl_pan, 2, 1, 1, 1)
-        layout.addWidget(self.__dial_pan, 3, 1, 1, 1)
+        layout.addWidget(self.__dial_pan, 3, 1, 1, 1, Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.__lbl_pan_text, 4, 1, 1, 1)
 
         layout.addWidget(self.__lbl_tone, 2, 2, 1, 1)
-        layout.addWidget(self.__dial_tone, 3, 2, 1, 1)
+        layout.addWidget(self.__dial_tone, 3, 2, 1, 1, Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.__lbl_tone_text, 4, 2, 1, 1)
 
         #####################################################
         layout.addWidget(self.__lbl_pitch, 5, 0, 1, 1)
-        layout.addWidget(self.__dial_pitch, 6, 0, 1, 1)
+        layout.addWidget(self.__dial_pitch, 6, 0, 1, 1, Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.__lbl_pitch_text, 7, 0, 1, 1)
 
         layout.addWidget(self.__lbl_length, 5, 1, 1, 1)
-        layout.addWidget(self.__dial_length, 6, 1, 1, 1)
+        layout.addWidget(self.__dial_length, 6, 1, 1, 1, Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.__lbl_length_text, 7, 1, 1, 1)
 
         layout.addWidget(self.__lbl_duration, 5, 2, 1, 1)
-        layout.addWidget(self.__dial_duration, 6, 2, 1, 1)
+        layout.addWidget(self.__dial_duration, 6, 2, 1, 1, Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.__lbl_duration_text, 7, 2, 1, 1)
 
         #######################################################
@@ -164,19 +166,17 @@ class DrumMachineChannel(QWidget):
         main_layout.addWidget(self.__group_box)
         self.setLayout(main_layout)
 
-        # Set colors
-        self.__group_box.setStyleSheet(self.__default_channel_color)
-        self.__btn_mute.setStyleSheet(self.__solo_button_color)
-        self.__btn_reset.setStyleSheet(self.__reset_button_color)
-        self.__btn_solo.setStyleSheet(self.__solo_button_color)
-
         # Set size for buttons in channel
         for btn in [self.__btn_solo, self.__btn_mute, self.__btn_reset, self.__btn_open_file,
                     self.__btn_post_preview_sound, self.__btn_preview_sound]:
             btn.setFixedSize(30, 30)
+            btn.setStyleSheet(self.__default_button_color)
+
+            if btn == self.__btn_reset:
+                btn.setStyleSheet(self.__reset_button_color)
 
         # label style
-        label_style = "QLabel { font-size: 12px; color: #aaaaaa; }"
+        label_style = "QLabel { font-size: 12px; font-weight: bold; color: #aaaaaa; }"
         for label in self.findChildren(QWidget):
             if isinstance(label, QLabel):
                 label.setStyleSheet(label_style)
@@ -200,6 +200,22 @@ class DrumMachineChannel(QWidget):
                 dial.setValue(100)
 
         self.setLayout(layout)
+
+    def set_solo_on(self, is_on):
+        if is_on:
+            self.__btn_solo.setStyleSheet(self.__solo_button_color_on)
+        else:
+            self.__btn_solo.setStyleSheet(self.__default_button_color)
+
+    def set_mute_on(self, is_on):
+        if is_on:
+            self.__btn_mute.setStyleSheet(self.__mute_button_color_on)
+        else:
+            self.__btn_mute.setStyleSheet(self.__default_button_color)
+
+    @property
+    def channel_name_text(self):
+        return self.__name_textbox
 
     @property
     def sound_selection_combobox(self):
@@ -276,6 +292,10 @@ class DrumMachineChannel(QWidget):
     @property
     def duration_dial(self):
         return self.__dial_duration
+
+    @property
+    def tone_dial(self):
+        return self.__dial_tone
 
     @property
     def channel_id(self):

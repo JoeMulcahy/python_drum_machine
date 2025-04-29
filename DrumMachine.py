@@ -36,6 +36,9 @@ class DrumMachine(QWidget):
         self.__number_of_steps = 16  # initial number of steps in stepper
 
         self.__number_of_drum_machine_channels = 8  # number of channels for the drum machine
+        self.__channel_solo_list = [False for i in range(self.__number_of_drum_machine_channels)]
+        self.__channel_mute_list = [False for i in range(self.__number_of_drum_machine_channels)]
+
         self.__drum_machine_channels_list = list()  # list of channel modules
         self.__current_selected_drum_machine_channel_index = 0
 
@@ -83,9 +86,11 @@ class DrumMachine(QWidget):
             dm_channel.sound_selection_combobox.addItems(
                 [file.name for file in self.__audio_samples_list])  # popular combobox with sample names
             dm_channel.sound_selection_combobox.setCurrentIndex(i)
+            filename = self.__audio_samples_list[i].name
             audio_voice = \
-                AudioVoice(self.__samples_dir + f"\\{self.__audio_samples_list[i].name}")  # set sample audio voice
+                AudioVoice(self.__samples_dir + f"\\{filename}")  # set sample audio voice
             audio_channel = AudioChannel(i, audio_voice, volume=0.5, pan=0.5)
+            dm_channel.channel_name_text.setText(filename[:filename.find('.')])  # remove extension from file name
             self.__audio_channels_list.append(audio_channel)
             self.__audio_engine.add_channel(audio_channel)
             self.__drum_machine_channels_list.append(dm_channel)
@@ -153,19 +158,36 @@ class DrumMachine(QWidget):
             self.__drum_machine_channels_list[i].pitch_dial.valueChanged \
                 .connect(lambda val, index=i: self.__set_sample_pitch(index, val))
 
-        # Listener for drum machine channel reset button
+            self.__drum_machine_channels_list[i].tone_dial.valueChanged \
+                .connect(lambda val, index=i: self.__set_sample_tone(index, val))
+
+        # Listener for drum machine channel preview buttons
         for i in range(self.__number_of_drum_machine_channels):
             dmc = self.__drum_machine_channels_list[i]
             dmc_index = dmc.channel_id
             btn = dmc.preview_button
             btn.released.connect(lambda dmc_i=dmc_index: self.__play_preview(dmc_i))
 
-        # Listener for drum machine channel preview button
+        # Listener for drum machine channel reset buttons
         for i in range(self.__number_of_drum_machine_channels):
             dmc = self.__drum_machine_channels_list[i]
             dmc_index = dmc.channel_id
             btn = dmc.reset_button
             btn.released.connect(lambda dmc_i=dmc_index: self.__reset_channel(dmc_i))
+
+        # Listener for drum machine channel solo buttons
+        for i in range(self.__number_of_drum_machine_channels):
+            dmc = self.__drum_machine_channels_list[i]
+            dmc_index = dmc.channel_id
+            btn = dmc.solo_button
+            btn.released.connect(lambda dmc_i=dmc_index: self.__solo_channels(dmc_i))
+
+        # Listener for drum machine channel mute buttons
+        for i in range(self.__number_of_drum_machine_channels):
+            dmc = self.__drum_machine_channels_list[i]
+            dmc_index = dmc.channel_id
+            btn = dmc.mute_button
+            btn.released.connect(lambda dmc_i=dmc_index: self.__mute_channels(dmc_i))
 
         #####################################################################################################
         ########################## Listeners for pattern selection ################################
@@ -275,8 +297,8 @@ class DrumMachine(QWidget):
 
     def __update_current_pattern(self):
         self.__current_pattern = \
-        self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
-            self.__channel_pattern_index]
+            self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
+                self.__channel_pattern_index]
         self.__selected_global_pattern = self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][
             self.__global_pattern_index]
         self.__update_stepper_display()
@@ -313,10 +335,62 @@ class DrumMachine(QWidget):
         print(f"channel: {index} : {value / 100}")
         self.__audio_channels_list[index].voice.set_time_stretch(value / 100)
 
+    def __set_sample_tone(self, index, value):
+        print(f"channel: {index} tone: {value / 100}")
+
     def __reset_channel(self, index):
         print(f" resetting channel: {index} ")
         self.__audio_channels_list[index].voice.reset_voice()
         self.__drum_machine_channels_list[index].reset_channel()
+
+    def __solo_channels(self, index):
+        if self.__channel_mute_list[index]:
+            self.__channel_mute_list[index] = False
+            self.__drum_machine_channels_list[index].set_mute_on(False)
+
+        if not self.__channel_solo_list[index]:
+            self.__channel_solo_list[index] = True
+            self.__drum_machine_channels_list[index].set_solo_on(True)
+        elif self.__channel_solo_list[index]:
+            self.__channel_solo_list[index] = False
+            self.__drum_machine_channels_list[index].set_solo_on(False)
+
+        print(f'soloed: {self.__channel_solo_list}')
+        self.__mute_audio_channels()
+
+    def __mute_channels(self, index):
+        if self.__channel_solo_list[index]:
+            self.__channel_solo_list[index] = False
+            self.__drum_machine_channels_list[index].set_solo_on(False)
+
+        if not self.__channel_mute_list[index]:
+            self.__channel_mute_list[index] = True
+            self.__drum_machine_channels_list[index].set_mute_on(True)
+        elif self.__channel_mute_list[index]:
+            self.__channel_mute_list[index] = False
+            self.__drum_machine_channels_list[index].set_mute_on(False)
+
+        print(f'muted: {self.__channel_mute_list}')
+        self.__mute_audio_channels()
+
+    def __mute_audio_channels(self):
+        # check if solo list has a True value before inversion
+        # inversion mutes any channel that hasn't been soloed
+        invert_solo = []
+        for val in self.__channel_solo_list:
+            if val:
+                invert_solo = [False if val else True for val in self.__channel_solo_list]
+                break
+            else:
+                invert_solo = self.__channel_solo_list
+
+        # combine inverted solo and mute list
+        to_muted = [a or b for a, b in zip(invert_solo, self.__channel_mute_list)]
+        for i in range(self.__number_of_drum_machine_channels):
+            if to_muted[i]:
+                self.__audio_channels_list[i].is_muted = True
+            else:
+                self.__audio_channels_list[i].is_muted = False
 
     ####################################################
     ## Create a list of sounds from dir

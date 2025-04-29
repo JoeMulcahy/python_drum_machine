@@ -12,8 +12,10 @@ class AudioChannel:
         self.is_playing = False  # Add is_playing attribute
         self.start_time = 0  # Add start_time attribute
 
+        self.__is_muted = False
+
     def next_stereo_chunk(self, frames: int) -> np.ndarray:
-        if not self.is_playing:
+        if not self.is_playing or self.__is_muted:
             return np.zeros((frames, 2), dtype=np.float32)
 
         mono = self.__voice.next_chunk(frames) * self.__volume
@@ -62,3 +64,11 @@ class AudioChannel:
     @pan.setter
     def pan(self, value):
         self.__pan = value
+
+    @property
+    def is_muted(self):
+        return self.__is_muted
+
+    @is_muted.setter
+    def is_muted(self, value):
+        self.__is_muted = value
