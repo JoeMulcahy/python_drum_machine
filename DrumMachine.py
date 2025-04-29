@@ -33,15 +33,11 @@ class DrumMachine(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.__init_number_of_steps = 16  # initial number of steps in stepper
-        # self.__current_global_pattern = list()  # pattern select (PatternSelect.py)
+        self.__number_of_steps = 16  # initial number of steps in stepper
 
+        self.__number_of_drum_machine_channels = 8  # number of channels for the drum machine
         self.__drum_machine_channels_list = list()  # list of channel modules
         self.__current_selected_drum_machine_channel_index = 0
-
-        self.__tempo = 120
-        self.__beats_per_bar = 4
-        self.__meter = 4
 
         self.__timing_resolution_dict = create_timing_resolution_dict()  # dictionary of [bpb, meter] timings
 
@@ -50,29 +46,27 @@ class DrumMachine(QWidget):
         # initialise SoundEngine
         self.__audio_engine = SoundEngine()
 
-        # pattern manager
-        self.__pattern_manager = PatternManager()
+        self.__audio_channels_list = list()  # list of AudioChannels
+        self.__samples_dir = r"C:\Users\josep\Desktop\Step Seq\audio"  # default drum samples directory
+        self.__audio_samples_list = self.get_audio_samples_list()  # list of .wav samples
+
+        # initialise timing values and application timer
+        self.__tempo = 120
+        self.__beats_per_bar = 4
+        self.__meter = 4
+
+        self.__app_timer = ApplicationTimer(self.__tempo, self.__beats_per_bar, self.__meter)
+        self.__app_timer.set_pulse_callback(self.on_pulse)  # init 'pulse' from app_timer
+
+        # initialise pattern manager
+        self.__pattern_manager = PatternManager(4, 8, self.__number_of_drum_machine_channels, self.__number_of_steps)
         self.__pattern_manager.bank_dict = PatternManager.generate_random_banks()
         self.__global_pattern_bank_index = 0
         self.__global_pattern_index = 0
         self.__channel_pattern_index = 0
 
-        self.__global_pattern_for_playback = self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][
+        self.__selected_global_pattern = self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][
             self.__global_pattern_index]
-
-        self.__pattern_manager.visualise_global_pattern_bank()
-
-        # self.__update_current_pattern()
-
-        self.__audio_channels_list = list()  # list of AudioChannel
-        self.__samples_dir = r"C:\Users\josep\Desktop\Step Seq\audio"  # samples location
-        self.__audio_samples_list = self.get_audio_samples_list()  # list of .wav samples
-
-        self.__number_of_drum_machine_channels = 8  # number of channels for the drum machine
-
-        # initialise application timer
-        self.__app_timer = ApplicationTimer(120, 4, 4)
-        self.__app_timer.set_pulse_callback(self.on_pulse)  # receive a 'pulse' from app_timer
 
         # layout for various modules in drum machine
         drum_machine_layout = QGridLayout()
@@ -82,30 +76,29 @@ class DrumMachine(QWidget):
         channels_layout.setSpacing(15)
         channels_layout.setContentsMargins(10, 10, 10, 10)
 
-        # layout for transport, step sequencer modules
-        controls_layout = QGridLayout()
-        controls_layout.setSpacing(15)
-        controls_layout.setContentsMargins(10, 10, 10, 10)
-
-        # create 8 drum machine channels and add to layout
-        # create 8 audio channels, 1 for each drum machine channel. Add each to engine
+        # initialise audio channels, 1 for each drum machine channel. Add each to engine
         # add drum_machine_channels to channels layout
-        # TODO might have to create list of created channels in audio engine??
         for i in range(self.__number_of_drum_machine_channels):
-            dm_channel = DrumMachineChannel(i)
+            dm_channel = DrumMachineChannel(i)  # drum machine channel
             dm_channel.sound_selection_combobox.addItems(
                 [file.name for file in self.__audio_samples_list])  # popular combobox with sample names
             dm_channel.sound_selection_combobox.setCurrentIndex(i)
-            audio_voice = AudioVoice(self.__samples_dir + f"\\{self.__audio_samples_list[i].name}")
+            audio_voice = \
+                AudioVoice(self.__samples_dir + f"\\{self.__audio_samples_list[i].name}")  # set sample audio voice
             audio_channel = AudioChannel(i, audio_voice, volume=0.5, pan=0.5)
             self.__audio_channels_list.append(audio_channel)
             self.__audio_engine.add_channel(audio_channel)
             self.__drum_machine_channels_list.append(dm_channel)
             channels_layout.addWidget(dm_channel, 0, i)
 
+        # layout for transport, step sequencer modules
+        controls_layout = QGridLayout()
+        controls_layout.setSpacing(15)
+        controls_layout.setContentsMargins(10, 10, 10, 10)
+
         # Transport and SequencerModule
         self.__transport = Transport()
-        self.__sequencer_module = SequencerModule(self.__init_number_of_steps)
+        self.__sequencer_module = SequencerModule(self.__number_of_steps)
 
         # select first channel as default
         self.__update_select_channel(self.__current_selected_drum_machine_channel_index)
@@ -117,8 +110,8 @@ class DrumMachine(QWidget):
         controls_layout.setColumnStretch(1, 5)
 
         # add channel and control layouts to drum_machine_layout layout
-        drum_machine_layout.addLayout(channels_layout, 0, 0)
-        drum_machine_layout.addLayout(controls_layout, 1, 0)
+        drum_machine_layout.addLayout(channels_layout, 0, 0)  # drum machine channels
+        drum_machine_layout.addLayout(controls_layout, 1, 0)  # transport, sequencer module
 
         # add drum machine layout to main layout
         main_layout = QGridLayout()
@@ -221,8 +214,8 @@ class DrumMachine(QWidget):
 
     def trigger_audio(self, count):
         pattern_to_play = []
-        for i in range(len(self.__global_pattern_for_playback)):
-            pattern_to_play.append(self.__global_pattern_for_playback[i][count % self.__init_number_of_steps])
+        for i in range(len(self.__selected_global_pattern)):
+            pattern_to_play.append(self.__selected_global_pattern[i][count % self.__number_of_steps])
 
         # Calculate the time at which the sound should be triggered.
         trigger_time = count * (60.0 / self.__tempo)  # Convert count to time based on BPM
@@ -281,8 +274,11 @@ class DrumMachine(QWidget):
         self.__update_current_pattern()
 
     def __update_current_pattern(self):
-        self.__current_pattern = self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][self.__channel_pattern_index]
-        self.__global_pattern_for_playback = self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index]
+        self.__current_pattern = \
+        self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
+            self.__channel_pattern_index]
+        self.__selected_global_pattern = self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][
+            self.__global_pattern_index]
         self.__update_stepper_display()
 
     def __update_stepper_display(self):

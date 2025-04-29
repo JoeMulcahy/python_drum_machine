@@ -23,6 +23,17 @@ Timing Select dial
 ################################################################################################
     To Do
 ################################################################################################
+Drum Machine Channel:
+    -   Add editable channel names
+    -   solo, mute buttons
+    -   post/pre preview
+    -   gui update
+        -channel colors
+        -fixed component sizes
+    -   tone control
+
+Master Controls:
+    - Master volume
 
 Metronome:
 -   Get it working
@@ -33,12 +44,6 @@ Metronome:
 Steps module:
     -   get it working with the stepper
     -   gray out stepper buttons not used
-
-Drum Machine Channel:
-    -   Add editable channel names
-
-Master Controls:
-    - Master volume
 
 GUI:
     - General improvement of looks
