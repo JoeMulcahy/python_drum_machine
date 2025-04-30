@@ -56,8 +56,11 @@ class DrumMachine(QWidget):
         # initialise audio sample lists
         self.__audio_channels_list = list()  # list of AudioChannels
         self.__samples_dir = settings.ROOT_DIRECTORY + "\\Step Seq\\audio"  # default drum samples directory
+        self.__samples_folders = [
+            'kick', 'snare', 'hats_close', 'hats_open', 'tom_hi', 'tom_med', 'tom_lo', 'perc', 'crash', 'cymbal'
+        ]
 
-        self.__audio_sample_dict = dict()
+        self.__audio_sample_dict = self.__get_audio_list_dict()
         self.__audio_samples_list = self.get_audio_samples_list()  # list of .wav samples
 
         # initialise timing values and application timer
@@ -70,9 +73,9 @@ class DrumMachine(QWidget):
 
         # initialise pattern manager
         self.__pattern_manager = PatternManager(4, 8, self.__number_of_drum_machine_channels, self.__number_of_steps)
-        self.__pattern_manager.bank_dict = PatternManager.generate_random_banks(4, 8,
-                                                                                self.__number_of_drum_machine_channels,
-                                                                                self.__number_of_steps)
+        # self.__pattern_manager.bank_dict = PatternManager.generate_random_banks(
+        #     4, 8, self.__number_of_drum_machine_channels, self.__number_of_steps
+        # )
         self.__global_pattern_bank_index = 0
         self.__global_pattern_index = 0
         self.__channel_pattern_index = 0
@@ -93,11 +96,11 @@ class DrumMachine(QWidget):
         for i in range(self.__number_of_drum_machine_channels):
             dm_channel = DrumMachineChannel(i)  # drum machine channel
             dm_channel.sound_selection_combobox.addItems(
-                [file.name for file in self.__audio_samples_list])  # popular combobox with sample names
+                [file.name for file in self.__audio_sample_dict[i]])  # popular combobox with sample names
             dm_channel.sound_selection_combobox.setCurrentIndex(i)
-            filename = self.__audio_samples_list[i].name
+            filename = self.__audio_sample_dict[i][0].name
             audio_voice = \
-                AudioVoice(self.__samples_dir + f"\\{filename}")  # set sample audio voice
+                AudioVoice(self.__samples_dir + "\\" + self.__samples_folders[i] + f"\\{filename}")  # set sample audio voice
             audio_channel = AudioChannel(i, audio_voice, volume=0.5, pan=0.5)
             dm_channel.channel_name_text.setText(filename[:filename.find('.')])  # remove extension from file name
             self.__audio_channels_list.append(audio_channel)
@@ -252,7 +255,7 @@ class DrumMachine(QWidget):
     def on_pulse(self, pulse_counter):
         # print(f"DrumMachine received pulse {pulse_counter}")
         # Trigger sound playback or other logic here
-        self.__sequencer_module.stepper.play_step_color(pulse_counter)
+        #self.__sequencer_module.stepper.play_step_color(pulse_counter)
         self.__sequencer_module.stepper.stepper_indicators_on_play(pulse_counter)
 
         self.trigger_audio(pulse_counter)
@@ -265,7 +268,6 @@ class DrumMachine(QWidget):
         # Calculate the time at which the sound should be triggered.
         trigger_time = count * (60.0 / self.__tempo)  # Convert count to time based on BPM
         current_time = self.__audio_engine.get_current_time()
-        print(f"play: {pattern_to_play}")
         for i in range(len(self.__audio_channels_list)):
             if pattern_to_play[i] == 1:
                 # Trigger the channel to play its sound.
@@ -333,12 +335,12 @@ class DrumMachine(QWidget):
         self.__audio_channels_list[index].voice.preview_voice()
 
     def __set_voice_for_drum_machine_channels(self, index, dmc_index):
-        voice = AudioVoice(self.__samples_dir + f"\\{self.__audio_samples_list[index].name}")
-        self.__audio_channels_list[dmc_index].voice = voice
-        print(f'voice: {voice} for channel: {dmc_index}')
-
-    def __set_voice_for_drum_machine_channels(self, index, dmc_index, samples_dir, samples_list):
-        voice = AudioVoice(samples_dir + f"\\{samples_list[index].name}")
+        print(f"debug, filename: {self.__audio_sample_dict[dmc_index][index].name}")
+        filename = self.__audio_sample_dict[dmc_index][index].name
+        # self.__samples_dir + "\\" + self.__samples_folders[i] + f"\\{filename}"
+        f = self.__samples_dir + "\\" + self.__samples_folders[dmc_index] + f"\\{filename}"
+        print(f"debug, file for voice: {f}")
+        voice = AudioVoice(self.__samples_dir + "\\" + self.__samples_folders[dmc_index] + f"\\{filename}")
         self.__audio_channels_list[dmc_index].voice = voice
         print(f'voice: {voice} for channel: {dmc_index}')
 
@@ -470,6 +472,34 @@ class DrumMachine(QWidget):
                 print('Error: {e}')
         else:
             print("No folder selected")
+
+    def __get_audio_list_dict(self):
+        directory = Path(self.__samples_dir)
+        # mode = os.stat(self.__samples_dir).st_mode
+        # print("Is directory:", stat.S_ISDIR(mode))
+        # print("Is readable:", os.access(self.__samples_dir, os.R_OK))
+        # print("Is writable:", os.access(self.__samples_dir, os.W_OK))
+
+        samples_dict = dict()
+
+        if not directory.is_dir():
+            raise NotADirectoryError(f"{directory} is not a valid directory!")
+
+        for i in range(len(self.__samples_folders)):
+            audio_list = []
+            sample_dir = Path(f"{directory}/{self.__samples_folders[i]}")
+            try:
+                for file in sample_dir.iterdir():
+                    print(f"checking file: {file}")
+                    if file.is_file():
+                        audio_list.append(file)
+                        samples_dict[i] = audio_list
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                print(f"Error when scanning directory: {e}")
+
+        return samples_dict
 
     ####################################################
     ## Create a list of sounds from dir

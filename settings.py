@@ -1,1 +1,1 @@
-ROOT_DIRECTORY = "C:\\Users\\josep\\Desktop\\"
+ROOT_DIRECTORY = "C:\\Users\\josep\\Desktop"
