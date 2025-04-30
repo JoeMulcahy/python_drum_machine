@@ -19,12 +19,8 @@ Timing Select dial
 ################################################################################################
     To Do
 ################################################################################################
-Files
-    -   implement way to load audio files to channel combo box from file explorer
-    -   file extension check and better error handling
 
 Drum Machine Channel:
-    -   post/pre preview
     -   tone control
 
 Master Controls:
@@ -38,13 +34,18 @@ Metronome:
 
 Pattern Select module
     -   clear global pattern
-    -
+    -   copy and paste
+    -   load ans save banks
 
 Steps module:
     -   clear pattern
     -   shift pattern
     -   gray out stepper buttons not used
     -   flam
+
+Files
+    -   implement way to load audio files to channel combo box from file explorer
+    -   file extension check and better error handling
 
 GUI:
     - General improvement of looks
@@ -63,17 +64,9 @@ Random kit
 ################################################################################################
     Nice to haves
 ################################################################################################
-Opening files
--   Option to select a folder and make them available across all channels
--   Have multi directories for audio files, each a type of drum sound
-        - open each type of separate channels
 
 Pattern Select
 -   Highlight bank and pattern select buttons with pattern in them
-
-Pattern Select
--   save global patterns (shelve)
--   load global pattern
 
 Stepper
 -   clear pattern
@@ -88,12 +81,9 @@ Stepper
 -   play new pattern from the very beginning
 
 Drum Machine Channel
--   button to preview original sound (done)
 -   button to preview sound after vol, panning, pitch etc
     -   could be in the form of a pre/post button
 -   each channel has can load a sample from disk
--   waveform mode where each channel has a speciality
-    - ch1: kick, ch2: snare etc
 -   duration control -> start - end sample
 
 Modulation

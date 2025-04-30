@@ -178,7 +178,14 @@ class DrumMachine(QWidget):
             dmc = self.__drum_machine_channels_list[i]
             dmc_index = dmc.channel_id
             btn = dmc.preview_button
-            btn.released.connect(lambda dmc_i=dmc_index: self.__play_preview(dmc_i))
+            btn.released.connect(lambda dmc_i=dmc_index: self.__play_preview(dmc_i, True))
+
+        # Listener for drum machine channel post preview buttons
+        for i in range(self.__number_of_drum_machine_channels):
+            dmc = self.__drum_machine_channels_list[i]
+            dmc_index = dmc.channel_id
+            btn = dmc.post_preview_button
+            btn.released.connect(lambda dmc_i=dmc_index: self.__play_preview(dmc_i, False))
 
         # Listener for drum machine channel reset buttons
         for i in range(self.__number_of_drum_machine_channels):
@@ -253,11 +260,7 @@ class DrumMachine(QWidget):
     # Take action upon receiving pulse from app_timer
     ########################################################################
     def on_pulse(self, pulse_counter):
-        # print(f"DrumMachine received pulse {pulse_counter}")
-        # Trigger sound playback or other logic here
-        #self.__sequencer_module.stepper.play_step_color(pulse_counter)
         self.__sequencer_module.stepper.stepper_indicators_on_play(pulse_counter)
-
         self.trigger_audio(pulse_counter)
 
     def trigger_audio(self, count):
@@ -330,19 +333,15 @@ class DrumMachine(QWidget):
         print(f'{self.__global_pattern_bank_index}{self.__global_pattern_index}{self.__channel_pattern_index}')
         self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
 
-    def __play_preview(self, index):
+    def __play_preview(self, index, is_pre):
         print(f"preview {index}")
-        self.__audio_channels_list[index].voice.preview_voice()
+        self.__audio_channels_list[index].voice.preview_voice(is_pre)
 
     def __set_voice_for_drum_machine_channels(self, index, dmc_index):
-        print(f"debug, filename: {self.__audio_sample_dict[dmc_index][index].name}")
         filename = self.__audio_sample_dict[dmc_index][index].name
-        # self.__samples_dir + "\\" + self.__samples_folders[i] + f"\\{filename}"
         f = self.__samples_dir + "\\" + self.__samples_folders[dmc_index] + f"\\{filename}"
-        print(f"debug, file for voice: {f}")
         voice = AudioVoice(self.__samples_dir + "\\" + self.__samples_folders[dmc_index] + f"\\{filename}")
         self.__audio_channels_list[dmc_index].voice = voice
-        print(f'voice: {voice} for channel: {dmc_index}')
 
     def __set_channel_volume(self, index, value):
         print(f'volume debug\n: vol: {value} chan: {index}')

@@ -7,8 +7,8 @@ import numpy as np
 class Voice:
     def __init__(self, data: np.ndarray, samplerate: int):
         self.__data = data
-        self.__data_manipulated = data
-        self.__original_data = data
+        self.__data_manipulated = self.__data.copy()
+        self.__original_data = self.__data.copy()
         self.__samplerate = samplerate
         self.__original_sample_rate = samplerate
         self.__original_voice_length = self.__original_data.shape[0]
@@ -65,11 +65,6 @@ class Voice:
         # Calculate the desired number of samples from voice for playback
         target_duration_samples = int(self.__original_voice_length * scaled_duration)
 
-        print(f"debug: Voice.set_voice_duration")
-        print(f"scaled duration (0.0 - 1.0): {scaled_duration}")
-        print(f"current_duration_samples: {self.__original_voice_length}")
-        print(f"target_duration_samples: {target_duration_samples}")
-
         # Handle mono or stereo safely
         if temp_data.ndim == 1:  # Mono
             self.__data_manipulated = temp_data[:target_duration_samples]
@@ -82,28 +77,23 @@ class Voice:
         self.reset_position()  # Important to reset playback!
 
     def set_time_stretch(self, duration_scale):
-        print(f"debug: Voice.set_time_stretch")
         duration_scale = duration_scale * 3  # (optional: clip first)
 
         if duration_scale <= 0:
             self.__data = np.zeros_like(self.__original_data)
             return
 
-        temp_data = self.__original_data
+        temp_data = self.__original_data.copy()
         current_duration_samples = temp_data.shape[0]
 
         desired_duration_seconds = duration_scale * (current_duration_samples / self.__samplerate)
         desired_num_samples = int(desired_duration_seconds * self.__samplerate)
 
         if desired_num_samples <= 0:
-            self.__data = np.zeros_like(self.__original_data)
+            self.__data = np.zeros_like(self.__original_data.copy())
             return
 
         stretch_ratio = current_duration_samples / desired_num_samples
-        print(f"debug: Voice.set_time_stretch")
-        print(f"scaled duration (0.0 - 1.0): {duration_scale}")
-        print(f"desired_duration_seconds: {desired_duration_seconds}")
-        print(f"Stretch ratio: {stretch_ratio}")
 
         if temp_data.ndim == 1:
             # MONO audio
@@ -149,18 +139,22 @@ class Voice:
 
         return chunk
 
-    def preview_voice(self):
+    def preview_voice(self, is_pre=True):
         if self._playback_thread and self._playback_thread.is_alive():
             print(f"Warning: sound is already playing.")
             return  # Important: Return, don't start a new thread
 
-        self._playback_thread = threading.Thread(target=self.__play_audio)
+        self._playback_thread = threading.Thread(target=self.__play_audio(is_pre))
         self._playback_thread.start()
         print(f"Started playback of: sound on a new thread.")
 
-    def __play_audio(self):
+    def __play_audio(self, is_pre):
         try:
-            sd.play(self.__data_manipulated, self.__samplerate)
+            if is_pre:
+                sd.play(self.__original_data, self.__samplerate)
+            else:
+                sd.play(self.__data_manipulated, self.__samplerate)
+
             # sd.wait()  # Uncomment if you want to wait for the audio to finish before moving on
         except Exception as e:
             print(f"Error during playback of sound: {e}")
