@@ -20,9 +20,6 @@ Timing Select dial
     To Do
 ################################################################################################
 
-Drum Machine Channel:
-    -   tone control
-
 Master Controls:
     - Master volume
 
@@ -60,6 +57,9 @@ Profiles
 
 Random kit
 -   Generate random kit from files
+
+Create a new class to handle eq and filtering
+-   relocate high and low shelving filters code to new class
 
 ################################################################################################
     Nice to haves

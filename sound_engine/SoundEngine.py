@@ -19,6 +19,7 @@ class SoundEngine:
         self.lock = threading.Lock()
         self.current_time = 0  # Keep track of the current time.
         self.block_duration = 0.0  # Store the duration of each audio callback block
+        self.__master_volume = 0.5
 
     def audio_callback(self, outdata, frames, time, status):
         with self.lock:
@@ -28,7 +29,7 @@ class SoundEngine:
 
             for channel in self.__channels:
                 if channel.is_playing:
-                    chunk = channel.next_stereo_chunk(frames)
+                    chunk = channel.next_stereo_chunk(frames) * self.__master_volume
                     mix += chunk
 
                     # Check if the voice is finished playing.
@@ -55,6 +56,9 @@ class SoundEngine:
     def get_current_time(self):
         return self.current_time
 
+    def set_master_volume(self, value):
+        self.__master_volume = value
+
     @property
     def sample_rate(self):
         return self.__samplerate
@@ -66,5 +70,3 @@ class SoundEngine:
     @property
     def channels(self):
         return self.__channels
-
-

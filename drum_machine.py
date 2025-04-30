@@ -73,9 +73,9 @@ class DrumMachine(QWidget):
 
         # initialise pattern manager
         self.__pattern_manager = PatternManager(4, 8, self.__number_of_drum_machine_channels, self.__number_of_steps)
-        # self.__pattern_manager.bank_dict = PatternManager.generate_random_banks(
-        #     4, 8, self.__number_of_drum_machine_channels, self.__number_of_steps
-        # )
+        self.__pattern_manager.bank_dict = PatternManager.generate_random_banks(
+            4, 8, self.__number_of_drum_machine_channels, self.__number_of_steps
+        )
         self.__global_pattern_bank_index = 0
         self.__global_pattern_index = 0
         self.__channel_pattern_index = 0
@@ -421,6 +421,8 @@ class DrumMachine(QWidget):
 
     def __set_master_volume(self, value):
         print(f"Master Volume {value / 100}")
+        #self.__audio_engine.master_volume(value / 100)
+        self.__audio_engine.set_master_volume(value / 100)
 
     def __load_profile(self):
         print(f"Load profile")
