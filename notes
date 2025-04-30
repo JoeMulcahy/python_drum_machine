@@ -20,6 +20,7 @@ Timing Select dial
     To Do
 ################################################################################################
 Drum Machine Channel:
+    -   increase to 10 channels
     -   post/pre preview
     -   tone control
 
@@ -34,6 +35,7 @@ Metronome:
 
 Steps module:
     -   gray out stepper buttons not used
+    -   flam
 
 Files
     -   implement way to add more files to combobox in DrumMachine channel
@@ -41,17 +43,24 @@ Files
 
 GUI:
     - General improvement of looks
+    - separate transport, bmp and metronome into separate modules
 
 Optimisations:
     - Drum Machine
         - combine listeners into one for loop
+
+Profiles
+-   Load and Save pattern and channels sounds and settings
+
+Random kit
+-   Generate random kit from files
 
 ################################################################################################
     Nice to haves
 ################################################################################################
 Opening files
 -   Option to select a folder and make them available across all channels
--   Have multi directories for audio files, each a type od drum sound
+-   Have multi directories for audio files, each a type of drum sound
         - open each type of separate channels
 
 Pattern Select
@@ -81,6 +90,13 @@ Drum Machine Channel
 -   waveform mode where each channel has a speciality
     - ch1: kick, ch2: snare etc
 -   duration control -> start - end sample
+
+Modulation
+-   LFO's to control channel dials
+
+Sound fx
+-   delay
+-   reverb
 
 
 

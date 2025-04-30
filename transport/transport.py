@@ -15,14 +15,8 @@ class Transport(QWidget):
         self.__tempo_spin_box = QSpinBox()
         self.__tempo_spin_box.setRange(1, 300)
         self.__tempo_spin_box.setValue(120)
-        self.__tempo_spin_box.setFixedSize(60, 60)
-        self.__tempo_spin_box.setStyleSheet("""
-            QSpinBox {
-                font-size: 24px;       /* Resize text */
-                color: #ff5733;        /* Change text color */
-            }
-        """)
-        self.__tempo_label = QLabel("bpm")
+
+        self.__lbl_bpm = QLabel("bpm")
 
         # metronome controls
         self.__metronome_checkbox = QCheckBox()
@@ -30,7 +24,6 @@ class Transport(QWidget):
         self.__metronome_checkbox.setText("on/off")
         self.__metronome_label = QLabel("Metronome")
         self.__metronome_volume_dial = QDial()
-        self.__dial_label = QLabel("Volume")
         self.__metronome_volume_dial.setRange(0, 100)
         self.__metronome_volume_dial.setValue(50)
         self.__metronome_volume_dial.setNotchesVisible(True)
@@ -40,45 +33,42 @@ class Transport(QWidget):
 
     def initialise_components(self):
         module_group_box = QGroupBox(f"Transport")
-        metronome_group_box = QGroupBox(f"metronome")
-        tempo_group_box = QGroupBox(f"tempo")
-
-        buttons_layout = QGridLayout()
-        buttons_layout.addWidget(self.__btn_play, 0, 0)
-        buttons_layout.addWidget(self.__btn_stop, 0, 1)
-
-        tempo_layout = QGridLayout()
-        tempo_layout.addWidget(self.__tempo_spin_box, 0, 0)
-
-        metronome_layout = QGridLayout()
-        metronome_layout.addWidget(self.__metronome_checkbox, 0, 0)
-        metronome_layout.addWidget(self.__metronome_volume_dial, 0, 1)
-
-        self.set_sizes()                # set sizes of widget components
+        self.set_style()  # set widgets style
 
         transport_module_layout = QGridLayout()
-        transport_module_layout.addLayout(buttons_layout, 0, 0)
-        transport_module_layout.addLayout(tempo_layout, 0, 1)
-        transport_module_layout.addLayout(metronome_layout, 1, 0, 1, 1)
+        transport_module_layout.setSpacing(20)
+        transport_module_layout.addWidget(self.__btn_play, 0, 0)
+        transport_module_layout.addWidget(self.__btn_stop, 0, 1)
+        transport_module_layout.addWidget(self.__lbl_bpm, 1, 0)
+        transport_module_layout.addWidget(self.__tempo_spin_box, 1, 1)
+        transport_module_layout.addWidget(self.__metronome_label, 2, 0)
+        transport_module_layout.addWidget(self.__metronome_checkbox, 3, 0)
+        transport_module_layout.addWidget(self.__metronome_volume_dial, 3, 1)
 
         module_group_box.setLayout(transport_module_layout)
-        transport_module_layout.addLayout(tempo_layout, 0, 1)
-        transport_module_layout.addLayout(metronome_layout, 1, 0, 1, 1)
 
-        # transport_module_layout.addWidget(tempo_group_box, 0, 1)
-        # transport_module_layout.addWidget(metronome_group_box, 1, 0, 1, 1)
-
-        #TODO
-        # Add group boxes to tempo and metronome controls
-
-        main_layout = QVBoxLayout()
+        main_layout = QGridLayout()
         main_layout.addWidget(module_group_box)
         self.setLayout(main_layout)
 
-    def set_sizes(self):
-        for c in [self.__btn_play, self.__btn_stop, self.__metronome_volume_dial,
-                  self.__metronome_checkbox, self.__tempo_spin_box]:
-            c.setFixedSize(100, 100)
+    def set_style(self):
+        for comp in [self.__btn_play, self.__btn_stop, self.__tempo_spin_box]:
+            comp.setFixedSize(100, 50)
+
+        text_style = "QLabel { font-size: 12px; font-weight: bold}"
+        self.__metronome_label.setStyleSheet(text_style)
+        self.__lbl_bpm.setStyleSheet(text_style)
+
+        self.__metronome_volume_dial.setFixedSize(50, 50)
+
+        self.__metronome_checkbox.setFixedSize(50, 50)
+
+        self.__tempo_spin_box.setStyleSheet("""
+            QSpinBox {
+                font-size: 24px;       /* Resize text */
+                color: #ff5733;        /* Change text color */
+            }
+        """)
 
     def set_is_playing(self, value):
         self.__is_playing = value

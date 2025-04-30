@@ -192,7 +192,7 @@ class DrumMachineChannel(QWidget):
             dial.setMinimum(1)
             dial.setMaximum(100)
             dial.setValue(50)
-            dial.setFixedSize(50, 50)
+            dial.setFixedSize(40, 40)
             dial.setNotchesVisible(True)
             dial.setWrapping(False)
 

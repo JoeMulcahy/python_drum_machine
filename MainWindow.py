@@ -1,10 +1,10 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import *
 
-from DrumMachineChannel import DrumMachineChannel
-from DrumMachine import DrumMachine
+from drum_machine_channel import DrumMachineChannel
+from drum_machine import DrumMachine
 from sequencer_module.sequencer_module import SequencerModule
-from transport_module.Transport import Transport
+from transport.transport import Transport
 
 
 class MainWindow(QMainWindow):

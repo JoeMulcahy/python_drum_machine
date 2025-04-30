@@ -1,23 +1,21 @@
 import os
 import stat
 from pathlib import Path
+import tkinter as tk
+from tkinter import filedialog
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout
 
-from DrumMachineChannel import DrumMachineChannel
+from drum_machine_channel import DrumMachineChannel
+from global_controls.global_controls import MasterControls
 from pattern.PatternManger import PatternManager
 from sequencer_module.sequencer_module import SequencerModule
 from sound_engine.AudioVoice import AudioVoice
 from sound_engine.AudioChannel import AudioChannel
 from sound_engine.SoundEngine import SoundEngine
-from timer.ApplicationTimer import ApplicationTimer
-from transport_module.Transport import Transport
-#from master_controls.master_controls import MasterControls
-
-import tkinter as tk
-from tkinter import filedialog
-
+from timer.application_timer import ApplicationTimer
+from transport.transport import Transport
 
 def create_timing_resolution_dict():
     d = dict()
@@ -108,16 +106,15 @@ class DrumMachine(QWidget):
         self.__update_select_channel(self.__current_selected_drum_machine_channel_index)
 
         # Master Control module
-        #master_controls = MasterControls()
+        self.__master_controls = MasterControls()
 
         # add transport and sequencerModule to layout controls layout
         controls_layout = QGridLayout()
         controls_layout.setSpacing(15)
         controls_layout.setContentsMargins(10, 10, 10, 10)
-        controls_layout.addWidget(self.__transport, 0, 0, alignment=Qt.AlignmentFlag.AlignLeft)
-        controls_layout.addWidget(self.__sequencer_module, 0, 1, alignment=Qt.AlignmentFlag.AlignLeft)
-        controls_layout.setColumnStretch(0, 2)
-        controls_layout.setColumnStretch(1, 5)
+        controls_layout.addWidget(self.__transport, 0, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
+        controls_layout.addWidget(self.__sequencer_module, 0, 1, 2, 1, alignment=Qt.AlignmentFlag.AlignTop)
+        controls_layout.addWidget(self.__master_controls, 0, 2, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
 
         # add channel and control layouts to drum_machine_layout layout
         drum_machine_layout.addLayout(channels_layout, 0, 0)  # drum machine channels
@@ -216,7 +213,7 @@ class DrumMachine(QWidget):
             temp_counter = temp_counter + 1
 
         #####################################################################################################
-        ########################## Listeners for Transport module ################################
+        ########################## Listeners for Transport module ###########################################
         #####################################################################################################
 
         # Listeners for Transport module
@@ -228,12 +225,19 @@ class DrumMachine(QWidget):
         )
 
         #####################################################################################################
-        ########################## Listeners for Timing resolution module ################################
+        ########################## Listeners for Timing resolution module ##################################
         #####################################################################################################
 
         # Listener for Timing resolution module
         self.__sequencer_module.timing_resolution_select. \
             timing_select_dial.valueChanged.connect(lambda index: self.set_timing_resolution(index))
+
+        #####################################################################################################
+        ########################## Listeners for Master Controls ############################################
+        #####################################################################################################
+        self.__master_controls.volume_dial.valueChanged.connect(lambda val: self.__set_master_volume(val))
+        self.__master_controls.load_profile_button.clicked.connect(lambda: self.__load_profile())
+        self.__master_controls.save_profile_button.clicked.connect(lambda: self.__save_profile())
 
     ########################################################################
     # Take action upon receiving pulse from app_timer
@@ -402,6 +406,15 @@ class DrumMachine(QWidget):
                 self.__audio_channels_list[i].is_muted = True
             else:
                 self.__audio_channels_list[i].is_muted = False
+
+    def __set_master_volume(self, value):
+        print(f"Master Volume {value / 100}")
+
+    def __load_profile(self):
+        print(f"Load profile")
+
+    def __save_profile(self):
+        print(f"Save profile")
 
     def __open_files(self, index):
         root = tk.Tk()
