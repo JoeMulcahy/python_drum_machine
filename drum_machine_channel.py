@@ -33,10 +33,10 @@ class DrumMachineChannel(QWidget):
         self.__sound_selection_combo_box.setCurrentIndex(0)
 
         # labels for channel controls
-        self.__lbl_volume = QLabel('Volume')
+        self.__lbl_volume = QLabel('Vol')
         self.__lbl_pan = QLabel('Pan')
         self.__lbl_pitch = QLabel('Pitch')
-        self.__lbl_length = QLabel('Length')
+        self.__lbl_length = QLabel('Len')
         self.__lbl_duration = QLabel('Stretch')
         self.__lbl_tone = QLabel('Tone')
         self.__lbl_preview = QLabel('Preview')
@@ -112,7 +112,7 @@ class DrumMachineChannel(QWidget):
 
     def init_components(self):
         layout = QGridLayout()
-        layout.setSpacing(5)
+        layout.setSpacing(2)
 
         #####################################################
         layout.addWidget(self.__name_textbox, 0, 0, 1, 3)
@@ -176,7 +176,7 @@ class DrumMachineChannel(QWidget):
                 btn.setStyleSheet(self.__reset_button_color)
 
         # label style
-        label_style = "QLabel { font-size: 12px; font-weight: bold; color: #aaaaaa; }"
+        label_style = "QLabel { font-size: 8px; font-weight: bold; color: #aaaaaa; }"
         for label in self.findChildren(QWidget):
             if isinstance(label, QLabel):
                 label.setStyleSheet(label_style)

@@ -37,7 +37,7 @@ class DrumMachine(QWidget):
 
         self.__number_of_steps = 16  # initial number of steps in stepper
 
-        self.__number_of_drum_machine_channels = 8  # number of channels for the drum machine
+        self.__number_of_drum_machine_channels = 10  # number of channels for the drum machine
         self.__channel_solo_list = [False for i in range(self.__number_of_drum_machine_channels)]
         self.__channel_mute_list = [False for i in range(self.__number_of_drum_machine_channels)]
 
@@ -65,7 +65,7 @@ class DrumMachine(QWidget):
 
         # initialise pattern manager
         self.__pattern_manager = PatternManager(4, 8, self.__number_of_drum_machine_channels, self.__number_of_steps)
-        self.__pattern_manager.bank_dict = PatternManager.generate_random_banks()
+        self.__pattern_manager.bank_dict = PatternManager.generate_random_banks(4, 8, self.__number_of_drum_machine_channels, self.__number_of_steps)
         self.__global_pattern_bank_index = 0
         self.__global_pattern_index = 0
         self.__channel_pattern_index = 0
@@ -78,8 +78,8 @@ class DrumMachine(QWidget):
 
         # layout for the step sequencer's audio channels
         channels_layout = QGridLayout()
-        channels_layout.setSpacing(15)
-        channels_layout.setContentsMargins(10, 10, 10, 10)
+        channels_layout.setSpacing(5)
+        channels_layout.setContentsMargins(5, 10, 5, 10)
 
         # initialise audio channels, 1 for each drum machine channel. Add each to engine
         # add drum_machine_channels to channels layout
@@ -258,13 +258,13 @@ class DrumMachine(QWidget):
         # Calculate the time at which the sound should be triggered.
         trigger_time = count * (60.0 / self.__tempo)  # Convert count to time based on BPM
         current_time = self.__audio_engine.get_current_time()
-
+        print(f"play: {pattern_to_play}")
         for i in range(len(self.__audio_channels_list)):
             if pattern_to_play[i] == 1:
                 # Trigger the channel to play its sound.
                 self.__audio_channels_list[i].trigger(trigger_time)
 
-        # print(f"play: {pattern_to_play}")
+
 
     def start_engine(self):
         self.__audio_engine.play()

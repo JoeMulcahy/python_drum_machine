@@ -13,7 +13,11 @@ class PatternManager:
         self.__number_of_global_patterns = number_of_global_patterns
         self.__number_of_banks = number_of_banks
 
-        self.__bank_dict = self.generate_patterns_for_banks(is_random=False)
+        print(f'debug: PatternManger: {self.__number_of_channels}')
+
+        self.__bank_dict = self.generate_patterns_for_banks(
+            self.__number_of_banks, self.__number_of_global_patterns,
+            self.__number_of_channels, self.__number_of_steps, is_random=False)
 
     @property
     def bank_dict(self):
