@@ -363,7 +363,8 @@ class DrumMachine(QWidget):
         self.__audio_channels_list[index].voice.set_time_stretch(value / 100)
 
     def __set_sample_tone(self, index, value):
-        print(f"channel: {index} tone: {value / 100}")
+        print(f"channel: {index} tone: {value}")
+        self.__audio_channels_list[index].set_hsf_gain(value)
 
     def __reset_channel(self, index):
         print(f" resetting channel: {index} ")

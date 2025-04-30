@@ -60,10 +60,10 @@ class Voice:
     ############################################################################
     def set_voice_length(self, scaled_duration):
         scaled_duration = np.clip(scaled_duration, 0.0, 1.0)  # ensure duration scale is between 0.0 and 1.0 (from UI)
-        temp_data = self.__original_data
+        temp_data = self.__data.copy()
 
         # Calculate the desired number of samples from voice for playback
-        target_duration_samples = int(self.__original_voice_length * scaled_duration)
+        target_duration_samples = int(temp_data.shape[0] * scaled_duration)
 
         # Handle mono or stereo safely
         if temp_data.ndim == 1:  # Mono
@@ -114,11 +114,13 @@ class Voice:
     def next_chunk(self, frames: int) -> np.ndarray:
         """Return the next chunk of audio data."""
         if not self.__active:
-            return np.zeros((frames, self.__data_manipulated.shape[1] if self.__data_manipulated.ndim > 1 else 1), dtype=np.float32)
+            return np.zeros((frames, self.__data_manipulated.shape[1] if self.__data_manipulated.ndim > 1 else 1),
+                            dtype=np.float32)
 
         if self.__position >= len(self.__data_manipulated):
             self.__active = False
-            return np.zeros((frames, self.__data_manipulated.shape[1] if self.__data_manipulated.ndim > 1 else 1), dtype=np.float32)
+            return np.zeros((frames, self.__data_manipulated.shape[1] if self.__data_manipulated.ndim > 1 else 1),
+                            dtype=np.float32)
 
         end = self.__position + frames
         chunk = self.__data_manipulated[self.__position:end]
@@ -133,8 +135,9 @@ class Voice:
 
         # Pad with zeros if end of audio
         if len(chunk) < frames:
-            padding = np.zeros((frames - len(chunk), self.__data_manipulated.shape[1] if self.__data_manipulated.ndim > 1 else 1),
-                               dtype=np.float32)
+            padding = np.zeros(
+                (frames - len(chunk), self.__data_manipulated.shape[1] if self.__data_manipulated.ndim > 1 else 1),
+                dtype=np.float32)
             chunk = np.concatenate((chunk, padding), axis=0)
 
         return chunk
