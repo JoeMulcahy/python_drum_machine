@@ -21,7 +21,7 @@ Timing Select dial
 ################################################################################################
 
 Master Controls:
-    - Master volume
+    - unmute and un solo buttons
 
 Metronome:
 -   Get it working
@@ -47,6 +47,7 @@ Files
 GUI:
     - General improvement of looks
     - separate transport, bmp and metronome into separate modules
+    - move all styling to a separate py file
 
 Optimisations:
     - Drum Machine

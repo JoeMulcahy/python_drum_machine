@@ -36,18 +36,15 @@ def create_timing_resolution_dict():
 class DrumMachine(QWidget):
     def __init__(self):
         super().__init__()
-
         self.__number_of_steps = 16  # initial number of steps in stepper
-
         self.__number_of_drum_machine_channels = 10  # number of channels for the drum machine
-        self.__channel_solo_list = [False for i in range(self.__number_of_drum_machine_channels)]
-        self.__channel_mute_list = [False for i in range(self.__number_of_drum_machine_channels)]
 
         self.__drum_machine_channels_list = list()  # list of channel modules
+        self.__channel_solo_list = [False for i in range(self.__number_of_drum_machine_channels)]
+        self.__channel_mute_list = [False for i in range(self.__number_of_drum_machine_channels)]
         self.__current_selected_drum_machine_channel_index = 0
 
         self.__timing_resolution_dict = create_timing_resolution_dict()  # dictionary of [bpb, meter] timings
-
         self.__metronome_on = False  # metronome on/off flag
 
         # initialise SoundEngine
@@ -100,7 +97,8 @@ class DrumMachine(QWidget):
             dm_channel.sound_selection_combobox.setCurrentIndex(i)
             filename = self.__audio_sample_dict[i][0].name
             audio_voice = \
-                AudioVoice(self.__samples_dir + "\\" + self.__samples_folders[i] + f"\\{filename}")  # set sample audio voice
+                AudioVoice(
+                    self.__samples_dir + "\\" + self.__samples_folders[i] + f"\\{filename}")  # set sample audio voice
             audio_channel = AudioChannel(i, audio_voice, volume=0.5, pan=0.5)
             dm_channel.channel_name_text.setText(filename[:filename.find('.')])  # remove extension from file name
             self.__audio_channels_list.append(audio_channel)
@@ -252,9 +250,12 @@ class DrumMachine(QWidget):
         #####################################################################################################
         ########################## Listeners for Master Controls ############################################
         #####################################################################################################
+        self
         self.__master_controls.volume_dial.valueChanged.connect(lambda val: self.__set_master_volume(val))
         self.__master_controls.load_profile_button.clicked.connect(lambda: self.__load_profile())
         self.__master_controls.save_profile_button.clicked.connect(lambda: self.__save_profile())
+        self.__master_controls.un_mute_all.clicked.connect(lambda: self.__unmute_all())
+        self.__master_controls.un_solo_all.clicked.connect(lambda: self.__unsolo_all())
 
     ########################################################################
     # Take action upon receiving pulse from app_timer
@@ -420,9 +421,17 @@ class DrumMachine(QWidget):
                 self.__audio_channels_list[i].is_muted = False
 
     def __set_master_volume(self, value):
-        print(f"Master Volume {value / 100}")
-        #self.__audio_engine.master_volume(value / 100)
         self.__audio_engine.set_master_volume(value / 100)
+
+    def __unmute_all(self):
+        for i in range(self.__number_of_drum_machine_channels):
+            if self.__channel_mute_list[i]:
+                self.__mute_channels(i)
+
+    def __unsolo_all(self):
+        for i in range(self.__number_of_drum_machine_channels):
+            if self.__channel_solo_list[i]:
+                self.__solo_channels(i)
 
     def __load_profile(self):
         print(f"Load profile")
