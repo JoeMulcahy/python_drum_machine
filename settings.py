@@ -1,0 +1,1 @@
+ROOT_DIRECTORY = "C:\\Users\\josep\\Desktop\\"

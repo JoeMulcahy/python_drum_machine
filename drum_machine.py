@@ -16,6 +16,8 @@ from sound_engine.AudioChannel import AudioChannel
 from sound_engine.SoundEngine import SoundEngine
 from timer.application_timer import ApplicationTimer
 from transport.transport import Transport
+import settings
+
 
 def create_timing_resolution_dict():
     d = dict()
@@ -51,8 +53,11 @@ class DrumMachine(QWidget):
         # initialise SoundEngine
         self.__audio_engine = SoundEngine()
 
+        # initialise audio sample lists
         self.__audio_channels_list = list()  # list of AudioChannels
-        self.__samples_dir = r"C:\Users\josep\Desktop\Step Seq\audio"  # default drum samples directory
+        self.__samples_dir = settings.ROOT_DIRECTORY + "\\Step Seq\\audio"  # default drum samples directory
+
+        self.__audio_sample_dict = dict()
         self.__audio_samples_list = self.get_audio_samples_list()  # list of .wav samples
 
         # initialise timing values and application timer
@@ -65,7 +70,9 @@ class DrumMachine(QWidget):
 
         # initialise pattern manager
         self.__pattern_manager = PatternManager(4, 8, self.__number_of_drum_machine_channels, self.__number_of_steps)
-        self.__pattern_manager.bank_dict = PatternManager.generate_random_banks(4, 8, self.__number_of_drum_machine_channels, self.__number_of_steps)
+        self.__pattern_manager.bank_dict = PatternManager.generate_random_banks(4, 8,
+                                                                                self.__number_of_drum_machine_channels,
+                                                                                self.__number_of_steps)
         self.__global_pattern_bank_index = 0
         self.__global_pattern_index = 0
         self.__channel_pattern_index = 0
@@ -196,7 +203,7 @@ class DrumMachine(QWidget):
             dmc = self.__drum_machine_channels_list[i]
             dmc_index = dmc.channel_id
             btn = dmc.open_file_button
-            btn.released.connect(lambda dmc_i=dmc_index: self.__open_files(dmc_i))
+            btn.released.connect(lambda dmc_i=dmc_index: self.__open_files_in_directory(dmc_i))
 
         #####################################################################################################
         ########################## Listeners for pattern selection ################################
@@ -264,8 +271,6 @@ class DrumMachine(QWidget):
                 # Trigger the channel to play its sound.
                 self.__audio_channels_list[i].trigger(trigger_time)
 
-
-
     def start_engine(self):
         self.__audio_engine.play()
         self.__app_timer.start_counter()
@@ -329,6 +334,11 @@ class DrumMachine(QWidget):
 
     def __set_voice_for_drum_machine_channels(self, index, dmc_index):
         voice = AudioVoice(self.__samples_dir + f"\\{self.__audio_samples_list[index].name}")
+        self.__audio_channels_list[dmc_index].voice = voice
+        print(f'voice: {voice} for channel: {dmc_index}')
+
+    def __set_voice_for_drum_machine_channels(self, index, dmc_index, samples_dir, samples_list):
+        voice = AudioVoice(samples_dir + f"\\{samples_list[index].name}")
         self.__audio_channels_list[dmc_index].voice = voice
         print(f'voice: {voice} for channel: {dmc_index}')
 
@@ -465,13 +475,14 @@ class DrumMachine(QWidget):
     ## Create a list of sounds from dir
     ####################################################
     def get_audio_samples_list(self):
-        print(f"debug: {self.__samples_dir}")
         directory = Path(self.__samples_dir)
 
         # mode = os.stat(self.__samples_dir).st_mode
         # print("Is directory:", stat.S_ISDIR(mode))
         # print("Is readable:", os.access(self.__samples_dir, os.R_OK))
         # print("Is writable:", os.access(self.__samples_dir, os.W_OK))
+
+        folders = ['crash', 'cymbal', 'hats_close', 'hats_open', 'kick', 'perc', 'snare', 'tom_hi', 'tom_med', 'tom_lo']
 
         if not directory.is_dir():
             raise NotADirectoryError(f"{directory} is not a valid directory!")

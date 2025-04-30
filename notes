@@ -19,8 +19,11 @@ Timing Select dial
 ################################################################################################
     To Do
 ################################################################################################
+Files
+    -   implement way to load audio files to channel combo box from file explorer
+    -   file extension check and better error handling
+
 Drum Machine Channel:
-    -   increase to 10 channels
     -   post/pre preview
     -   tone control
 
@@ -33,13 +36,15 @@ Metronome:
     -   beat/meter emphasis (could use digital waveforms from audio engine)
     -   improve gui look
 
+Pattern Select module
+    -   clear global pattern
+    -
+
 Steps module:
+    -   clear pattern
+    -   shift pattern
     -   gray out stepper buttons not used
     -   flam
-
-Files
-    -   implement way to add more files to combobox in DrumMachine channel
-    -   file extension check and better error handling
 
 GUI:
     - General improvement of looks
