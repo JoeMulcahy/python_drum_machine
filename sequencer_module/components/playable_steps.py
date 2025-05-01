@@ -22,11 +22,18 @@ class PlayableSteps(QWidget):
         main_layout.addWidget(self.group_box_step_select)
         self.setLayout(main_layout)
 
-        # Listeners
-        self.__current_number_of_playable_steps = self.__steps_spin_box.valueChanged
+    def set_spinbox_range(self, value):
+        self.__steps_spin_box.setRange(1, value)
+
+    def set_spinbox_value(self, value):
+        self.__steps_spin_box.setValue(value)
 
     @property
     def current_number_of_playable_steps(self):
         return self.__current_number_of_playable_steps
+
+    @property
+    def playable_steps_spinbox(self):
+        return self.__steps_spin_box
 
 

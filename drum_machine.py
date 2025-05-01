@@ -47,6 +47,9 @@ class DrumMachine(QWidget):
         self.__timing_resolution_dict = create_timing_resolution_dict()  # dictionary of [bpb, meter] timings
         self.__metronome_on = False  # metronome on/off flag
 
+        ######## intention is to have selectable [1-16][17-32][33-48][49-64] steps banks
+        self.__steps_banks = 1;
+
         # initialise SoundEngine
         self.__audio_engine = SoundEngine()
 
@@ -243,6 +246,13 @@ class DrumMachine(QWidget):
             temp_counter = temp_counter + 1
 
         #####################################################################################################
+        ########################## Listeners for Playable Steps module ######################################
+        #####################################################################################################
+        self.__sequencer_module.playable_steps_module.playable_steps_spinbox.valueChanged.connect(
+            lambda val: self.__set_playable_steps(val)
+        )
+
+        #####################################################################################################
         ########################## Listeners for Timing resolution ##########################################
         #####################################################################################################
 
@@ -280,7 +290,7 @@ class DrumMachine(QWidget):
     def trigger_audio(self, count):
         pattern_to_play = []
         for i in range(len(self.__selected_global_pattern)):
-            pattern_to_play.append(self.__selected_global_pattern[i][count % self.__number_of_steps])
+            pattern_to_play.append(self.__selected_global_pattern[i][count % self.__playable_steps])
 
         # Calculate the time at which the sound should be triggered.
         trigger_time = count * (60.0 / self.__tempo)  # Convert count to time based on BPM
@@ -306,6 +316,11 @@ class DrumMachine(QWidget):
     def set_metronome_on_off(self, is_on):
         self.__metronome_on = is_on
         print(f"metronome: {self.__metronome_on}")
+
+    def __set_playable_steps(self, value):
+        print(f"playable steps: {value}")
+        self.__playable_steps = value
+        self.__sequencer_module.stepper.number_of_playable_steps = value
 
     def set_time_resolution(self, bpb, meter):
         self.__app_timer.set_timing_resolution(bpb, meter)

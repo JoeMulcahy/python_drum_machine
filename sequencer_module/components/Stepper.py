@@ -29,7 +29,7 @@ class Stepper(QWidget):
 
         self.__btn_generate_pattern = QPushButton()
         self.__spin_step_freq = QSpinBox()
-        self.__spin_step_freq.setRange(1, int(self.__number_of_steps / 2))
+        self.__spin_step_freq.setRange(1, int(self.__number_of_steps - 1))
         self.__spin_step_freq.setValue(4)
 
         self.__btn_generate_random = QPushButton()
@@ -134,6 +134,26 @@ class Stepper(QWidget):
     def hide_stepper(self):
         self.setVisible(False)
 
+    def play_step_color(self, index):
+        index = index % self.__number_of_steps_playable
+        previous_index = (index - 1) % self.__number_of_steps_playable  # ensures wrap-around
+
+        self.__stepper_buttons_list[index].setStyleSheet(self.play_color)
+
+        if self.__current_stepper_buttons_selected[previous_index] == 1:
+            self.__stepper_buttons_list[previous_index].setStyleSheet(self.toggle_on_color)
+        else:
+            self.__stepper_buttons_list[previous_index].setStyleSheet(self.default_color)
+
+    def stepper_indicators_on_play(self, counter):
+        counter = counter % self.__number_of_steps_playable
+        self.__step_indicator_list[counter - 1].setStyleSheet(self.__green_indicator)
+        self.__step_indicator_list[counter].setStyleSheet(self.__red_indicator)
+
+    def reset_stepper_indicators(self):
+        for indicator in self.__step_indicator_list:
+            indicator.setStyleSheet(self.__green_indicator)
+
     @property
     def stepper_id(self):
         return self.__stepper_id
@@ -143,8 +163,12 @@ class Stepper(QWidget):
         return self.__number_of_steps
 
     @property
-    def number_of_steps_playable(self):
+    def number_of_playable_steps(self):
         return self.__number_of_steps_playable
+
+    @number_of_playable_steps.setter
+    def number_of_playable_steps(self, value):
+        self.__number_of_steps_playable = value
 
     @number_of_steps.setter
     def number_of_steps(self, value):
@@ -177,24 +201,3 @@ class Stepper(QWidget):
     @property
     def step_freq_spinbox(self):
         return self.__spin_step_freq
-
-    def play_step_color(self, index):
-        print(index)
-        index = index % self.__number_of_steps
-        previous_index = (index - 1) % self.__number_of_steps  # ensures wrap-around
-
-        self.__stepper_buttons_list[index].setStyleSheet(self.play_color)
-
-        if self.__current_stepper_buttons_selected[previous_index] == 1:
-            self.__stepper_buttons_list[previous_index].setStyleSheet(self.toggle_on_color)
-        else:
-            self.__stepper_buttons_list[previous_index].setStyleSheet(self.default_color)
-
-    def stepper_indicators_on_play(self, counter):
-        counter = counter % self.__number_of_steps
-        self.__step_indicator_list[counter - 1].setStyleSheet(self.__green_indicator)
-        self.__step_indicator_list[counter].setStyleSheet(self.__red_indicator)
-
-    def reset_stepper_indicators(self):
-        for indicator in self.__step_indicator_list:
-            indicator.setStyleSheet(self.__green_indicator)
