@@ -11,7 +11,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Widgets App")
-        app_layout = QVBoxLayout()
+        app_layout = QGridLayout()
         app_layout.addWidget(DrumMachine())
         widget = QWidget()
         widget.setLayout(app_layout)

@@ -57,7 +57,7 @@ class DrumMachine(QWidget):
             'kick', 'snare', 'hats_close', 'hats_open', 'tom_hi', 'tom_med', 'tom_lo', 'perc', 'crash', 'cymbal'
         ]
 
-        self.__audio_sample_dict = self.__get_audio_list_dict()
+        self.__audio_sample_dict = self.__get_audio_list_dict()  # dict for storing .wav file, dict[idx] = channel
         self.__audio_samples_list = self.get_audio_samples_list()  # list of .wav samples
 
         # initialise timing values and application timer
@@ -109,6 +109,9 @@ class DrumMachine(QWidget):
         # Transport and SequencerModule
         self.__transport = Transport()
         self.__sequencer_module = SequencerModule(self.__number_of_steps)
+
+        # number of playable steps
+        self.__playable_steps = self.__sequencer_module.playable_steps_module.current_number_of_playable_steps
 
         # select first channel as default
         self.__update_select_channel(self.__current_selected_drum_machine_channel_index)
@@ -214,6 +217,18 @@ class DrumMachine(QWidget):
             btn.released.connect(lambda dmc_i=dmc_index: self.__open_files_in_directory(dmc_i))
 
         #####################################################################################################
+        ########################## Listeners for Transport module ###########################################
+        #####################################################################################################
+
+        # Listeners for Transport module
+        self.__transport.btn_play.clicked.connect(lambda: self.start_engine())
+        self.__transport.btn_stop.clicked.connect(lambda: self.stop_engine())
+        self.__transport.tempo_spinbox.valueChanged.connect(lambda value: self.set_tempo(value))
+        self.__transport.metronome_checkbox.clicked.connect(
+            lambda checked: self.set_metronome_on_off(checked)
+        )
+
+        #####################################################################################################
         ########################## Listeners for pattern selection ################################
         #####################################################################################################
 
@@ -228,19 +243,7 @@ class DrumMachine(QWidget):
             temp_counter = temp_counter + 1
 
         #####################################################################################################
-        ########################## Listeners for Transport module ###########################################
-        #####################################################################################################
-
-        # Listeners for Transport module
-        self.__transport.btn_play.clicked.connect(lambda: self.start_engine())
-        self.__transport.btn_stop.clicked.connect(lambda: self.stop_engine())
-        self.__transport.tempo_spinbox.valueChanged.connect(lambda value: self.set_tempo(value))
-        self.__transport.metronome_checkbox.clicked.connect(
-            lambda checked: self.set_metronome_on_off(checked)
-        )
-
-        #####################################################################################################
-        ########################## Listeners for Timing resolution module ##################################
+        ########################## Listeners for Timing resolution ##########################################
         #####################################################################################################
 
         # Listener for Timing resolution module
@@ -263,9 +266,9 @@ class DrumMachine(QWidget):
         self.__sequencer_module.stepper.shift_right_button.clicked.connect(lambda: self.__shift_pattern_right())
         self.__sequencer_module.stepper.clear_button.clicked.connect(lambda: self.__clear_pattern())
         self.__sequencer_module.stepper.generate_pattern_button.clicked.connect(lambda: self.__generate_pattern())
-        self.__sequencer_module.stepper.generate_random_pattern_button.clicked.connect(lambda: self.__generate_random_pattern())
+        self.__sequencer_module.stepper.generate_random_pattern_button.clicked.connect(
+            lambda: self.__generate_random_pattern())
         self.__sequencer_module.stepper.invert_patter_button.clicked.connect(lambda: self.__invert_pattern())
-
 
     ########################################################################
     # Take action upon receiving pulse from app_timer

@@ -2,11 +2,11 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout, QGroupBox, QLabel, QSpinBox
 
 
-class NumberOfStepsSelect(QWidget):
+class PlayableSteps(QWidget):
     def __init__(self, number_of_steps):
         super().__init__()
         self.__number_of_steps = number_of_steps
-        self.__current_number_of_steps = number_of_steps
+        self.__current_number_of_playable_steps = number_of_steps
         self.__steps_spin_box = QSpinBox()
 
         self.group_box_step_select = QGroupBox("Steps")
@@ -23,8 +23,10 @@ class NumberOfStepsSelect(QWidget):
         self.setLayout(main_layout)
 
         # Listeners
-        self.__current_number_of_steps = self.__steps_spin_box.valueChanged
+        self.__current_number_of_playable_steps = self.__steps_spin_box.valueChanged
 
     @property
-    def current_number_of_steps(self):
-        return self.__current_number_of_steps
+    def current_number_of_playable_steps(self):
+        return self.__current_number_of_playable_steps
+
+

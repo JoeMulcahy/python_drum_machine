@@ -106,7 +106,6 @@ class Stepper(QWidget):
         """)
         self.__spin_step_freq.setFixedSize(40, 20)
 
-
     def __button_toggle(self, btn_id):
         self.__update_stepper_buttons_list(int(btn_id))
 

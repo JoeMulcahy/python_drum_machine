@@ -1,7 +1,7 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout, QGroupBox, QVBoxLayout
 
-from sequencer_module.components.NumberOfStepsSelect import NumberOfStepsSelect
+from sequencer_module.components.playable_steps import PlayableSteps
 from sequencer_module.components.PatternSelect import PatternSelect
 from sequencer_module.components.Stepper import Stepper
 from sequencer_module.components.TimingResolutionSelector import TimingSelector
@@ -14,13 +14,13 @@ class SequencerModule(QWidget):
         self.__timing_resolution_select = TimingSelector()
         self.__stepper = Stepper(1, initial_number_of_steps)
         self.__pattern_select = PatternSelect(8, 4)
-        self.__number_of_steps_select = NumberOfStepsSelect(self.__stepper.number_of_steps)
+        self.__playable_steps_module = PlayableSteps(self.__stepper.number_of_steps)
 
         stepper_module_layout = QGridLayout()
         group_box_stepper_module = QGroupBox("Sequencer")
 
         stepper_module_layout.addWidget(self.__pattern_select, 0, 0, alignment=Qt.AlignmentFlag.AlignHCenter)
-        stepper_module_layout.addWidget(self.__number_of_steps_select, 0, 1, alignment=Qt.AlignmentFlag.AlignHCenter)
+        stepper_module_layout.addWidget(self.__playable_steps_module, 0, 1, alignment=Qt.AlignmentFlag.AlignHCenter)
         stepper_module_layout.addWidget(self.__timing_resolution_select, 0, 2, alignment=Qt.AlignmentFlag.AlignHCenter)
         stepper_module_layout.addWidget(self.__stepper, 2, 0, 1, 3)
 
@@ -39,8 +39,8 @@ class SequencerModule(QWidget):
         return self.__timing_resolution_select
 
     @property
-    def number_of_steps_select(self):
-        return self.__number_of_steps_select
+    def playable_steps_module(self):
+        return self.__playable_steps_module
 
     @property
     def pattern_select(self):

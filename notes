@@ -19,6 +19,13 @@ Timing Select dial
 ################################################################################################
     To Do
 ################################################################################################
+Stepper module:
+    -   gray out stepper buttons not used
+    -   flam
+    -   have a slight spacing every four or third step depending on time resolution
+    -   edit steps to include up to 64 steps
+        - selectable [1-16][17-32][33-48][49-64]
+
 
 Pattern Select module
     -   clear global pattern
@@ -35,12 +42,6 @@ Metronome:
     -   beat/meter emphasis (could use digital waveforms from audio engine)
     -   improve gui look
 
-Steps module:
-    -   clear pattern
-    -   shift pattern
-    -   gray out stepper buttons not used
-    -   flam
-    -   have a slight spacing every four or third step depending on time resolution
 
 Files
     -   implement way to load audio files to channel combo box from file explorer
@@ -50,6 +51,7 @@ GUI:
     - General improvement of looks
     - separate transport, bmp and metronome into separate modules
     - move all styling to a separate py file
+    -   have a slight spacing every four or third step depending on time resolution
 
 Optimisations:
     - Drum Machine
