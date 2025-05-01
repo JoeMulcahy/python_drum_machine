@@ -70,9 +70,9 @@ class DrumMachine(QWidget):
 
         # initialise pattern manager
         self.__pattern_manager = PatternManager(4, 8, self.__number_of_drum_machine_channels, self.__number_of_steps)
-        self.__pattern_manager.bank_dict = PatternManager.generate_random_banks(
-            4, 8, self.__number_of_drum_machine_channels, self.__number_of_steps
-        )
+        # self.__pattern_manager.bank_dict = PatternManager.generate_random_banks(
+        #     4, 8, self.__number_of_drum_machine_channels, self.__number_of_steps
+        # )
         self.__global_pattern_bank_index = 0
         self.__global_pattern_index = 0
         self.__channel_pattern_index = 0
@@ -250,12 +250,22 @@ class DrumMachine(QWidget):
         #####################################################################################################
         ########################## Listeners for Master Controls ############################################
         #####################################################################################################
-        self
         self.__master_controls.volume_dial.valueChanged.connect(lambda val: self.__set_master_volume(val))
         self.__master_controls.load_profile_button.clicked.connect(lambda: self.__load_profile())
         self.__master_controls.save_profile_button.clicked.connect(lambda: self.__save_profile())
         self.__master_controls.un_mute_all.clicked.connect(lambda: self.__unmute_all())
         self.__master_controls.un_solo_all.clicked.connect(lambda: self.__unsolo_all())
+
+        #####################################################################################################
+        ########################## Listeners for stepper controls ############################################
+        #####################################################################################################
+        self.__sequencer_module.stepper.shift_left_button.clicked.connect(lambda: self.__shift_pattern_left())
+        self.__sequencer_module.stepper.shift_right_button.clicked.connect(lambda: self.__shift_pattern_right())
+        self.__sequencer_module.stepper.clear_button.clicked.connect(lambda: self.__clear_pattern())
+        self.__sequencer_module.stepper.generate_pattern_button.clicked.connect(lambda: self.__generate_pattern())
+        self.__sequencer_module.stepper.generate_random_pattern_button.clicked.connect(lambda: self.__generate_random_pattern())
+        self.__sequencer_module.stepper.invert_patter_button.clicked.connect(lambda: self.__invert_pattern())
+
 
     ########################################################################
     # Take action upon receiving pulse from app_timer
@@ -333,6 +343,48 @@ class DrumMachine(QWidget):
     def __update_stepper_display(self):
         print(f'{self.__global_pattern_bank_index}{self.__global_pattern_index}{self.__channel_pattern_index}')
         self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
+
+    # stepper control methods
+    def __shift_pattern_left(self):
+        print(f'shift left')
+        temp_pattern = PatternManager.shift_pattern_left(self.__current_pattern, amount=1)
+        self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
+            self.__channel_pattern_index] = temp_pattern
+        self.__update_current_pattern()
+
+    def __shift_pattern_right(self):
+        print(f'shift left')
+        temp_pattern = PatternManager.shift_pattern_right(self.__current_pattern, amount=1)
+        self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
+            self.__channel_pattern_index] = temp_pattern
+        self.__update_current_pattern()
+
+    def __invert_pattern(self):
+        temp_pattern = PatternManager.invert_pattern(self.__current_pattern)
+        self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
+            self.__channel_pattern_index] = temp_pattern
+        self.__update_current_pattern()
+
+    def __clear_pattern(self):
+        print('clear')
+        temp_pattern = PatternManager.clear_pattern(self.__current_pattern)
+        self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
+            self.__channel_pattern_index] = temp_pattern
+        self.__update_current_pattern()
+
+    def __generate_pattern(self):
+        number_of_steps = self.__sequencer_module.stepper.number_of_steps
+        freq = self.__sequencer_module.stepper.step_freq_spinbox.value()
+        temp_pattern = PatternManager.generate_sequenced_pattern(number_of_steps, freq)
+        self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
+            self.__channel_pattern_index] = temp_pattern
+        self.__update_current_pattern()
+
+    def __generate_random_pattern(self):
+        temp_pattern = PatternManager.generate_random_pattern()
+        self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
+            self.__channel_pattern_index] = temp_pattern
+        self.__update_current_pattern()
 
     def __play_preview(self, index, is_pre):
         print(f"preview {index}")

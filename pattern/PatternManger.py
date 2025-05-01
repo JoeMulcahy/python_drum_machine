@@ -46,7 +46,7 @@ class PatternManager:
         return banks
 
     @staticmethod
-    def shift_pattern_left(pattern, *, amount=1):
+    def shift_pattern_right(pattern, *, amount=1):
         shifted = []
         for i in range(len(pattern)):
             shifted.append(pattern[(i - amount) % len(pattern)])
@@ -54,12 +54,16 @@ class PatternManager:
         return shifted
 
     @staticmethod
-    def shift_pattern_right(pattern, *, amount=1):
+    def shift_pattern_left(pattern, *, amount=1):
         shifted = []
         for i in range(len(pattern)):
             shifted.append(pattern[(i + amount) % len(pattern)])
 
         return shifted
+
+    @staticmethod
+    def clear_pattern(pattern):
+        return [0 for _ in pattern]
 
     @staticmethod
     def generate_sequenced_pattern(pattern_length, every_x_steps):
@@ -69,6 +73,16 @@ class PatternManager:
                 pattern.append(1)
             else:
                 pattern.append(0)
+
+        return pattern
+
+    @staticmethod
+    def invert_pattern(pattern):
+        for i in range(len(pattern)):
+            if pattern[i] == 0:
+                pattern[i] = 1
+            elif pattern[i] == 1:
+                pattern[i] = 0
 
         return pattern
 

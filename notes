@@ -20,8 +20,14 @@ Timing Select dial
     To Do
 ################################################################################################
 
+Pattern Select module
+    -   clear global pattern
+    -   copy and paste
+    -   load ans save banks
+
+
 Master Controls:
-    - unmute and un solo buttons
+-   Load and Save pattern and channels sounds and settings
 
 Metronome:
 -   Get it working
@@ -29,16 +35,12 @@ Metronome:
     -   beat/meter emphasis (could use digital waveforms from audio engine)
     -   improve gui look
 
-Pattern Select module
-    -   clear global pattern
-    -   copy and paste
-    -   load ans save banks
-
 Steps module:
     -   clear pattern
     -   shift pattern
     -   gray out stepper buttons not used
     -   flam
+    -   have a slight spacing every four or third step depending on time resolution
 
 Files
     -   implement way to load audio files to channel combo box from file explorer
@@ -52,9 +54,6 @@ GUI:
 Optimisations:
     - Drum Machine
         - combine listeners into one for loop
-
-Profiles
--   Load and Save pattern and channels sounds and settings
 
 Random kit
 -   Generate random kit from files
