@@ -34,6 +34,9 @@ class Stepper(QWidget):
 
         self.__btn_generate_random = QPushButton()
 
+        self.__btn_copy_pattern = QPushButton("Copy")
+        self.__btn_paste_pattern = QPushButton("Paste")
+
         self.__btn_shift_left.setIcon(QIcon("images/left-chevron.png"))
         self.__btn_shift_right.setIcon(QIcon("images/right-chevron.png"))
         self.__btn_generate_random.setIcon(QIcon("images/dices.png"))
@@ -58,6 +61,9 @@ class Stepper(QWidget):
         self.stepper_layout.addWidget(self.__btn_generate_pattern, 0, 7, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
         self.stepper_layout.addWidget(self.__spin_step_freq, 0, 8, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
         self.stepper_layout.addWidget(self.__btn_generate_random, 0, 9, 1, 1, alignment=Qt.AlignmentFlag.AlignRight)
+
+        self.stepper_layout.addWidget(self.__btn_copy_pattern, 0, 11, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.stepper_layout.addWidget(self.__btn_paste_pattern, 0, 12, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
 
         for i in range(self.__number_of_steps):
             step_indicator = QLabel(f".")
@@ -93,7 +99,7 @@ class Stepper(QWidget):
 
         for btn in [
             self.__btn_shift_left, self.__btn_shift_right, self.__btn_clear_pattern, self.__btn_invert_pattern,
-            self.__btn_generate_pattern, self.__btn_generate_random
+            self.__btn_generate_pattern, self.__btn_generate_random, self.__btn_copy_pattern, self.__btn_paste_pattern
         ]:
             btn.setFixedSize(40, 20)
 
@@ -195,9 +201,19 @@ class Stepper(QWidget):
         return self.__btn_generate_random
 
     @property
-    def invert_patter_button(self):
+    def invert_pattern_button(self):
         return self.__btn_invert_pattern
+
+    @property
+    def copy_button(self):
+        return self.__btn_copy_pattern
+
+    @property
+    def paste_button(self):
+        return self.__btn_paste_pattern
 
     @property
     def step_freq_spinbox(self):
         return self.__spin_step_freq
+
+

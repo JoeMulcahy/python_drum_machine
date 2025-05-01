@@ -3,6 +3,7 @@ from random import choice
 
 
 class PatternManager:
+
     def __init__(self, number_of_banks=4, number_of_global_patterns=8, number_of_channels=8, number_of_steps=16):
         self.__bank_index = 0
         self.__global_pattern_index = 0
@@ -13,7 +14,8 @@ class PatternManager:
         self.__number_of_global_patterns = number_of_global_patterns
         self.__number_of_banks = number_of_banks
 
-        print(f'debug: PatternManger: {self.__number_of_channels}')
+        self.__temp_local_pattern = []      # used for copying and pasting pattern
+        self.__temp_global_pattern = []   # used for copying and pasting pattern bank
 
         self.__bank_dict = self.generate_patterns_for_banks(
             self.__number_of_banks, self.__number_of_global_patterns,
@@ -138,3 +140,19 @@ class PatternManager:
     @staticmethod
     def generate_random_pattern(pattern_length=16):
         return [choice([0, 1]) for _ in range(pattern_length)]
+
+    @property
+    def temp_local_pattern(self):
+        return self.__temp_local_pattern
+
+    @temp_local_pattern.setter
+    def temp_local_pattern(self, value):
+        self.__temp_local_pattern = value
+
+    @property
+    def temp_global_pattern(self):
+        return self.__temp_global_pattern
+
+    @temp_global_pattern.setter
+    def temp_global_pattern(self, value):
+        self.__temp_global_pattern = value

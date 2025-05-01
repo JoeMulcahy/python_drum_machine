@@ -1,3 +1,4 @@
+import copy
 import os
 import stat
 from pathlib import Path
@@ -245,6 +246,14 @@ class DrumMachine(QWidget):
             btn.clicked.connect(lambda checked, index=temp_counter: self.__update_bank_index(index))
             temp_counter = temp_counter + 1
 
+        self.__sequencer_module.pattern_select.copy_button.clicked.connect(
+            lambda: self.__copy_global_pattern()
+        )
+
+        self.__sequencer_module.pattern_select.paste_button.clicked.connect(
+            lambda: self.__paste_global_pattern()
+        )
+
         #####################################################################################################
         ########################## Listeners for Playable Steps module ######################################
         #####################################################################################################
@@ -278,7 +287,9 @@ class DrumMachine(QWidget):
         self.__sequencer_module.stepper.generate_pattern_button.clicked.connect(lambda: self.__generate_pattern())
         self.__sequencer_module.stepper.generate_random_pattern_button.clicked.connect(
             lambda: self.__generate_random_pattern())
-        self.__sequencer_module.stepper.invert_patter_button.clicked.connect(lambda: self.__invert_pattern())
+        self.__sequencer_module.stepper.invert_pattern_button.clicked.connect(lambda: self.__invert_pattern())
+        self.__sequencer_module.stepper.copy_button.clicked.connect(lambda: self.__copy_pattern())
+        self.__sequencer_module.stepper.paste_button.clicked.connect(lambda: self.__paste_pattern())
 
     ########################################################################
     # Take action upon receiving pulse from app_timer
@@ -363,6 +374,25 @@ class DrumMachine(QWidget):
         self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
 
     # stepper control methods
+    def __copy_pattern(self):
+        self.__pattern_manager.temp_local_pattern = self.__current_pattern
+        print(f'copied: {self.__pattern_manager.temp_local_pattern}')
+
+    def __paste_pattern(self):
+        # if list not empty and does not contain all 0's
+        # if not self.__pattern_manager.temp_local_pattern and not self.__pattern_manager.temp_local_pattern == [0 for i in range(self.__number_of_steps)]:
+        self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
+            self.__channel_pattern_index] = self.__pattern_manager.temp_local_pattern
+        self.__update_current_pattern()
+
+    def __copy_global_pattern(self):
+        self.__pattern_manager.temp_global_pattern = copy.deepcopy(self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][
+            self.__global_pattern_index])
+
+    def __paste_global_pattern(self):
+        self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index] = self.__pattern_manager.temp_global_pattern
+        self.__update_current_pattern()
+
     def __shift_pattern_left(self):
         print(f'shift left')
         temp_pattern = PatternManager.shift_pattern_left(self.__current_pattern, amount=1)

@@ -1,3 +1,4 @@
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout, QGroupBox, QPushButton
 
 
@@ -39,7 +40,15 @@ class PatternSelect(QWidget):
             button.setStyleSheet(self.default_color_bank)
             self.__bank_buttons_list.append(button)
             self.pattern_select_layout.addWidget(button, 2, i)
-            self.__buttons_list[0].setStyleSheet(self.toggle_on_color_bank)
+
+        self.__bank_buttons_list[0].setStyleSheet(self.toggle_on_color_bank)
+
+        self.__btn_copy = QPushButton('Copy')
+        self.__btn_paste = QPushButton('Paste')
+
+        self.pattern_select_layout.addWidget(self.__btn_copy, 3, 0, 1, 2)
+        self.pattern_select_layout.addWidget(self.__btn_paste, 3, 2, 1, 2)
+
 
         # Listener to set selected pattern button index and to highlight selected button
         for btn in self.__buttons_list:
@@ -72,6 +81,14 @@ class PatternSelect(QWidget):
     @property
     def bank_buttons_list(self):
         return self.__bank_buttons_list
+
+    @property
+    def copy_button(self):
+        return self.__btn_copy
+
+    @property
+    def paste_button(self):
+        return self.__btn_paste
 
     @property
     def selected_button_index(self):

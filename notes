@@ -5,6 +5,10 @@ Stepper
 -   play indicator(green) gets stuck on step buttons when switch channels
         - seems random
 
+GUI
+-   Gui elements keep resizing
+-   glitch in stepper. It looks like it resizing when indicators light are in action
+
 Drum Machine channel
 -   Altering voice using pitch, length, stretch
         - individually they work but using a combination of these dials doesn't have the desired
@@ -19,18 +23,17 @@ Timing Select dial
 ################################################################################################
     To Do
 ################################################################################################
+Pattern Select module
+    -   clear global pattern
+    -   copy and paste
+    -   load and save banks
+
 Stepper module:
     -   gray out stepper buttons not used
     -   flam
     -   have a slight spacing every four or third step depending on time resolution
     -   edit steps to include up to 64 steps
         - selectable [1-16][17-32][33-48][49-64]
-
-
-Pattern Select module
-    -   clear global pattern
-    -   copy and paste
-    -   load ans save banks
 
 
 Master Controls:
