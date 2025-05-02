@@ -1,3 +1,4 @@
+import copy
 import threading
 import sounddevice as sd
 import librosa
@@ -16,6 +17,40 @@ class Voice:
         self.__active = True
         self._playback_thread = None  # To keep track of the playback thread
         self.__pitch_factor = 0.5  # Default pitch factor (1.0 means no change)
+
+    def update_data(self, updated_data):
+        self.__data = copy.deepcopy(updated_data)
+
+    def next_chunk(self, frames: int) -> np.ndarray:
+        """Return the next chunk of audio data."""
+        if not self.__active:
+            return np.zeros((frames, self.__data.shape[1] if self.__data.ndim > 1 else 1),
+                            dtype=np.float32)
+
+        if self.__position >= len(self.__data):
+            self.__active = False
+            return np.zeros((frames, self.__data.shape[1] if self.__data.ndim > 1 else 1),
+                            dtype=np.float32)
+
+        end = self.__position + frames
+        chunk = self.__data[self.__position:end]
+
+        # Ensure chunk is 2D
+        if chunk.ndim == 1:
+            chunk = chunk[:, np.newaxis]  # Add a channel dimension
+        elif chunk.ndim > 2:
+            chunk = chunk.squeeze(axis=1)
+
+        self.__position = end
+
+        # Pad with zeros if end of audio
+        if len(chunk) < frames:
+            padding = np.zeros(
+                (frames - len(chunk), self.__data.shape[1] if self.__data.ndim > 1 else 1),
+                dtype=np.float32)
+            chunk = np.concatenate((chunk, padding), axis=0)
+
+        return chunk
 
     ############################################################################
     ## Alter pitch of voice using resampling
@@ -111,37 +146,6 @@ class Voice:
         self.__data = self.__data_manipulated
         self.reset_position()
 
-    def next_chunk(self, frames: int) -> np.ndarray:
-        """Return the next chunk of audio data."""
-        if not self.__active:
-            return np.zeros((frames, self.__data_manipulated.shape[1] if self.__data_manipulated.ndim > 1 else 1),
-                            dtype=np.float32)
-
-        if self.__position >= len(self.__data_manipulated):
-            self.__active = False
-            return np.zeros((frames, self.__data_manipulated.shape[1] if self.__data_manipulated.ndim > 1 else 1),
-                            dtype=np.float32)
-
-        end = self.__position + frames
-        chunk = self.__data_manipulated[self.__position:end]
-
-        # Ensure chunk is 2D
-        if chunk.ndim == 1:
-            chunk = chunk[:, np.newaxis]  # Add a channel dimension
-        elif chunk.ndim > 2:
-            chunk = chunk.squeeze(axis=1)
-
-        self.__position = end
-
-        # Pad with zeros if end of audio
-        if len(chunk) < frames:
-            padding = np.zeros(
-                (frames - len(chunk), self.__data_manipulated.shape[1] if self.__data_manipulated.ndim > 1 else 1),
-                dtype=np.float32)
-            chunk = np.concatenate((chunk, padding), axis=0)
-
-        return chunk
-
     def preview_voice(self, is_pre=True):
         if self._playback_thread and self._playback_thread.is_alive():
             print(f"Warning: sound is already playing.")
@@ -158,7 +162,7 @@ class Voice:
             else:
                 sd.play(self.__data_manipulated, self.__samplerate)
 
-            # sd.wait()  # Uncomment if you want to wait for the audio to finish before moving on
+            # sd.wait()
         except Exception as e:
             print(f"Error during playback of sound: {e}")
         finally:

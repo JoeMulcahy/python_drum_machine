@@ -19,14 +19,18 @@ Timing Select dial
 -   need to double check if triplet timings are calculated properly
 
 
+Notes:
+
+
 
 ################################################################################################
     To Do
 ################################################################################################
-Pattern Select module
-    -   clear global pattern
-    -   copy and paste
-    -   load and save banks
+Metronome:
+    -   improve gui look
+        !!!!!!! change number of playable beats depending on beat and meter??
+        !!!!!!! Change from a timing resolution to beat / meter
+        new to do calculations
 
 Stepper module:
     -   gray out stepper buttons not used
@@ -39,22 +43,15 @@ Stepper module:
 Master Controls:
 -   Load and Save pattern and channels sounds and settings
 
-Metronome:
--   Get it working
-    -   volume
-    -   beat/meter emphasis (could use digital waveforms from audio engine)
-    -   improve gui look
-
-
-Files
-    -   implement way to load audio files to channel combo box from file explorer
-    -   file extension check and better error handling
-
 GUI:
     - General improvement of looks
     - separate transport, bmp and metronome into separate modules
     - move all styling to a separate py file
     -   have a slight spacing every four or third step depending on time resolution
+
+Pattern Select module
+    -   clear global pattern
+    -   load and save banks
 
 Optimisations:
     - Drum Machine
@@ -66,9 +63,19 @@ Random kit
 Create a new class to handle eq and filtering
 -   relocate high and low shelving filters code to new class
 
+Files
+    -   implement way to load audio files to channel combo box from file explorer
+    -   file extension check and better error handling
+
+
+
 ################################################################################################
     Nice to haves
 ################################################################################################
+Audio Engine:
+    - update engine to handle continuous changing voices. At the moment a voice is a singular sound
+        such as a sample or set synth wave form(synth parameters such as freq can't be easily changed)
+
 
 Pattern Select
 -   Highlight bank and pattern select buttons with pattern in them

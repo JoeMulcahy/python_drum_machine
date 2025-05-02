@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import QWidget, QGridLayout
 
 from drum_machine_channel import DrumMachineChannel
 from global_controls.global_controls import MasterControls
+from metronome.metronome import Metronome
 from pattern.PatternManger import PatternManager
 from sequencer_module.sequencer_module import SequencerModule
 from sound_engine.AudioVoice import AudioVoice
@@ -46,7 +47,6 @@ class DrumMachine(QWidget):
         self.__current_selected_drum_machine_channel_index = 0
 
         self.__timing_resolution_dict = create_timing_resolution_dict()  # dictionary of [bpb, meter] timings
-        self.__metronome_on = False  # metronome on/off flag
 
         ######## intention is to have selectable [1-16][17-32][33-48][49-64] steps banks
         self.__steps_banks = 1;
@@ -109,6 +109,12 @@ class DrumMachine(QWidget):
             self.__audio_engine.add_channel(audio_channel)
             self.__drum_machine_channels_list.append(dm_channel)
             channels_layout.addWidget(dm_channel, 0, i)
+
+        # initialise metronome
+        self.__metronome_on = False  # metronome on/off flag
+        self.__metronome = Metronome()
+        self.__metro_audio_channel = AudioChannel(99, self.__metronome.metronome_voice, volume=0.5, pan=0.5)
+        self.__audio_engine.add_channel(self.__metro_audio_channel)
 
         # Transport and SequencerModule
         self.__transport = Transport()
@@ -231,6 +237,7 @@ class DrumMachine(QWidget):
         self.__transport.metronome_checkbox.clicked.connect(
             lambda checked: self.set_metronome_on_off(checked)
         )
+        self.__transport.metronome_volume_dial.valueChanged.connect(lambda val: self.__set_metronome_volume(val))
 
         #####################################################################################################
         ########################## Listeners for pattern selection ################################
@@ -311,6 +318,11 @@ class DrumMachine(QWidget):
                 # Trigger the channel to play its sound.
                 self.__audio_channels_list[i].trigger(trigger_time)
 
+        if self.__metronome_on:
+            self.__metro_audio_channel.voice = self.__metronome.metronome_tick_voice(count)
+            self.__metro_audio_channel.trigger(trigger_time)
+
+
     def start_engine(self):
         self.__audio_engine.play()
         self.__app_timer.start_counter()
@@ -339,6 +351,8 @@ class DrumMachine(QWidget):
     def set_timing_resolution(self, index):
         index = index - 1
         self.set_time_resolution(self.__timing_resolution_dict[index][0], self.__timing_resolution_dict[index][1])
+        self.__metronome.meter = self.__timing_resolution_dict[index][1]
+        self.__metronome.beats_per_bar = self.__timing_resolution_dict[index][0]
 
     def __update_bank_index(self, index):
         self.__global_pattern_bank_index = index
@@ -522,6 +536,9 @@ class DrumMachine(QWidget):
 
     def __set_master_volume(self, value):
         self.__audio_engine.set_master_volume(value / 100)
+
+    def __set_metronome_volume(self, value):
+        self.__metro_audio_channel.volume = value / 100
 
     def __unmute_all(self):
         for i in range(self.__number_of_drum_machine_channels):

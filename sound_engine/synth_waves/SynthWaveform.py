@@ -1,5 +1,7 @@
 import numpy as np
 
+from sound_engine.Voice import Voice
+
 
 class SynthWaveform:
     def __init__(self, waveform, frequency, volume, duration, samplerate):
