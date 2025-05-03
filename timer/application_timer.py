@@ -103,4 +103,5 @@ class ApplicationTimer(threading.Thread):
         self.calculate_interval()
 
     def calculate_interval(self):
-        self.__interval = 60 / self.__tempo / (self.__beats_per_bar / self.__meter)
+        # self.__interval = 60 / self.__tempo / (self.__beats_per_bar / self.__meter)
+        self.__interval = (60 / self.__tempo) * (self.meter / self.beats_per_bar)

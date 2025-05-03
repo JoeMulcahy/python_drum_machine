@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import QWidget, QGridLayout, QGroupBox, QVBoxLayout
 from sequencer_module.components.playable_steps import PlayableSteps
 from sequencer_module.components.PatternSelect import PatternSelect
 from sequencer_module.components.Stepper import Stepper
-from sequencer_module.components.TimingResolutionSelector import TimingSelector
+from sequencer_module.components.beat_timing import TimingSelector
 
 
 class SequencerModule(QWidget):

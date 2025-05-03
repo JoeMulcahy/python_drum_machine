@@ -8,8 +8,8 @@ class Metronome:
         self.__beats_per_bar = beats_per_bar
         self.__meter = meter
 
-        self.__metronome_voice_hi = SynthVoice(WaveForm.SQUARE, 880, 0.1, 0.5, 44100)
-        self.__metronome_voice_lo = SynthVoice(WaveForm.SQUARE, 440, 0.1, 0.5, 44100)
+        self.__metronome_voice_hi = SynthVoice(WaveForm.SQUARE, 880, 0.05, 0.5, 44100)
+        self.__metronome_voice_lo = SynthVoice(WaveForm.SQUARE, 440, 0.05, 0.5, 44100)
         self.__metronome_voice = self.__metronome_voice_hi
 
     def metronome_tick_voice(self, count):

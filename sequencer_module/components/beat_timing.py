@@ -11,6 +11,7 @@ class TimingSelector(QWidget):
 
         self.group_box_time_resolution_select = QGroupBox("Timing")
         self.timing_select_layout = QGridLayout()
+        self.timing_select_layout.setSpacing(5)
 
         self.timing_select_dial = QDial()
         self.timing_select_values_list = ("1/2", "1/4", "1/8", "1/8T", "1/16", "1/16T", "1/32", "1/64")
@@ -24,8 +25,34 @@ class TimingSelector(QWidget):
         self.timing_select_dial.setNotchesVisible(True)
         self.timing_select_dial.setWrapping(False)
 
-        self.timing_select_layout.addWidget(self.timing_select_dial, 0, 0)
-        self.timing_select_layout.addWidget(self.timing_select_label, 0, 1)
+        self.__flam_dial = QDial()
+        self.__swing_dial = QDial()
+        self.__humanise_dial = QDial()
+
+        for dial in [self.__flam_dial, self.__swing_dial, self.__humanise_dial]:
+            dial.setFixedSize(35, 35)
+            dial.setRange(0, 100)
+            dial.setValue(0)
+            dial.setNotchesVisible(True)
+
+        self.__lbl_flam = QLabel('Flam')
+        self.__lbl_swing = QLabel('Swing')
+        self.__lbl_humanise = QLabel('Humanise')
+
+        label_style = "QLabel { font-size: 8px; font-weight: bold}"
+        for lbl in [self.__lbl_flam, self.__lbl_swing, self.__lbl_humanise]:
+            lbl.setStyleSheet(label_style)
+
+        self.timing_select_layout.addWidget(self.timing_select_dial, 0, 0, 1, 2)
+        self.timing_select_layout.addWidget(self.timing_select_label, 0, 2, 1, 1)
+
+        self.timing_select_layout.addWidget(self.__flam_dial, 1, 0, 1, 1)
+        self.timing_select_layout.addWidget(self.__swing_dial, 1, 1, 1, 1)
+        self.timing_select_layout.addWidget(self.__humanise_dial, 1, 2, 1, 1)
+
+        self.timing_select_layout.addWidget(self.__lbl_flam, 2, 0, 1, 1)
+        self.timing_select_layout.addWidget(self.__lbl_swing, 2, 1, 1, 1)
+        self.timing_select_layout.addWidget(self.__lbl_humanise, 2, 2, 1, 1)
 
         self.group_box_time_resolution_select.setLayout(self.timing_select_layout)
 
@@ -48,3 +75,15 @@ class TimingSelector(QWidget):
     @current_index.setter
     def current_index(self, value):
         self.__current_index = value
+
+    @property
+    def flam_dial(self):
+        return self.__flam_dial
+
+    @property
+    def swing_dial(self):
+        return self.__swing_dial
+
+    @property
+    def humanise_dial(self):
+        return self.__humanise_dial

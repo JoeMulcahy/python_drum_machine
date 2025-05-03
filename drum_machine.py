@@ -1,6 +1,8 @@
 import copy
 import os
+import random
 import stat
+import threading
 from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog
@@ -26,9 +28,9 @@ def create_timing_resolution_dict():
     d[0] = [2, 4]
     d[1] = [4, 4]
     d[2] = [8, 4]
-    d[3] = [8, 3]
+    d[3] = [9, 3]
     d[4] = [16, 4]
-    d[5] = [16, 3]
+    d[5] = [18, 3]
     d[6] = [32, 4]
     d[7] = [64, 4]
 
@@ -68,6 +70,11 @@ class DrumMachine(QWidget):
         self.__tempo = 120
         self.__beats_per_bar = 4
         self.__meter = 4
+
+        self.__flam_timing = 0.0
+        self.__swing_timing = 0.0
+        self.__humanise_timing = 0.0
+        self.__humanise_timing_strength = 0.0
 
         self.__app_timer = ApplicationTimer(self.__tempo, self.__beats_per_bar, self.__meter)
         self.__app_timer.set_pulse_callback(self.on_pulse)  # init 'pulse' from app_timer
@@ -269,12 +276,21 @@ class DrumMachine(QWidget):
         )
 
         #####################################################################################################
-        ########################## Listeners for Timing resolution ##########################################
+        ########################## Listeners for Timings module ##########################################
         #####################################################################################################
 
         # Listener for Timing resolution module
         self.__sequencer_module.timing_resolution_select. \
             timing_select_dial.valueChanged.connect(lambda index: self.set_timing_resolution(index))
+
+        self.__sequencer_module.timing_resolution_select. \
+            flam_dial.valueChanged.connect(lambda val: self.__set_flam(val))
+
+        self.__sequencer_module.timing_resolution_select. \
+            swing_dial.valueChanged.connect(lambda val: self.__set_swing(val))
+
+        self.__sequencer_module.timing_resolution_select. \
+            humanise_dial.valueChanged.connect(lambda val: self.__set_humanise(val))
 
         #####################################################################################################
         ########################## Listeners for Master Controls ############################################
@@ -311,17 +327,27 @@ class DrumMachine(QWidget):
             pattern_to_play.append(self.__selected_global_pattern[i][count % self.__playable_steps])
 
         # Calculate the time at which the sound should be triggered.
-        trigger_time = count * (60.0 / self.__tempo)  # Convert count to time based on BPM
-        current_time = self.__audio_engine.get_current_time()
+        # trigger_time = count * (60.0 / self.__tempo)  # Convert count to time based on BPM
+        # current_time = self.__audio_engine.get_current_time()
+        delay = 0
+        if self.__humanise_timing_strength > 0:
+            self.__calculate_humanise_timing()
+
+        if count % 2 == 0:
+            delay = self.__flam_timing + self.__humanise_timing
+        elif count % 2 == 1:
+            delay = self.__swing_timing + self.__humanise_timing
+
         for i in range(len(self.__audio_channels_list)):
             if pattern_to_play[i] == 1:
-                # Trigger the channel to play its sound.
-                self.__audio_channels_list[i].trigger(trigger_time)
+                if self.__humanise_timing > 0.0 or self.__flam_timing > 0.0 or self.__swing_timing > 0.0:
+                    threading.Timer(delay, self.__audio_channels_list[i].trigger).start()
+                else:
+                    self.__audio_channels_list[i].trigger()
 
         if self.__metronome_on:
             self.__metro_audio_channel.voice = self.__metronome.metronome_tick_voice(count)
-            self.__metro_audio_channel.trigger(trigger_time)
-
+            self.__metro_audio_channel.trigger()
 
     def start_engine(self):
         self.__audio_engine.play()
@@ -332,6 +358,10 @@ class DrumMachine(QWidget):
         self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
         self.__sequencer_module.stepper.reset_stepper_indicators()
         self.__app_timer.stop_counter()
+
+    # Transport methods
+    def __set_metronome_volume(self, value):
+        self.__metro_audio_channel.volume = value / 100
 
     def set_tempo(self, value):
         self.__app_timer.set_tempo(int(value))
@@ -353,6 +383,31 @@ class DrumMachine(QWidget):
         self.set_time_resolution(self.__timing_resolution_dict[index][0], self.__timing_resolution_dict[index][1])
         self.__metronome.meter = self.__timing_resolution_dict[index][1]
         self.__metronome.beats_per_bar = self.__timing_resolution_dict[index][0]
+
+    def __set_flam(self, value):
+        if value > 0:
+            delay = self.__app_timer.interval * (value / 100)
+            self.__flam_timing = delay
+        else:
+            self.__flam_timing = 0.0
+
+    def __set_swing(self, value):
+        if value > 0:
+            delay = self.__app_timer.interval * (value / 100)
+            self.__swing_timing = delay
+        else:
+            self.__swing_timing = 0.0
+
+    def __set_humanise(self, value):
+        if value > 0:
+            self.__humanise_timing_strength = value / 100
+        else:
+            self.__humanise_timing = 0.0
+            self.__humanise_timing_strength = 0.0
+
+    def __calculate_humanise_timing(self):
+        delay = random.uniform(0.0, self.__app_timer.interval) * self.__humanise_timing_strength
+        self.__humanise_timing = delay
 
     def __update_bank_index(self, index):
         self.__global_pattern_bank_index = index
@@ -399,14 +454,6 @@ class DrumMachine(QWidget):
             self.__channel_pattern_index] = self.__pattern_manager.temp_local_pattern
         self.__update_current_pattern()
 
-    def __copy_global_pattern(self):
-        self.__pattern_manager.temp_global_pattern = copy.deepcopy(self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][
-            self.__global_pattern_index])
-
-    def __paste_global_pattern(self):
-        self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index] = self.__pattern_manager.temp_global_pattern
-        self.__update_current_pattern()
-
     def __shift_pattern_left(self):
         print(f'shift left')
         temp_pattern = PatternManager.shift_pattern_left(self.__current_pattern, amount=1)
@@ -448,6 +495,18 @@ class DrumMachine(QWidget):
             self.__channel_pattern_index] = temp_pattern
         self.__update_current_pattern()
 
+    # pattern select methods
+    def __copy_global_pattern(self):
+        self.__pattern_manager.temp_global_pattern = copy.deepcopy(
+            self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][
+                self.__global_pattern_index])
+
+    def __paste_global_pattern(self):
+        self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][
+            self.__global_pattern_index] = self.__pattern_manager.temp_global_pattern
+        self.__update_current_pattern()
+
+    # drum machine channel methods
     def __play_preview(self, index, is_pre):
         print(f"preview {index}")
         self.__audio_channels_list[index].voice.preview_voice(is_pre)
@@ -534,11 +593,9 @@ class DrumMachine(QWidget):
             else:
                 self.__audio_channels_list[i].is_muted = False
 
+    # Global Controls methods
     def __set_master_volume(self, value):
         self.__audio_engine.set_master_volume(value / 100)
-
-    def __set_metronome_volume(self, value):
-        self.__metro_audio_channel.volume = value / 100
 
     def __unmute_all(self):
         for i in range(self.__number_of_drum_machine_channels):
