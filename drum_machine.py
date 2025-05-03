@@ -108,10 +108,9 @@ class DrumMachine(QWidget):
             dm_channel.sound_selection_combobox.addItems(
                 [file.name for file in self.__audio_sample_dict[i]])  # popular combobox with sample names
             dm_channel.sound_selection_combobox.setCurrentIndex(i)
+            filepath = self.__audio_sample_dict[i][0]
             filename = self.__audio_sample_dict[i][0].name
-            audio_voice = \
-                AudioVoice(
-                    self.__samples_dir + "\\" + self.__samples_folders[i] + f"\\{filename}")  # set sample audio voice
+            audio_voice = AudioVoice(filepath)  # set sample audio voice
             audio_channel = AudioChannel(i, audio_voice, volume=0.5, pan=0.5)
             dm_channel.channel_name_text.setText(filename[:filename.find('.')])  # remove extension from file name
             self.__audio_channels_list.append(audio_channel)
