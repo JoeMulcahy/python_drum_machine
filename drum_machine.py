@@ -40,6 +40,8 @@ def create_timing_resolution_dict():
 class DrumMachine(QWidget):
     def __init__(self):
         super().__init__()
+        self.___test_counter = 0
+
         self.__number_of_steps = 16  # initial number of steps in stepper
         self.__number_of_drum_machine_channels = 10  # number of channels for the drum machine
 
@@ -368,10 +370,8 @@ class DrumMachine(QWidget):
 
     def set_metronome_on_off(self, is_on):
         self.__metronome_on = is_on
-        print(f"metronome: {self.__metronome_on}")
 
     def __set_playable_steps(self, value):
-        print(f"playable steps: {value}")
         self.__playable_steps = value
         self.__sequencer_module.stepper.number_of_playable_steps = value
 
@@ -455,14 +455,12 @@ class DrumMachine(QWidget):
         self.__update_current_pattern()
 
     def __shift_pattern_left(self):
-        print(f'shift left')
         temp_pattern = PatternManager.shift_pattern_left(self.__current_pattern, amount=1)
         self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
             self.__channel_pattern_index] = temp_pattern
         self.__update_current_pattern()
 
     def __shift_pattern_right(self):
-        print(f'shift left')
         temp_pattern = PatternManager.shift_pattern_right(self.__current_pattern, amount=1)
         self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
             self.__channel_pattern_index] = temp_pattern
@@ -475,7 +473,6 @@ class DrumMachine(QWidget):
         self.__update_current_pattern()
 
     def __clear_pattern(self):
-        print('clear')
         temp_pattern = PatternManager.clear_pattern(self.__current_pattern)
         self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
             self.__channel_pattern_index] = temp_pattern
@@ -508,40 +505,35 @@ class DrumMachine(QWidget):
 
     # drum machine channel methods
     def __play_preview(self, index, is_pre):
-        print(f"preview {index}")
         self.__audio_channels_list[index].voice.preview_voice(is_pre)
 
     def __set_voice_for_drum_machine_channels(self, index, dmc_index):
-        filename = self.__audio_sample_dict[dmc_index][index].name
-        f = self.__samples_dir + "\\" + self.__samples_folders[dmc_index] + f"\\{filename}"
-        voice = AudioVoice(self.__samples_dir + "\\" + self.__samples_folders[dmc_index] + f"\\{filename}")
+        print(f'debug combo values: {self.__audio_sample_dict[dmc_index]}')
+        filename = self.__audio_sample_dict[dmc_index][index]
+        voice = AudioVoice(filename)
         self.__audio_channels_list[dmc_index].voice = voice
+        print(f'{self.__audio_channels_list[dmc_index].voice}')
+        print(f'\n\n')
 
     def __set_channel_volume(self, index, value):
-        print(f'volume debug\n: vol: {value} chan: {index}')
         self.__audio_channels_list[index].volume = value / 100
 
     def __set_channel_pan(self, index, value):
         self.__audio_channels_list[index].pan = value / 100
 
     def __set_voice_length(self, index, value):
-        print(f"{self.__audio_channels_list[index]} : {value / 100}")
         self.__audio_channels_list[index].voice.set_voice_length(value / 100)
 
     def __set_sample_pitch(self, index, value):
-        print(f"channel: {index} : {value / 100}")
         self.__audio_channels_list[index].voice.set_pitch(value / 100)
 
     def __set_time_stretch(self, index, value):
-        print(f"channel: {index} : {value / 100}")
         self.__audio_channels_list[index].voice.set_time_stretch(value / 100)
 
     def __set_sample_tone(self, index, value):
-        print(f"channel: {index} tone: {value}")
         self.__audio_channels_list[index].set_hsf_gain(value)
 
     def __reset_channel(self, index):
-        print(f" resetting channel: {index} ")
         self.__audio_channels_list[index].voice.reset_voice()
         self.__drum_machine_channels_list[index].reset_channel()
 
@@ -613,32 +605,6 @@ class DrumMachine(QWidget):
     def __save_profile(self):
         print(f"Save profile")
 
-    def __open_files(self, index):
-        root = tk.Tk()
-        root.withdraw()  # Hide main window
-
-        filepath = filedialog.askopenfilenames(initialdir=r"C:\Users\josep\Desktop\Step Seq\audio",
-                                               title="Select .wav file to add",
-                                               defaultextension=".wav", multiple=True)
-
-        if filepath:
-            try:
-                with open(filepath, 'r') as file:
-                    contents = file.read()
-                    filenames = [file.name for _ in file]
-                    for i in range(len(filenames)):
-                        filename = filenames[i]
-                        if filename[filename.find('.'):] == '.wav':
-                            print("wav found")
-                    print(f"File contains: {contents}")
-                    # check if file is .wav then add to combobox
-            except FileNotFoundError:
-                print(f'File not found at {filepath}')
-            except Exception as e:
-                print(f'An error occurred: \n{e}')
-        else:
-            print("No file selected")
-
     def __open_files_in_directory(self, index):
         root = tk.Tk()
         root.withdraw()  # Hide main window
@@ -646,25 +612,35 @@ class DrumMachine(QWidget):
         folder_path = filedialog.askdirectory(initialdir=r"C:\Users\josep\Desktop\Step Seq\audio",
                                               title="Choose .wav files in directory")
 
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        directory = Path(folder_path)
+
         if folder_path:
-            import os
             try:
-                contents = os.listdir(folder_path)
-                print(contents)
+                print(f'PRE Audio in dict at index: {index}\n{self.__audio_sample_dict[index]}')
+                audio_list = []
+                self.__drum_machine_channels_list[index].sound_selection_combobox.clear()
+                for file in directory.iterdir():
+                    if file.is_file():
+                        audio_list.append(file)
+                        self.__drum_machine_channels_list[index].sound_selection_combobox \
+                            .addItem(f"{file.name}")
+
+                self.__audio_sample_dict[index] = copy.deepcopy(audio_list)
+                filename = self.__audio_sample_dict[index][0].name
+                voice = AudioVoice(folder_path + f"\\{filename}")
+                self.__audio_channels_list[index].voice = voice
+                print(f'{self.__audio_channels_list[index].voice}')
+
             except FileNotFoundError:
-                print(f'Folder not found at {folder_path}')
+                print(f'Folder not found at {directory}')
             except Exception as e:
-                print('Error: {e}')
+                print(f'Error!!!!!!!!!!!!!!!!!!!!: {e}')
         else:
             print("No folder selected")
 
     def __get_audio_list_dict(self):
         directory = Path(self.__samples_dir)
-        # mode = os.stat(self.__samples_dir).st_mode
-        # print("Is directory:", stat.S_ISDIR(mode))
-        # print("Is readable:", os.access(self.__samples_dir, os.R_OK))
-        # print("Is writable:", os.access(self.__samples_dir, os.W_OK))
-
         samples_dict = dict()
 
         if not directory.is_dir():
@@ -675,15 +651,16 @@ class DrumMachine(QWidget):
             sample_dir = Path(f"{directory}/{self.__samples_folders[i]}")
             try:
                 for file in sample_dir.iterdir():
-                    print(f"checking file: {file}")
                     if file.is_file():
                         audio_list.append(file)
-                        samples_dict[i] = audio_list
+
+                    samples_dict[i] = audio_list
             except Exception as e:
                 import traceback
                 traceback.print_exc()
                 print(f"Error when scanning directory: {e}")
 
+        print(samples_dict)
         return samples_dict
 
     ####################################################
@@ -705,7 +682,6 @@ class DrumMachine(QWidget):
         audio_list = []
         try:
             for file in directory.iterdir():
-                print(f"checking file: {file}")
                 if file.is_file():
                     audio_list.append(file)
         except Exception as e:

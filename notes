@@ -2,8 +2,9 @@
     Known Bugs and behaviours
 ################################################################################################
 Stepper
--   play indicator(green) gets stuck on step buttons when switch channels
-        - seems random
+-   play step indicator gets stuck on step buttons when switch channels
+-   indicator lights in stepper remain red when changing number of playable steps
+        while the drum machine is running
 
 GUI
 -   Gui elements keep resizing
@@ -16,22 +17,30 @@ Drum Machine channel
         - will all have to be recalculated? ie if stretch change -> recalculated length, pitch??
 
 ################################################################################################
+    Comments
+################################################################################################
+-   swing, flam and humanise are working but I don't like how's it implemented
+    - can this logic be moved to the application timer instead??
+
+
+################################################################################################
     To Do
 ################################################################################################
-Timing Module
--   add flam and swing controls
+Master Controls:
+-   Load and Save pattern and channels sounds and settings
+
+Metronome:
+    -   make metronome independent of time resolution
+        improve gui look
+        change number of playable beats depending on beat and meter??
+        Change from a timing resolution to beat / meter ??
 
 
 Stepper module:
     -   gray out stepper buttons not used
-    -   flam
     -   have a slight spacing every four or third step depending on time resolution
     -   edit steps to include up to 64 steps
         - selectable [1-16][17-32][33-48][49-64]
-
-
-Master Controls:
--   Load and Save pattern and channels sounds and settings
 
 GUI:
     - General improvement of looks
@@ -56,12 +65,6 @@ Create a new class to handle eq and filtering
 Files
     -   implement way to load audio files to channel combo box from file explorer
     -   file extension check and better error handling
-
-Metronome:
-    -   make metronome independent of time resolution
-        improve gui look
-        change number of playable beats depending on beat and meter??
-        Change from a timing resolution to beat / meter ??
 
 
 
