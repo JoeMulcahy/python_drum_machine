@@ -16,6 +16,7 @@ from drum_machine_channel import DrumMachineChannel
 from global_controls.global_controls import MasterControls
 from metronome.metronome import Metronome
 from pattern.PatternManger import PatternManager
+from persistence.profile import Profile
 from sequencer_module.sequencer_module import SequencerModule
 from sound_engine.AudioVoice import AudioVoice
 from sound_engine.AudioChannel import AudioChannel
@@ -41,6 +42,7 @@ def create_timing_resolution_dict():
 
 class DrumMachine(QWidget):
     restart_requested = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.___test_counter = 0
@@ -54,6 +56,7 @@ class DrumMachine(QWidget):
         self.__current_selected_drum_machine_channel_index = 0
 
         self.__timing_resolution_dict = create_timing_resolution_dict()  # dictionary of [bpb, meter] timings
+        self.__timing_resolution_index = 2
 
         ######## intention is to have selectable [1-16][17-32][33-48][49-64] steps banks
         self.__steps_banks = 1
@@ -249,7 +252,8 @@ class DrumMachine(QWidget):
             lambda checked: self.set_metronome_on_off(checked)
         )
         self.__transport.metronome_volume_dial.valueChanged.connect(lambda val: self.__set_metronome_volume(val))
-        self.__transport.beat_per_bar_spinbox.valueChanged.connect(lambda value: self.__set_metronome_beats_per_bar(value))
+        self.__transport.beat_per_bar_spinbox.valueChanged.connect(
+            lambda value: self.__set_metronome_beats_per_bar(value))
         self.__transport.meter_spinbox.valueChanged.connect(lambda value: self.__set_metronome_meter(value))
 
         #####################################################################################################
@@ -394,8 +398,10 @@ class DrumMachine(QWidget):
         self.__app_timer.set_timing_resolution(bpb, meter)
 
     def set_timing_resolution(self, index):
-        index = index - 1
-        self.set_time_resolution(self.__timing_resolution_dict[index][0], self.__timing_resolution_dict[index][1])
+        self.__timing_resolution_index = index - 1
+        self.set_time_resolution(self.__timing_resolution_dict[
+                                     self.__timing_resolution_index][0],
+                                 self.__timing_resolution_dict[self.__timing_resolution_index][1])
 
     def __set_flam(self, value):
         if value > 0:
@@ -612,12 +618,6 @@ class DrumMachine(QWidget):
             if self.__channel_solo_list[i]:
                 self.__solo_channels(i)
 
-    def __load_profile(self):
-        print(f"Load profile")
-
-    def __save_profile(self):
-        print(f"Save profile")
-
     def __open_files_in_directory(self, index):
         root = tk.Tk()
         root.withdraw()  # Hide main window
@@ -704,7 +704,6 @@ class DrumMachine(QWidget):
 
         return audio_list
 
-
     def __reset_drum_machine(self):
         reply = QMessageBox.question(
             self,
@@ -717,3 +716,42 @@ class DrumMachine(QWidget):
             self.restart_requested.emit()  # Emit the signal
         else:
             print("User canceled restart.")
+
+    def __load_profile(self):
+        print(f"Load profile")
+
+    def __save_profile(self):
+        print('debug: __save_profile')
+        channels_settings_dict = {'channel_settings': {}}
+        for i in range(len(self.__drum_machine_channels_list)):
+            channel_settings = [self.__drum_machine_channels_list[i].channel_id,
+                                self.__drum_machine_channels_list[i].channel_name_text.text(),
+                                self.__drum_machine_channels_list[i].sound_selection_combobox.currentIndex(),
+                                self.__drum_machine_channels_list[i].volume_dial.value(),
+                                self.__drum_machine_channels_list[i].pan_dial.value(),
+                                self.__drum_machine_channels_list[i].tone_dial.value(),
+                                self.__drum_machine_channels_list[i].pitch_dial.value(),
+                                self.__drum_machine_channels_list[i].length_dial.value(),
+                                self.__drum_machine_channels_list[i].duration_dial.value()]
+            channels_settings_dict['channel_settings'][i] = channel_settings
+
+        print(f'debug: \n{channels_settings_dict}')
+
+        Profile(
+            channels_settings_dict,
+            self.__channel_mute_list,
+            self.__channel_solo_list,
+            self.__tempo,
+            self.__beats_per_bar,
+            self.__meter,
+            self.__metronome_on,
+            self.__pattern_manager.bank_dict,
+            self.__global_pattern_bank_index,
+            self.__global_pattern_index,
+            self.__playable_steps,
+            self.__timing_resolution_index,
+            self.__flam_timing,
+            self.__swing_timing,
+            self.__humanise_timing,
+            self.__humanise_timing_strength
+        )

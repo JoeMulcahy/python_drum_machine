@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import QWidget, QGridLayout, QGroupBox, QLabel, QDial
 class TimingSelector(QWidget):
     def __init__(self):
         super().__init__()
-        self.__current_index = 1
+        self.__current_index = 2
 
         self.group_box_time_resolution_select = QGroupBox("Timing")
         self.timing_select_layout = QGridLayout()
