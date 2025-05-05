@@ -1,5 +1,6 @@
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGroupBox, QGridLayout, QPushButton, QVBoxLayout, QSpinBox, QLabel, QCheckBox, \
-    QDial
+    QDial, QComboBox
 
 
 class Transport(QWidget):
@@ -22,7 +23,16 @@ class Transport(QWidget):
         self.__metronome_checkbox = QCheckBox()
         self.__metronome_checkbox.setChecked(False)
         self.__metronome_checkbox.setText("on/off")
+
         self.__metronome_label = QLabel("Metronome")
+        self.__time_signature_label = QLabel('Time signature')
+        self.__bpb_spinbox = QSpinBox()
+        self.__bpb_spinbox.setRange(1, 12)
+        self.__bpb_spinbox.setValue(4)
+
+        self.__meter_spinbox = CustomSpinBox([2, 4, 8, 16])
+        self.__meter_spinbox.setValue(1)
+
         self.__metronome_volume_dial = QDial()
         self.__metronome_volume_dial.setRange(0, 100)
         self.__metronome_volume_dial.setValue(50)
@@ -39,11 +49,18 @@ class Transport(QWidget):
         transport_module_layout.setSpacing(20)
         transport_module_layout.addWidget(self.__btn_play, 0, 0)
         transport_module_layout.addWidget(self.__btn_stop, 0, 1)
+
         transport_module_layout.addWidget(self.__lbl_bpm, 1, 0)
         transport_module_layout.addWidget(self.__tempo_spin_box, 1, 1)
+
         transport_module_layout.addWidget(self.__metronome_label, 2, 0)
-        transport_module_layout.addWidget(self.__metronome_checkbox, 3, 0)
-        transport_module_layout.addWidget(self.__metronome_volume_dial, 3, 1)
+
+        transport_module_layout.addWidget( self.__time_signature_label, 3, 0)
+        transport_module_layout.addWidget(self.__meter_spinbox, 3, 1, 1, 1, Qt.AlignmentFlag.AlignRight)
+        transport_module_layout.addWidget(self.__bpb_spinbox, 3, 1, 1, 1, Qt.AlignmentFlag.AlignLeft)
+
+        transport_module_layout.addWidget(self.__metronome_checkbox, 4, 0)
+        transport_module_layout.addWidget(self.__metronome_volume_dial, 4, 1)
 
         module_group_box.setLayout(transport_module_layout)
 
@@ -69,6 +86,24 @@ class Transport(QWidget):
                 color: #ff5733;        /* Change text color */
             }
         """)
+
+        self.__bpb_spinbox.setStyleSheet("""
+            QAbstractSpinBox::up-button, QAbstractSpinBox::down-button {
+                width: 0;
+                height: 0;
+                border: none;
+            }
+        """)
+        self.__bpb_spinbox.setFixedSize(40, 20)
+
+        self.__meter_spinbox.setStyleSheet("""
+                    QAbstractSpinBox::up-button, QAbstractSpinBox::down-button {
+                        width: 0;
+                        height: 0;
+                        border: none;
+                    }
+                """)
+        self.__meter_spinbox.setFixedSize(40, 20)
 
     def set_is_playing(self, value):
         self.__is_playing = value
@@ -96,3 +131,29 @@ class Transport(QWidget):
     @property
     def metronome_volume_dial(self):
         return self.__metronome_volume_dial
+
+    @property
+    def beat_per_bar_spinbox(self):
+        return self.__bpb_spinbox
+
+    @property
+    def meter_spinbox(self):
+        return self.__meter_spinbox
+
+
+class CustomSpinBox(QSpinBox):
+    def __init__(self, values, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._values = values
+        self._index = 0
+        self.setRange(0, len(self._values) - 1)
+        self.setValue(0)  # index of the list
+
+    def valueFromText(self, text):
+        return self._values.index(int(text))
+
+    def textFromValue(self, value):
+        return str(self._values[value])
+
+    def value(self):
+        return self._values[super().value()]

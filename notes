@@ -26,8 +26,12 @@ Drum Machine channel
 ################################################################################################
     To Do
 ################################################################################################
+DM Channels
+-   add indicator to channel to indicate that a sample is being play from it
+
 Master Controls:
 -   Load and Save pattern and channels sounds and settings
+-   global reset
 
 Metronome:
     -   make metronome independent of time resolution

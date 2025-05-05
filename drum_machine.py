@@ -81,6 +81,12 @@ class DrumMachine(QWidget):
         self.__app_timer = ApplicationTimer(self.__tempo, self.__beats_per_bar, self.__meter)
         self.__app_timer.set_pulse_callback(self.on_pulse)  # init 'pulse' from app_timer
 
+        # initialise metronome
+        self.__metronome_on = False  # metronome on/off flag
+        self.__metronome = Metronome()
+        self.__metro_audio_channel = AudioChannel(99, self.__metronome.metronome_voice, volume=0.5, pan=0.5)
+        self.__audio_engine.add_channel(self.__metro_audio_channel)
+
         # initialise pattern manager
         self.__pattern_manager = PatternManager(4, 8, self.__number_of_drum_machine_channels, self.__number_of_steps)
         # self.__pattern_manager.bank_dict = PatternManager.generate_random_banks(
@@ -117,12 +123,6 @@ class DrumMachine(QWidget):
             self.__audio_engine.add_channel(audio_channel)
             self.__drum_machine_channels_list.append(dm_channel)
             channels_layout.addWidget(dm_channel, 0, i)
-
-        # initialise metronome
-        self.__metronome_on = False  # metronome on/off flag
-        self.__metronome = Metronome()
-        self.__metro_audio_channel = AudioChannel(99, self.__metronome.metronome_voice, volume=0.5, pan=0.5)
-        self.__audio_engine.add_channel(self.__metro_audio_channel)
 
         # Transport and SequencerModule
         self.__transport = Transport()
@@ -246,6 +246,8 @@ class DrumMachine(QWidget):
             lambda checked: self.set_metronome_on_off(checked)
         )
         self.__transport.metronome_volume_dial.valueChanged.connect(lambda val: self.__set_metronome_volume(val))
+        self.__transport.beat_per_bar_spinbox.valueChanged.connect(lambda value: self.__set_metronome_beats_per_bar(value))
+        self.__transport.meter_spinbox.valueChanged.connect(lambda value: self.__set_metronome_meter(value))
 
         #####################################################################################################
         ########################## Listeners for pattern selection ################################
@@ -366,9 +368,19 @@ class DrumMachine(QWidget):
 
     def set_tempo(self, value):
         self.__app_timer.set_tempo(int(value))
+        self.__metronome.tempo = int(value)
 
     def set_metronome_on_off(self, is_on):
         self.__metronome_on = is_on
+
+    def __set_metronome_beats_per_bar(self, value):
+        self.__metronome.beats_per_bar = value
+        print(f'time signature: {self.__metronome.beats_per_bar} / {self.__metronome.meter}')
+
+    def __set_metronome_meter(self, value):
+        meters = [2, 4, 8, 16]
+        self.__metronome.meter = meters[value]
+        print(f'time signature: {self.__metronome.beats_per_bar} / {self.__metronome.meter}')
 
     def __set_playable_steps(self, value):
         self.__playable_steps = value
@@ -380,8 +392,6 @@ class DrumMachine(QWidget):
     def set_timing_resolution(self, index):
         index = index - 1
         self.set_time_resolution(self.__timing_resolution_dict[index][0], self.__timing_resolution_dict[index][1])
-        self.__metronome.meter = self.__timing_resolution_dict[index][1]
-        self.__metronome.beats_per_bar = self.__timing_resolution_dict[index][0]
 
     def __set_flam(self, value):
         if value > 0:

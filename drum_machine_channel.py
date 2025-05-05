@@ -182,6 +182,9 @@ class DrumMachineChannel(QWidget):
                 label.setStyleSheet(label_style)
                 label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        channel_number_style = "QLabel { font-size: 16px; font-weight: bold; color: #aaaaaa; }"
+        self.__lbl_channel_number.setStyleSheet(channel_number_style)
+
         # LineEdit style
         textbox_style = "QLineEdit { font-size: 12px; color: #aaaaaa; font-weight: bold; }"
         self.__name_textbox.setStyleSheet(textbox_style)
