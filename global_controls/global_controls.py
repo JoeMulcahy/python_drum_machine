@@ -25,9 +25,12 @@ class MasterControls(QWidget):
         self.__btn_unmute_all = QPushButton("M")
         self.__btn_unsolo_all = QPushButton("S")
 
+        self.__btn_reset_all = QPushButton('All')
+
         controls_layout.addWidget(self.__lbl_un_solo_mute, 0, 0, 1, 1, Qt.AlignmentFlag.AlignLeft)
         controls_layout.addWidget(self.__btn_unsolo_all, 1, 0, 1, 1, Qt.AlignmentFlag.AlignLeft)
         controls_layout.addWidget(self.__btn_unmute_all, 1, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
+        controls_layout.addWidget(self.__btn_reset_all, 1, 1, 1, 1, Qt.AlignmentFlag.AlignLeft)
 
         controls_layout.addWidget(self.__lbl__volume, 2, 0, 1, 1, Qt.AlignmentFlag.AlignLeft)
         controls_layout.addWidget(self.__volume_dial, 3, 0, 1, 2, Qt.AlignmentFlag.AlignHCenter)
@@ -36,9 +39,12 @@ class MasterControls(QWidget):
         controls_layout.addWidget(self.__btn_save_profile, 5, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
 
         button_style = "QPushButton { font-size: 10px; }"
-        for btn in [self.__btn_load_profile, self.__btn_save_profile, self.__btn_unsolo_all, self.__btn_unmute_all]:
+        for btn in [self.__btn_load_profile, self.__btn_save_profile, self.__btn_unsolo_all, self.__btn_unmute_all, self.__btn_reset_all]:
             btn.setFixedSize(30, 30)
             btn.setStyleSheet(button_style)
+
+        reset_btn_style = "QPushButton { color: #ff3333}"
+        self.__btn_reset_all.setStyleSheet(reset_btn_style)
 
         label_style = "QLabel { font-size: 12px; font-weight: bold; }"
         for lbl in [self.__lbl__volume, self.__lbl__profile, self.__lbl_un_solo_mute]:
@@ -68,3 +74,7 @@ class MasterControls(QWidget):
     @property
     def un_solo_all(self):
         return self.__btn_unsolo_all
+
+    @property
+    def reset_all_button(self):
+        return self.__btn_reset_all

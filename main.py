@@ -9,7 +9,12 @@ def main():
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    app.exec()
+    result = app.exec()
+
+    if result == 100:  # Custom restart code
+        main()  # Call main again to restart
+    else:
+        sys.exit(result)
 
 
 if __name__ == "__main__":

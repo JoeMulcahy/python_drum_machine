@@ -2,14 +2,16 @@ import copy
 import os
 import random
 import stat
+import sys
 import threading
 from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget, QGridLayout
+from PyQt6.QtWidgets import QWidget, QGridLayout, QMessageBox, QApplication
 
+import main
 from drum_machine_channel import DrumMachineChannel
 from global_controls.global_controls import MasterControls
 from metronome.metronome import Metronome
@@ -303,6 +305,7 @@ class DrumMachine(QWidget):
         self.__master_controls.save_profile_button.clicked.connect(lambda: self.__save_profile())
         self.__master_controls.un_mute_all.clicked.connect(lambda: self.__unmute_all())
         self.__master_controls.un_solo_all.clicked.connect(lambda: self.__unsolo_all())
+        self.__master_controls.reset_all_button.clicked.connect(lambda: self.__reset_drum_machine())
 
         #####################################################################################################
         ########################## Listeners for stepper controls ############################################
@@ -699,3 +702,20 @@ class DrumMachine(QWidget):
             print(f"Error when scanning directory: {e}")
 
         return audio_list
+
+    def __reset_drum_machine(self):
+        reply = QMessageBox.question(
+            self,
+            "Reset Drum Machine",
+            "Are you sure?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            self.__restart_app()
+        else:
+            print("User canceled")
+
+    def __restart_app(self):
+        QApplication.quit()
+        sys.exit(100)  # Use custom exit code to indicate restart
