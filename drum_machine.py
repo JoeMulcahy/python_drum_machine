@@ -1,3 +1,4 @@
+from PyQt6.QtCore import pyqtSignal
 import copy
 import os
 import random
@@ -11,7 +12,6 @@ from tkinter import filedialog
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout, QMessageBox, QApplication
 
-import main
 from drum_machine_channel import DrumMachineChannel
 from global_controls.global_controls import MasterControls
 from metronome.metronome import Metronome
@@ -40,6 +40,7 @@ def create_timing_resolution_dict():
 
 
 class DrumMachine(QWidget):
+    restart_requested = pyqtSignal()
     def __init__(self):
         super().__init__()
         self.___test_counter = 0
@@ -55,7 +56,7 @@ class DrumMachine(QWidget):
         self.__timing_resolution_dict = create_timing_resolution_dict()  # dictionary of [bpb, meter] timings
 
         ######## intention is to have selectable [1-16][17-32][33-48][49-64] steps banks
-        self.__steps_banks = 1;
+        self.__steps_banks = 1
 
         # initialise SoundEngine
         self.__audio_engine = SoundEngine()
@@ -703,19 +704,16 @@ class DrumMachine(QWidget):
 
         return audio_list
 
+
     def __reset_drum_machine(self):
         reply = QMessageBox.question(
             self,
             "Reset Drum Machine",
-            "Are you sure?",
+            "Are you sure you want to restart the drum machine?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
         )
 
         if reply == QMessageBox.StandardButton.Yes:
-            self.__restart_app()
+            self.restart_requested.emit()  # Emit the signal
         else:
-            print("User canceled")
-
-    def __restart_app(self):
-        QApplication.quit()
-        sys.exit(100)  # Use custom exit code to indicate restart
+            print("User canceled restart.")
