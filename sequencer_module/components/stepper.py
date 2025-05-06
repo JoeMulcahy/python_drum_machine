@@ -48,8 +48,8 @@ class Stepper(QWidget):
 
         # stepper buttons, indicators and stepper button numbers
         self.__green_indicator = "QLabel {font-size: 40px; color: #12ff12;}"
-        self.__red_indicator = "QLabel {font-size: 45px; color: #ff1212;}"
-        self.__orange_indicator = "QLabel {font-size: 45px; color: #ffff12;}"
+        self.__red_indicator = "QLabel {font-size: 40px; color: #ff1212;}"
+        self.__orange_indicator = "QLabel {font-size: 40px; color: #ffff12;}"
 
         self.stepper_layout.addWidget(self.__lbl_shift, 0, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight)
         self.stepper_layout.addWidget(self.__btn_shift_left, 0, 1, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
@@ -67,7 +67,7 @@ class Stepper(QWidget):
 
         for i in range(self.__number_of_steps):
             step_indicator = QLabel(f".")
-            step_indicator.setStyleSheet(self.__orange_indicator)
+            step_indicator.setStyleSheet(self.__green_indicator)
             self.__step_indicator_list.append(step_indicator)
 
             button = QPushButton()

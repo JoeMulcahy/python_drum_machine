@@ -334,19 +334,6 @@ class DrumMachine(QWidget):
     def on_pulse(self, pulse_counter):
         self.__sequencer_module.stepper.stepper_indicators_on_play(pulse_counter)
         self.trigger_audio(pulse_counter)
-        self.highlight_channel_on_sample_played(pulse_counter)
-
-    def highlight_channel_on_sample_played(self, counter):
-        pattern_to_play = []
-        for i in range(len(self.__selected_global_pattern)):
-            pattern_to_play.append(self.__selected_global_pattern[i][counter % self.__playable_steps])
-
-        # highlight channel number if sample if triggered
-        for i in range(len(self.__audio_channels_list)):
-            if pattern_to_play[i] == 1:
-                self.__drum_machine_channels_list[i].highlight_channel_number(True)
-            else:
-                self.__drum_machine_channels_list[i].highlight_channel_number(False)
 
     def trigger_audio(self, count):
         pattern_to_play = []
@@ -367,13 +354,10 @@ class DrumMachine(QWidget):
 
         for i in range(len(self.__audio_channels_list)):
             if pattern_to_play[i] == 1:
-                self.__drum_machine_channels_list[i].highlight_channel_number(True)
                 if self.__humanise_timing > 0.0 or self.__flam_timing > 0.0 or self.__swing_timing > 0.0:
                     threading.Timer(delay, self.__audio_channels_list[i].trigger).start()
                 else:
                     self.__audio_channels_list[i].trigger()
-            elif pattern_to_play[i] == 0:
-                self.__drum_machine_channels_list[i].highlight_channel_number(False)
 
         if self.__metronome_on:
             self.__metro_audio_channel.voice = self.__metronome.metronome_tick_voice(count)
@@ -384,13 +368,10 @@ class DrumMachine(QWidget):
         self.__app_timer.start_counter()
 
     def stop_engine(self):
-        for i in range(self.__number_of_drum_machine_channels):
-            self.__drum_machine_channels_list[i].highlight_channel_number(False)
         self.__audio_engine.stop()
         self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
         self.__sequencer_module.stepper.reset_stepper_indicators()
         self.__app_timer.stop_counter()
-
 
     # Transport methods
     def __set_metronome_volume(self, value):

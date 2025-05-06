@@ -15,6 +15,7 @@ Drum Machine channel
         - individually they work but using a combination of these dials doesn't have the desired
           behaviour. Might need some kind of temp_data that is shared between functions.
         - will all have to be recalculated? ie if stretch change -> recalculated length, pitch??
+-   Graphical glitches occur when channel number is changing color
 
 ################################################################################################
     Comments
@@ -26,31 +27,23 @@ Drum Machine channel
 ################################################################################################
     To Do
 ################################################################################################
-DM Channels
--   add indicator to channel to indicate that a sample is being play from it
 
 Master Controls:
 -   debug load and save profile
+
+Stepper Module
+-   fix indicator lights
 
 Metronome:
     -   make metronome independent of time resolution
         change number of playable beats depending on beat and meter??
         Change from a timing resolution to beat / meter ??
 
-
-Stepper module:
-    -   gray out stepper buttons not used
-    -   have a slight spacing every four or third step depending on time resolution
-    -   edit steps to include up to 64 steps
-        - selectable [1-16][17-32][33-48][49-64]
-
 GUI:
     - General improvement of looks
     - separate transport, bmp and metronome into separate modules
     - move all styling to a separate py file
     -   have a slight spacing every four or third step depending on time resolution
-
-
 
 Optimisations:
     - Drum Machine
@@ -62,9 +55,18 @@ Optimisations:
 ################################################################################################
     Nice to haves
 ################################################################################################
+Stepper module:
+    -   gray out stepper buttons not used
+    -   have a slight spacing every four or third step depending on time resolution
+    -   edit steps to include up to 64 steps
+        - selectable [1-16][17-32][33-48][49-64]
+
 Audio Engine:
     - update engine to handle continuous changing voices. At the moment a voice is a singular sound
         such as a sample or set synth wave form(synth parameters such as freq can't be easily changed)
+    - Sound fx
+        -   delay
+        -   reverb
 
 Create a new class to handle eq and filtering
 -   relocate high and low shelving filters code to new class
@@ -73,9 +75,6 @@ Pattern Select
 -   Highlight bank and pattern select buttons with pattern in them
 
 Stepper
--   clear pattern
--   random pattern
--   list of common pattern (maybe a dropdown list) -> specific to individual channels
 -   drum pattern matrix
     - 16 x 8 matrix to program drums on
 
@@ -89,17 +88,13 @@ Pattern Select module
 -   play new pattern from the very beginning
 
 Drum Machine Channel
--   button to preview sound after vol, panning, pitch etc
-    -   could be in the form of a pre/post button
--   each channel has can load a sample from disk
+-   pop out sample editor
 -   duration control -> start - end sample
 
 Modulation
 -   LFO's to control channel dials
 
-Sound fx
--   delay
--   reverb
+
 
 
 
