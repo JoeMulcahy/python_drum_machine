@@ -8,7 +8,7 @@ from drum_machine import DrumMachine
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Widgets App")
+        self.setWindowTitle("PyBeats")
         self.central_widget = QWidget()
         self.app_layout = QGridLayout()
         self.drum_machine = DrumMachine()

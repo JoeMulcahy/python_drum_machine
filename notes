@@ -27,6 +27,17 @@ Drum Machine channel
 ################################################################################################
     To Do
 ################################################################################################
+GUI:
+    -Drum Channels
+        make elements smaller, btns, dials
+        make vol, ton etc labels bigger
+        remove '.wav' from combobox elements
+        fixed channels size
+    - General improvement of looks
+    - separate transport, bmp and metronome into separate modules
+    - move all styling to a separate py file
+    -   have a slight spacing every four or third step depending on time resolution
+
 
 Master Controls:
 -   debug load and save profile
@@ -39,11 +50,7 @@ Metronome:
         change number of playable beats depending on beat and meter??
         Change from a timing resolution to beat / meter ??
 
-GUI:
-    - General improvement of looks
-    - separate transport, bmp and metronome into separate modules
-    - move all styling to a separate py file
-    -   have a slight spacing every four or third step depending on time resolution
+
 
 Optimisations:
     - Drum Machine

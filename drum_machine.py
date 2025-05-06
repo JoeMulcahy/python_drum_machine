@@ -1,29 +1,26 @@
-from PyQt6.QtCore import pyqtSignal
 import copy
-import os
 import random
-import stat
-import sys
 import threading
-from pathlib import Path
 import tkinter as tk
+from pathlib import Path
 from tkinter import filedialog
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget, QGridLayout, QMessageBox, QApplication
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import QWidget, QGridLayout, QMessageBox, QSizePolicy
 
+import settings
 from drum_machine_channel import DrumMachineChannel
 from global_controls.global_controls import MasterControls
 from metronome.metronome import Metronome
 from pattern.PatternManger import PatternManager
 from persistence.profile import Profile
 from sequencer_module.sequencer_module import SequencerModule
-from sound_engine.AudioVoice import AudioVoice
 from sound_engine.AudioChannel import AudioChannel
+from sound_engine.AudioVoice import AudioVoice
 from sound_engine.SoundEngine import SoundEngine
 from timer.application_timer import ApplicationTimer
 from transport.transport import Transport
-import settings
 
 
 def create_timing_resolution_dict():
@@ -45,6 +42,8 @@ class DrumMachine(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.__size_policy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+
         self.__current_profile = None
 
         self.__number_of_steps = 16  # initial number of steps in stepper
@@ -118,8 +117,8 @@ class DrumMachine(QWidget):
         for i in range(self.__number_of_drum_machine_channels):
             dm_channel = DrumMachineChannel(i)  # drum machine channel
             dm_channel.sound_selection_combobox.addItems(
-                [file.name for file in self.__audio_sample_dict[i]])  # popular combobox with sample names
-            dm_channel.sound_selection_combobox.setCurrentIndex(i)
+                [file.name[:file.name.find('.')] for file in self.__audio_sample_dict[i]])  # popular combobox with sample names
+            dm_channel.sound_selection_combobox.setCurrentIndex(0)
             filepath = self.__audio_sample_dict[i][0]
             filename = self.__audio_sample_dict[i][0].name
             audio_voice = AudioVoice(filepath)  # set sample audio voice
@@ -354,10 +353,13 @@ class DrumMachine(QWidget):
 
         for i in range(len(self.__audio_channels_list)):
             if pattern_to_play[i] == 1:
+                self.__drum_machine_channels_list[i].highlight_channel_number(True)
                 if self.__humanise_timing > 0.0 or self.__flam_timing > 0.0 or self.__swing_timing > 0.0:
                     threading.Timer(delay, self.__audio_channels_list[i].trigger).start()
                 else:
                     self.__audio_channels_list[i].trigger()
+            else:
+                self.__drum_machine_channels_list[i].highlight_channel_number(False)
 
         if self.__metronome_on:
             self.__metro_audio_channel.voice = self.__metronome.metronome_tick_voice(count)

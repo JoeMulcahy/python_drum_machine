@@ -4,7 +4,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QWidget, QGridLayout, QLabel, QDial, QGroupBox, QVBoxLayout, QPushButton,
-    QComboBox, QLineEdit
+    QComboBox, QLineEdit, QSizePolicy
 )
 
 
@@ -17,6 +17,9 @@ class DrumMachineChannel(QWidget):
         super().__init__()
 
         self.__channel_id = channel_index
+
+        # layout size policy
+        self.__size_policy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
         # groupbox
         self.__group_box = QGroupBox()
@@ -81,10 +84,10 @@ class DrumMachineChannel(QWidget):
         self.__channel_select_color = "QGroupBox { background-color: #5957ba; border: 1px solid gray}"
 
         # button colors
-        self.__reset_button_color = "QPushButton {font-size: 10px;  font-weight: bold; background-color: #c41431; color: white;}"
-        self.__default_button_color = "QPushButton {font-size: 10px;  font-weight: bold; background-color: #1f2e23; color: white;}"
-        self.__solo_button_color_on = "QPushButton {font-size: 10px;  font-weight: bold; background-color: #14c443; color: white;}"
-        self.__mute_button_color_on = "QPushButton {font-size: 10px;  font-weight: bold; background-color: #bbc414; color: white;}"
+        self.__reset_button_color = "QPushButton {font-size: 9px;  font-weight: bold; background-color: #c41431; color: white;}"
+        self.__default_button_color = "QPushButton {font-size: 9px;  font-weight: bold; background-color: #1f2e23; color: white;}"
+        self.__solo_button_color_on = "QPushButton {font-size: 9px;  font-weight: bold; background-color: #14c443; color: white;}"
+        self.__mute_button_color_on = "QPushButton {font-size: 9px;  font-weight: bold; background-color: #bbc414; color: white;}"
 
         self.__channel_number_style = "QLabel { font-size: 16px; font-weight: bold; color: #aaaaaa; }"
         self.__channel_number__highlight_style = "QLabel { font-size: 16px; font-weight: bold; color: #cc2216; }"
@@ -172,15 +175,17 @@ class DrumMachineChannel(QWidget):
         # Set size for buttons in channel
         for btn in [self.__btn_solo, self.__btn_mute, self.__btn_reset, self.__btn_open_file,
                     self.__btn_post_preview_sound, self.__btn_preview_sound]:
-            btn.setFixedSize(30, 30)
+            btn.setFixedSize(25, 25)
             btn.setStyleSheet(self.__default_button_color)
+            btn.setSizePolicy(self.__size_policy)
 
             if btn == self.__btn_reset:
                 btn.setStyleSheet(self.__reset_button_color)
 
         # label style
-        label_style = "QLabel { font-size: 8px; font-weight: bold; color: #aaaaaa; }"
+        label_style = "QLabel { font-size: 9px; font-weight: bold; color: #aaaaaa; }"
         for label in self.findChildren(QWidget):
+            label.setSizePolicy(self.__size_policy)
             if isinstance(label, QLabel):
                 label.setStyleSheet(label_style)
                 label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -188,7 +193,7 @@ class DrumMachineChannel(QWidget):
         self.__lbl_channel_number.setStyleSheet(self.__channel_number_style)
 
         # LineEdit style
-        textbox_style = "QLineEdit { font-size: 12px; color: #aaaaaa; font-weight: bold; }"
+        textbox_style = "QLineEdit { font-size: 10px; color: #aaaaaa; font-weight: bold; }"
         self.__name_textbox.setStyleSheet(textbox_style)
 
         # Set default dial values
@@ -197,7 +202,7 @@ class DrumMachineChannel(QWidget):
             dial.setMinimum(1)
             dial.setMaximum(100)
             dial.setValue(50)
-            dial.setFixedSize(40, 40)
+            dial.setFixedSize(35, 35)
             dial.setNotchesVisible(True)
             dial.setWrapping(False)
 
