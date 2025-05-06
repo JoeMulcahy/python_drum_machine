@@ -86,6 +86,9 @@ class DrumMachineChannel(QWidget):
         self.__solo_button_color_on = "QPushButton {font-size: 10px;  font-weight: bold; background-color: #14c443; color: white;}"
         self.__mute_button_color_on = "QPushButton {font-size: 10px;  font-weight: bold; background-color: #bbc414; color: white;}"
 
+        self.__channel_number_style = "QLabel { font-size: 16px; font-weight: bold; color: #aaaaaa; }"
+        self.__channel_number__highlight_style = "QLabel { font-size: 16px; font-weight: bold; color: #cc2216; }"
+
         self.init_components()
 
         # Listeners - change labels to match values of dials
@@ -182,8 +185,7 @@ class DrumMachineChannel(QWidget):
                 label.setStyleSheet(label_style)
                 label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        channel_number_style = "QLabel { font-size: 16px; font-weight: bold; color: #aaaaaa; }"
-        self.__lbl_channel_number.setStyleSheet(channel_number_style)
+        self.__lbl_channel_number.setStyleSheet(self.__channel_number_style)
 
         # LineEdit style
         textbox_style = "QLineEdit { font-size: 12px; color: #aaaaaa; font-weight: bold; }"
@@ -204,6 +206,12 @@ class DrumMachineChannel(QWidget):
 
         self.setLayout(layout)
 
+    def highlight_channel_number(self, is_on):
+        if is_on:
+            self.__lbl_channel_number.setStyleSheet(self.__channel_number__highlight_style)
+        else:
+            self.__lbl_channel_number.setStyleSheet(self.__channel_number_style)
+
     def set_solo_on(self, is_on):
         if is_on:
             self.__btn_solo.setStyleSheet(self.__solo_button_color_on)
@@ -216,10 +224,30 @@ class DrumMachineChannel(QWidget):
         else:
             self.__btn_mute.setStyleSheet(self.__default_button_color)
 
+    # channel number label
+    @property
+    def channel_number_label(self):
+        return self.__lbl_channel_number
+
+    # channel id
+    @property
+    def channel_id(self):
+        return self.__channel_id
+
+    @channel_id.setter
+    def channel_id(self, value):
+        self.__channel_id = value
+
+    # channel name
     @property
     def channel_name_text(self):
         return self.__name_textbox
 
+    @channel_name_text.setter
+    def channel_name_text(self, value):
+        self.__name_textbox.setText(value)
+
+    # samples combo box
     @property
     def sound_selection_combobox(self):
         return self.__sound_selection_combo_box
@@ -229,24 +257,114 @@ class DrumMachineChannel(QWidget):
         self.__sound_selection_combo_box = value
 
     @property
+    def combobox_index(self):
+        return self.sound_selection_combobox.currentIndex()
+
+    @combobox_index.setter
+    def combobox_index(self, value):
+        self.sound_selection_combobox.setCurrentIndex(value)
+
+    # channel volume
+    @property
     def volume_value_label(self):
         return self.__lbl_volume_text
 
+    @volume_value_label.setter
+    def volume_value_label(self, value):
+        self.__lbl_volume_text.setText(value)
+
+    @property
+    def volume_dial(self):
+        return self.__dial_volume
+
+    @volume_dial.setter
+    def volume_dial(self, value):
+        self.__dial_volume.setValue(value)
+
+    # channel pan
     @property
     def pan_value_label(self):
         return self.__lbl_pan_text
 
+    @pan_value_label.setter
+    def pan_value_label(self, value):
+        self.__lbl_pan_text.setText(value)
+
+    @property
+    def pan_dial(self):
+        return self.__dial_pan
+
+    @pan_dial.setter
+    def pan_dial(self, value):
+        self.__dial_pan.setValue(value)
+
+    # channel tone
+    @property
+    def tone_value_label(self):
+        return self.__lbl_tone_text
+
+    @tone_value_label.setter
+    def tone_value_label(self, value):
+        self.__lbl_tone_text.setText(value)
+
+    @property
+    def tone_dial(self):
+        return self.__dial_tone
+
+    @tone_dial.setter
+    def tone_dial(self, value):
+        self.__dial_tone.setValue(value)
+
+    # channel pitch
     @property
     def pitch_value_label(self):
         return self.__lbl_pitch_text
 
+    @pitch_value_label.setter
+    def pitch_value_label(self, value):
+        self.__lbl_pitch_text.setText(value)
+
+    @property
+    def pitch_dial(self):
+        return self.__dial_pitch
+
+    @pitch_dial.setter
+    def pitch_dial(self, value):
+        self.__dial_pitch.setValue(value)
+
+    # channel sample length
     @property
     def length_value_label(self):
         return self.__lbl_length_text
 
+    @length_value_label.setter
+    def length_value_label(self, value):
+        self.__lbl_length_text.setText(value)
+
+    @property
+    def length_dial(self):
+        return self.__dial_length
+
+    @length_dial.setter
+    def length_dial(self, value):
+        self.__dial_length.setValue(value)
+
+    # channel sample stretch
     @property
     def duration_value_label(self):
         return self.__lbl_duration_text
+
+    @duration_value_label.setter
+    def duration_value_label(self, value):
+        self.__lbl_duration_text.setText(value)
+
+    @property
+    def duration_dial(self):
+        return self.__dial_duration
+
+    @duration_dial.setter
+    def duration_dial(self, value):
+        self.__dial_duration.setValue(value)
 
     @property
     def open_file_button(self):
@@ -277,18 +395,6 @@ class DrumMachineChannel(QWidget):
         return self.__btn_reset
 
     @property
-    def volume_dial(self):
-        return self.__dial_volume
-
-    @property
-    def pan_dial(self):
-        return self.__dial_pan
-
-    @property
-    def pitch_dial(self):
-        return self.__dial_pitch
-
-    @property
     def length_dial(self):
         return self.__dial_length
 
@@ -299,10 +405,6 @@ class DrumMachineChannel(QWidget):
     @property
     def tone_dial(self):
         return self.__dial_tone
-
-    @property
-    def channel_id(self):
-        return self.__channel_id
 
     def select_channel(self):
         self.__group_box.setStyleSheet(self.__channel_select_color)

@@ -45,7 +45,7 @@ class DrumMachine(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.___test_counter = 0
+        self.__current_profile = None
 
         self.__number_of_steps = 16  # initial number of steps in stepper
         self.__number_of_drum_machine_channels = 10  # number of channels for the drum machine
@@ -142,6 +142,9 @@ class DrumMachine(QWidget):
 
         # Master Control module
         self.__master_controls = MasterControls()
+
+        # create default profile
+        self.__create_profile()
 
         # add transport and sequencerModule to layout controls layout
         controls_layout = QGridLayout()
@@ -331,6 +334,19 @@ class DrumMachine(QWidget):
     def on_pulse(self, pulse_counter):
         self.__sequencer_module.stepper.stepper_indicators_on_play(pulse_counter)
         self.trigger_audio(pulse_counter)
+        self.highlight_channel_on_sample_played(pulse_counter)
+
+    def highlight_channel_on_sample_played(self, counter):
+        pattern_to_play = []
+        for i in range(len(self.__selected_global_pattern)):
+            pattern_to_play.append(self.__selected_global_pattern[i][counter % self.__playable_steps])
+
+        # highlight channel number if sample if triggered
+        for i in range(len(self.__audio_channels_list)):
+            if pattern_to_play[i] == 1:
+                self.__drum_machine_channels_list[i].highlight_channel_number(True)
+            else:
+                self.__drum_machine_channels_list[i].highlight_channel_number(False)
 
     def trigger_audio(self, count):
         pattern_to_play = []
@@ -351,10 +367,13 @@ class DrumMachine(QWidget):
 
         for i in range(len(self.__audio_channels_list)):
             if pattern_to_play[i] == 1:
+                self.__drum_machine_channels_list[i].highlight_channel_number(True)
                 if self.__humanise_timing > 0.0 or self.__flam_timing > 0.0 or self.__swing_timing > 0.0:
                     threading.Timer(delay, self.__audio_channels_list[i].trigger).start()
                 else:
                     self.__audio_channels_list[i].trigger()
+            elif pattern_to_play[i] == 0:
+                self.__drum_machine_channels_list[i].highlight_channel_number(False)
 
         if self.__metronome_on:
             self.__metro_audio_channel.voice = self.__metronome.metronome_tick_voice(count)
@@ -365,10 +384,13 @@ class DrumMachine(QWidget):
         self.__app_timer.start_counter()
 
     def stop_engine(self):
+        for i in range(self.__number_of_drum_machine_channels):
+            self.__drum_machine_channels_list[i].highlight_channel_number(False)
         self.__audio_engine.stop()
         self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
         self.__sequencer_module.stepper.reset_stepper_indicators()
         self.__app_timer.stop_counter()
+
 
     # Transport methods
     def __set_metronome_volume(self, value):
@@ -383,12 +405,11 @@ class DrumMachine(QWidget):
 
     def __set_metronome_beats_per_bar(self, value):
         self.__metronome.beats_per_bar = value
-        print(f'time signature: {self.__metronome.beats_per_bar} / {self.__metronome.meter}')
 
     def __set_metronome_meter(self, value):
         meters = [2, 4, 8, 16]
-        self.__metronome.meter = meters[value]
-        print(f'time signature: {self.__metronome.beats_per_bar} / {self.__metronome.meter}')
+        index = meters.index(value)
+        self.__metronome.meter = meters[index]
 
     def __set_playable_steps(self, value):
         self.__playable_steps = value
@@ -458,13 +479,11 @@ class DrumMachine(QWidget):
         self.__update_stepper_display()
 
     def __update_stepper_display(self):
-        print(f'{self.__global_pattern_bank_index}{self.__global_pattern_index}{self.__channel_pattern_index}')
         self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
 
     # stepper control methods
     def __copy_pattern(self):
         self.__pattern_manager.temp_local_pattern = self.__current_pattern
-        print(f'copied: {self.__pattern_manager.temp_local_pattern}')
 
     def __paste_pattern(self):
         # if list not empty and does not contain all 0's
@@ -531,8 +550,6 @@ class DrumMachine(QWidget):
         filename = self.__audio_sample_dict[dmc_index][index]
         voice = AudioVoice(filename)
         self.__audio_channels_list[dmc_index].voice = voice
-        print(f'{self.__audio_channels_list[dmc_index].voice}')
-        print(f'\n\n')
 
     def __set_channel_volume(self, index, value):
         self.__audio_channels_list[index].volume = value / 100
@@ -625,12 +642,10 @@ class DrumMachine(QWidget):
         folder_path = filedialog.askdirectory(initialdir=r"C:\Users\josep\Desktop\Step Seq\audio",
                                               title="Choose .wav files in directory")
 
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         directory = Path(folder_path)
 
         if folder_path:
             try:
-                print(f'PRE Audio in dict at index: {index}\n{self.__audio_sample_dict[index]}')
                 audio_list = []
                 self.__drum_machine_channels_list[index].sound_selection_combobox.clear()
                 for file in directory.iterdir():
@@ -643,7 +658,6 @@ class DrumMachine(QWidget):
                 filename = self.__audio_sample_dict[index][0].name
                 voice = AudioVoice(folder_path + f"\\{filename}")
                 self.__audio_channels_list[index].voice = voice
-                print(f'{self.__audio_channels_list[index].voice}')
 
             except FileNotFoundError:
                 print(f'Folder not found at {directory}')
@@ -718,10 +732,142 @@ class DrumMachine(QWidget):
             print("User canceled restart.")
 
     def __load_profile(self):
-        print(f"Load profile")
+        print('------------------------------')
+        settings_dict = self.__current_profile.load_profile()
+        # change values in drum machine
+        print(settings_dict)
+        profile_name = settings_dict['profile_name']
+
+        print('channel settings --->>')
+        channel_settings = settings_dict['channel_settings']['channel_settings']
+        for i in range(len(channel_settings)):
+            self.__drum_machine_channels_list[i].channel_id = channel_settings[i][0]
+            print(f'channel id: {channel_settings[i][0]}')
+
+            self.__drum_machine_channels_list[i].channel_name_text = channel_settings[i][1]
+            print(f'channel name: {channel_settings[i][1]}')
+
+            self.__drum_machine_channels_list[i].sound_selection_combobox.setCurrentIndex(channel_settings[i][2])
+            print(f'cb index: {channel_settings[i][2]}')
+
+            self.__set_voice_for_drum_machine_channels(channel_settings[i][2], i)
+            print(f'set voice: {channel_settings[i][2]}')
+
+            print('---------pre cannel vol')
+            self.__drum_machine_channels_list[i].volume_dial.setValue(int(channel_settings[i][3]))
+            self.__drum_machine_channels_list[i].volume_value_label.setText(str(channel_settings[i][3]))
+            self.__set_channel_volume(i, int(channel_settings[i][3]))
+            print(f'channel vol: {channel_settings[i][3]}')
+
+            self.__drum_machine_channels_list[i].pan_dial.setValue(int(channel_settings[i][4]))
+            self.__drum_machine_channels_list[i].pan_value_label.setText(str(channel_settings[i][4]))
+            self.__set_channel_pan(i, int(channel_settings[i][4]))
+            print(f'channel pan: {channel_settings[i][4]}')
+
+            self.__drum_machine_channels_list[i].tone_dial.setValue(int(channel_settings[i][5]))
+            self.__drum_machine_channels_list[i].tone_value_label.setText(str(channel_settings[i][5]))
+            self.__set_sample_tone(i, int(channel_settings[i][5]))
+            print(f'channel tone: {channel_settings[i][5]}')
+
+            self.__drum_machine_channels_list[i].pitch_dial.setValue(int(channel_settings[i][6]))
+            self.__drum_machine_channels_list[i].pitch_value_label.setText(str(channel_settings[i][6]))
+            self.__set_sample_pitch(i, int(channel_settings[i][6]))
+            print(f'channel pitch: {channel_settings[i][6]}')
+
+            self.__drum_machine_channels_list[i].length_dial.setValue(int(channel_settings[i][7]))
+            self.__drum_machine_channels_list[i].length_value_label.setText(str(channel_settings[i][7]))
+            self.__set_voice_length(i, int(channel_settings[i][7]))
+            print(f'channel len: {channel_settings[i][7]}')
+
+            self.__drum_machine_channels_list[i].duration_dial.setValue(int(channel_settings[i][8]))
+            self.__drum_machine_channels_list[i].duration_value_label.setText(str(channel_settings[i][8]))
+            self.__set_time_stretch(i, int(channel_settings[i][8]))
+            print(f'channel stretch: {channel_settings[i][8]}')
+
+        mute_list = settings_dict['mute_list']
+        self.__channel_mute_list = mute_list
+        solo_list = settings_dict['solo_list']
+        self.__channel_solo_list = solo_list
+        self.__mute_audio_channels()
+        print(f'solo mute list loaded')
+
+        beats_per_minute = settings_dict['beats_per_minute']
+        self.__tempo = beats_per_minute
+        self.set_tempo(beats_per_minute)
+        print(f'tempo loaded')
+
+        beats_per_bar = settings_dict['beats_per_bar']
+        self.__beats_per_bar = beats_per_bar
+        self.__set_metronome_beats_per_bar(beats_per_bar)
+        print(f'beat per bar loaded')
+
+        meter = settings_dict['meter']
+        self.__meter = meter
+        self.__set_metronome_meter(meter)
+        print(f'meter loaded')
+
+        metronome_on = settings_dict['metronome_on']
+        self.__metronome_on = metronome_on
+        self.set_metronome_on_off(metronome_on)
+        print(f'metro on off loaded')
+
+        pattern_dict = settings_dict['pattern_dict']
+        self.__pattern_manager.bank_dict = pattern_dict
+        print(f'pattern dict loaded')
+
+        pattern_bank = settings_dict['pattern_bank']
+        self.__global_pattern_bank_index = pattern_bank
+        print(f'pattern[i][] loaded')
+
+        pattern_selected = settings_dict['pattern_selected']
+        self.__global_pattern_index = pattern_selected
+        self.__update_current_pattern()
+        print(f'pattern[][i] loaded')
+
+        playable_steps = settings_dict['playable_steps']
+        self.__playable_steps = playable_steps
+        self.__set_playable_steps(playable_steps)
+        print(f'playable steps loaded')
+
+        time_resolution = settings_dict['time_resolution']
+        self.__timing_resolution_index = time_resolution
+        self.set_timing_resolution(time_resolution)
+        self.set_time_resolution(self.__tempo, self.__meter)
+        self.__sequencer_module.timing_resolution_select.current_index = time_resolution
+        self.__sequencer_module.timing_resolution_select.set_timing_label()
+        print(f'time resolution loaded')
+
+        timing_flam = settings_dict['timing_flam']
+        self.__flam_timing = int(timing_flam * 100)
+        self.__set_flam(timing_flam)
+        print(f'flam loaded')
+
+        timing_swing = settings_dict['timing_swing']
+        self.__swing_timing = int(timing_swing * 100)
+        self.__set_swing(timing_swing)
+        print(f'swing loaded')
+
+        timing_humanise = settings_dict['timing_humanise']
+        self.__humanise_timing = int(timing_humanise * 100)
+        self.__set_humanise(self.__humanise_timing)
+
+        timing_humanise_strength = settings_dict['timing_humanise_strength']
+        self.__humanise_timing_strength = timing_humanise_strength
+        self.__calculate_humanise_timing()
+        print(f'humanise loaded')
+
+
+
+        self.__create_profile()
+
+        # create a profile
+        # print(self.__current_profile)
 
     def __save_profile(self):
-        print('debug: __save_profile')
+        self.__create_profile()
+        self.__current_profile.save_profile()
+
+    def __create_profile(self):
         channels_settings_dict = {'channel_settings': {}}
         for i in range(len(self.__drum_machine_channels_list)):
             channel_settings = [self.__drum_machine_channels_list[i].channel_id,
@@ -737,7 +883,7 @@ class DrumMachine(QWidget):
 
         print(f'debug: \n{channels_settings_dict}')
 
-        Profile(
+        self.__current_profile = Profile(
             channels_settings_dict,
             self.__channel_mute_list,
             self.__channel_solo_list,

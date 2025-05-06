@@ -30,12 +30,10 @@ DM Channels
 -   add indicator to channel to indicate that a sample is being play from it
 
 Master Controls:
--   Load and Save pattern and channels sounds and settings
--   global reset
+-   debug load and save profile
 
 Metronome:
     -   make metronome independent of time resolution
-        improve gui look
         change number of playable beats depending on beat and meter??
         Change from a timing resolution to beat / meter ??
 
@@ -52,23 +50,12 @@ GUI:
     - move all styling to a separate py file
     -   have a slight spacing every four or third step depending on time resolution
 
-Pattern Select module
-    -   clear global pattern
-    -   load and save banks
+
 
 Optimisations:
     - Drum Machine
         - combine listeners into one for loop
 
-Random kit
--   Generate random kit from files
-
-Create a new class to handle eq and filtering
--   relocate high and low shelving filters code to new class
-
-Files
-    -   implement way to load audio files to channel combo box from file explorer
-    -   file extension check and better error handling
 
 
 
@@ -79,6 +66,8 @@ Audio Engine:
     - update engine to handle continuous changing voices. At the moment a voice is a singular sound
         such as a sample or set synth wave form(synth parameters such as freq can't be easily changed)
 
+Create a new class to handle eq and filtering
+-   relocate high and low shelving filters code to new class
 
 Pattern Select
 -   Highlight bank and pattern select buttons with pattern in them
@@ -89,6 +78,10 @@ Stepper
 -   list of common pattern (maybe a dropdown list) -> specific to individual channels
 -   drum pattern matrix
     - 16 x 8 matrix to program drums on
+
+Pattern Select module
+    -   clear global pattern
+    -   load and save banks
 
 - playback control
 -   immediate change on pattern select
