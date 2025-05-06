@@ -1,11 +1,13 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QWidget, QGridLayout, QPushButton, QGroupBox, QLabel, QComboBox, QSpinBox
+from PyQt6.QtWidgets import QWidget, QGridLayout, QPushButton, QGroupBox, QLabel, QComboBox, QSpinBox, QSizePolicy
 
 
 class Stepper(QWidget):
     def __init__(self, stepper_id, number_of_steps):
         super().__init__()
+
+        self.__size_policy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
         self.__stepper_id = stepper_id
         self.__stepper_buttons_list = list()
@@ -48,7 +50,7 @@ class Stepper(QWidget):
 
         # stepper buttons, indicators and stepper button numbers
         self.__green_indicator = "QLabel {font-size: 40px; color: #12ff12;}"
-        self.__red_indicator = "QLabel {font-size: 40px; color: #ff1212;}"
+        self.__red_indicator = "QLabel {font-size: 45px; color: #ff1212;}"
         self.__orange_indicator = "QLabel {font-size: 40px; color: #ffff12;}"
 
         self.stepper_layout.addWidget(self.__lbl_shift, 0, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight)
@@ -71,6 +73,7 @@ class Stepper(QWidget):
             self.__step_indicator_list.append(step_indicator)
 
             button = QPushButton()
+            button.setSizePolicy(self.__size_policy)
             button.setProperty("id", i)
             button.setFixedSize(50, 50)
             button.setStyleSheet(self.default_color)  # set color
@@ -80,6 +83,7 @@ class Stepper(QWidget):
             self.stepper_layout.addWidget(step_indicator, 1, int(i), alignment=Qt.AlignmentFlag.AlignHCenter)
             self.stepper_layout.addWidget(button, 2, int(i), alignment=Qt.AlignmentFlag.AlignBottom)
             self.stepper_layout.addWidget(label, 3, int(i), alignment=Qt.AlignmentFlag.AlignHCenter)
+
 
         # Listeners
         for btn in self.__stepper_buttons_list:

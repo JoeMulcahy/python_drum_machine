@@ -54,8 +54,6 @@ class DrumMachine(QWidget):
         self.__channel_mute_list = [False for i in range(self.__number_of_drum_machine_channels)]
         self.__current_selected_drum_machine_channel_index = 0
 
-        self.__timing_resolution_dict = create_timing_resolution_dict()  # dictionary of [bpb, meter] timings
-        self.__timing_resolution_index = 2
 
         ######## intention is to have selectable [1-16][17-32][33-48][49-64] steps banks
         self.__steps_banks = 1
@@ -85,6 +83,10 @@ class DrumMachine(QWidget):
 
         self.__app_timer = ApplicationTimer(self.__tempo, self.__beats_per_bar, self.__meter)
         self.__app_timer.set_pulse_callback(self.on_pulse)  # init 'pulse' from app_timer
+
+        self.__timing_resolution_dict = create_timing_resolution_dict()  # dictionary of [bpb, meter] timings
+        self.__timing_resolution_index = 4
+        self.set_timing_resolution(self.__timing_resolution_index)
 
         # initialise metronome
         self.__metronome_on = False  # metronome on/off flag
@@ -293,7 +295,7 @@ class DrumMachine(QWidget):
 
         # Listener for Timing resolution module
         self.__sequencer_module.timing_resolution_select. \
-            timing_select_dial.valueChanged.connect(lambda index: self.set_timing_resolution(index))
+            timing_select_dial.valueChanged.connect(lambda index: self.set_timing_resolution(index - 1))
 
         self.__sequencer_module.timing_resolution_select. \
             flam_dial.valueChanged.connect(lambda val: self.__set_flam(val))
@@ -402,7 +404,7 @@ class DrumMachine(QWidget):
         self.__app_timer.set_timing_resolution(bpb, meter)
 
     def set_timing_resolution(self, index):
-        self.__timing_resolution_index = index - 1
+        self.__timing_resolution_index = index
         self.set_time_resolution(self.__timing_resolution_dict[
                                      self.__timing_resolution_index][0],
                                  self.__timing_resolution_dict[self.__timing_resolution_index][1])
