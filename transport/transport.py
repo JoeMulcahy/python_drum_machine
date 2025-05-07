@@ -25,6 +25,7 @@ class Transport(QWidget):
         self.__metronome_checkbox.setText("on/off")
 
         self.__metronome_label = QLabel("Metronome")
+        self.__time_signature_divider_label = QLabel('/')
         self.__time_signature_label = QLabel('Time signature')
         self.__bpb_spinbox = QSpinBox()
         self.__bpb_spinbox.setRange(1, 12)
@@ -42,31 +43,42 @@ class Transport(QWidget):
         self.initialise_components()
 
     def initialise_components(self):
-        module_group_box = QGroupBox(f"Transport")
-        self.set_style()  # set widgets style
+        # group boxes
+        transport_group_box = QGroupBox(f"Transport")
+        tempo_group_box = QGroupBox("Tempo")
+        metronome_group_box = QGroupBox("Metronome")
 
         transport_module_layout = QGridLayout()
+        tempo_module_layout = QGridLayout()
+        metronome_module_layout = QGridLayout()
+
         transport_module_layout.setSpacing(20)
         transport_module_layout.addWidget(self.__btn_play, 0, 0)
         transport_module_layout.addWidget(self.__btn_stop, 0, 1)
 
-        transport_module_layout.addWidget(self.__lbl_bpm, 1, 0)
-        transport_module_layout.addWidget(self.__tempo_spin_box, 1, 1)
+        tempo_module_layout.addWidget(self.__lbl_bpm, 0, 0)
+        tempo_module_layout.addWidget(self.__tempo_spin_box, 0, 1)
 
-        transport_module_layout.addWidget(self.__metronome_label, 2, 0)
+        metronome_module_layout.addWidget(self.__time_signature_label, 0, 0, 1, 2)
+        metronome_module_layout.addWidget(self.__bpb_spinbox, 0, 2, 1, 1, Qt.AlignmentFlag.AlignRight)
+        metronome_module_layout.addWidget(self.__time_signature_divider_label, 0, 3, 1, 1, Qt.AlignmentFlag.AlignCenter)
+        metronome_module_layout.addWidget(self.__meter_spinbox, 0, 4, 1, 1, Qt.AlignmentFlag.AlignLeft)
 
-        transport_module_layout.addWidget( self.__time_signature_label, 3, 0)
-        transport_module_layout.addWidget(self.__meter_spinbox, 3, 1, 1, 1, Qt.AlignmentFlag.AlignRight)
-        transport_module_layout.addWidget(self.__bpb_spinbox, 3, 1, 1, 1, Qt.AlignmentFlag.AlignLeft)
+        metronome_module_layout.addWidget(self.__metronome_checkbox, 1, 0, 1, 2, Qt.AlignmentFlag.AlignLeft)
+        metronome_module_layout.addWidget(self.__metronome_volume_dial, 1, 2, 1, 1)
 
-        transport_module_layout.addWidget(self.__metronome_checkbox, 4, 0)
-        transport_module_layout.addWidget(self.__metronome_volume_dial, 4, 1)
+        transport_group_box.setLayout(transport_module_layout)
+        tempo_group_box.setLayout(tempo_module_layout)
+        metronome_group_box.setLayout(metronome_module_layout)
 
-        module_group_box.setLayout(transport_module_layout)
+        module_layout = QGridLayout()
+        module_layout.addWidget(transport_group_box, 0, 0)
+        module_layout.addWidget(tempo_group_box, 1, 0)
+        module_layout.addWidget(metronome_group_box, 2, 0)
 
-        main_layout = QGridLayout()
-        main_layout.addWidget(module_group_box)
-        self.setLayout(main_layout)
+        self.set_style()  # set widgets style
+
+        self.setLayout(module_layout)
 
     def set_style(self):
         for comp in [self.__btn_play, self.__btn_stop, self.__tempo_spin_box]:
@@ -77,8 +89,7 @@ class Transport(QWidget):
         self.__lbl_bpm.setStyleSheet(text_style)
 
         self.__metronome_volume_dial.setFixedSize(50, 50)
-
-        self.__metronome_checkbox.setFixedSize(50, 50)
+        self.__metronome_checkbox.setFixedSize(70, 70)
 
         self.__tempo_spin_box.setStyleSheet("""
             QSpinBox {
@@ -94,7 +105,7 @@ class Transport(QWidget):
                 border: none;
             }
         """)
-        self.__bpb_spinbox.setFixedSize(40, 20)
+        self.__bpb_spinbox.setFixedSize(30, 20)
 
         self.__meter_spinbox.setStyleSheet("""
                     QAbstractSpinBox::up-button, QAbstractSpinBox::down-button {
@@ -103,7 +114,7 @@ class Transport(QWidget):
                         border: none;
                     }
                 """)
-        self.__meter_spinbox.setFixedSize(40, 20)
+        self.__meter_spinbox.setFixedSize(30, 20)
 
     def set_is_playing(self, value):
         self.__is_playing = value

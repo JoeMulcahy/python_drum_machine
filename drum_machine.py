@@ -12,6 +12,7 @@ from PyQt6.QtWidgets import QWidget, QGridLayout, QMessageBox, QSizePolicy
 import settings
 from drum_machine_channel import DrumMachineChannel
 from global_controls.global_controls import MasterControls
+from gui_refresh_signal import DrumMachineSignals
 from metronome.metronome import Metronome
 from pattern.PatternManger import PatternManager
 from persistence.profile import Profile
@@ -21,6 +22,8 @@ from sound_engine.AudioVoice import AudioVoice
 from sound_engine.SoundEngine import SoundEngine
 from timer.application_timer import ApplicationTimer
 from transport.transport import Transport
+
+from PyQt6.QtCore import pyqtSignal, QObject
 
 
 def create_timing_resolution_dict():
@@ -42,6 +45,7 @@ class DrumMachine(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.signals = DrumMachineSignals()
         self.__size_policy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
         self.__current_profile = None
@@ -54,8 +58,6 @@ class DrumMachine(QWidget):
         self.__channel_mute_list = [False for i in range(self.__number_of_drum_machine_channels)]
         self.__current_selected_drum_machine_channel_index = 0
 
-
-        ######## intention is to have selectable [1-16][17-32][33-48][49-64] steps banks
         self.__steps_banks = 1
 
         # initialise SoundEngine
@@ -119,7 +121,8 @@ class DrumMachine(QWidget):
         for i in range(self.__number_of_drum_machine_channels):
             dm_channel = DrumMachineChannel(i)  # drum machine channel
             dm_channel.sound_selection_combobox.addItems(
-                [file.name[:file.name.find('.')] for file in self.__audio_sample_dict[i]])  # popular combobox with sample names
+                [file.name[:file.name.find('.')] for file in
+                 self.__audio_sample_dict[i]])  # popular combobox with sample names
             dm_channel.sound_selection_combobox.setCurrentIndex(0)
             filepath = self.__audio_sample_dict[i][0]
             filename = self.__audio_sample_dict[i][0].name
@@ -333,7 +336,9 @@ class DrumMachine(QWidget):
     # Take action upon receiving pulse from app_timer
     ########################################################################
     def on_pulse(self, pulse_counter):
-        self.__sequencer_module.stepper.stepper_indicators_on_play(pulse_counter)
+        # self.__sequencer_module.stepper.stepper_indicators_on_play(pulse_counter) ->
+        #   has being moved to main_window
+        self.signals.pulse_signal.emit(pulse_counter)  # SAFE
         self.trigger_audio(pulse_counter)
 
     def trigger_audio(self, count):
@@ -841,8 +846,6 @@ class DrumMachine(QWidget):
         self.__calculate_humanise_timing()
         print(f'humanise loaded')
 
-
-
         self.__create_profile()
 
         # create a profile
@@ -886,3 +889,7 @@ class DrumMachine(QWidget):
             self.__humanise_timing,
             self.__humanise_timing_strength
         )
+
+    @property
+    def sequencer_module(self):
+        return self.__sequencer_module

@@ -1,23 +1,33 @@
-# MainWindow.py
+# main_window.py
 
 from PyQt6.QtWidgets import *
 
 from drum_machine import DrumMachine
+from gui_refresh_signal import DrumMachineSignals
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.signals = DrumMachineSignals()
+
         self.setWindowTitle("PyBeats")
         self.central_widget = QWidget()
         self.app_layout = QGridLayout()
         self.drum_machine = DrumMachine()
+        self.drum_machine.signals.pulse_signal.connect(self.update_step_indicators)
         self.app_layout.addWidget(self.drum_machine)
         self.central_widget.setLayout(self.app_layout)
+        # self.setFixedSize(1920, 1080)
         self.setCentralWidget(self.central_widget)
 
         # Connect the signal from DrumMachine to the slot in MainWindow
         self.drum_machine.restart_requested.connect(self._reinitialize_drum_machine)
+
+    # this is a
+    def update_step_indicators(self, step_index):
+        # Do all GUI changes here
+        self.drum_machine.sequencer_module.stepper.stepper_indicators_on_play(step_index)
 
     def _reinitialize_drum_machine(self):
         # Remove the old drum machine widget

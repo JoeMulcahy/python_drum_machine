@@ -1,6 +1,10 @@
 ################################################################################################
     Known Bugs and behaviours
 ################################################################################################
+Metronome
+-   Adjusting meter crashes application
+-   time signature does not correlate with metronome
+
 Stepper
 -   play step indicator gets stuck on step buttons when switch channels
 -   indicator lights in stepper remain red when changing number of playable steps
@@ -16,6 +20,15 @@ Drum Machine channel
           behaviour. Might need some kind of temp_data that is shared between functions.
         - will all have to be recalculated? ie if stretch change -> recalculated length, pitch??
 -   Graphical glitches occur when channel number is changing color
+-   Pre post button not behaving as expected
+
+Profile
+-   profile settings does load but
+    -   gui widgets such as dials and labels don't update
+    -   all sounds are triggered at once until time resolution is changed,
+            suggesting pattern_to_play list is not updated correctly
+    -
+
 
 ################################################################################################
     Comments
@@ -28,16 +41,13 @@ Drum Machine channel
     To Do
 ################################################################################################
 GUI:
-    -Drum Channels
-        make elements smaller, btns, dials
-        make vol, ton etc labels bigger
-        remove '.wav' from combobox elements
-        fixed channels size
-    - General improvement of looks
-    - separate transport, bmp and metronome into separate modules
     - move all styling to a separate py file
     -   have a slight spacing every four or third step depending on time resolution
 
+Threading
+    -  Gui freezes
+        - a quick search online indicates some parts of the code will need separate threads :(,
+            this will increase performance and prevent gui freezes
 
 Master Controls:
 -   debug load and save profile
@@ -49,8 +59,6 @@ Metronome:
     -   make metronome independent of time resolution
         change number of playable beats depending on beat and meter??
         Change from a timing resolution to beat / meter ??
-
-
 
 Optimisations:
     - Drum Machine

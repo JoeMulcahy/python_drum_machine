@@ -50,7 +50,7 @@ class Stepper(QWidget):
 
         # stepper buttons, indicators and stepper button numbers
         self.__green_indicator = "QLabel {font-size: 40px; color: #12ff12;}"
-        self.__red_indicator = "QLabel {font-size: 45px; color: #ff1212;}"
+        self.__red_indicator = "QLabel {font-size: 40px; color: #ff1212;}"
         self.__orange_indicator = "QLabel {font-size: 40px; color: #ffff12;}"
 
         self.stepper_layout.addWidget(self.__lbl_shift, 0, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight)
@@ -84,7 +84,6 @@ class Stepper(QWidget):
             self.stepper_layout.addWidget(button, 2, int(i), alignment=Qt.AlignmentFlag.AlignBottom)
             self.stepper_layout.addWidget(label, 3, int(i), alignment=Qt.AlignmentFlag.AlignHCenter)
 
-
         # Listeners
         for btn in self.__stepper_buttons_list:
             btn.clicked.connect(lambda checked, b=btn: self.__button_toggle(b.property("id")))
@@ -92,6 +91,7 @@ class Stepper(QWidget):
         self.__set_style()
 
         self.group_box_stepper.setLayout(self.stepper_layout)
+        self.group_box_stepper.setSizePolicy(self.__size_policy)
 
         main_layout = QGridLayout()
         main_layout.addWidget(self.group_box_stepper)
@@ -219,5 +219,3 @@ class Stepper(QWidget):
     @property
     def step_freq_spinbox(self):
         return self.__spin_step_freq
-
-

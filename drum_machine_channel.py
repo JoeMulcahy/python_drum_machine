@@ -34,6 +34,7 @@ class DrumMachineChannel(QWidget):
         # combobox with audio file names
         self.__sound_selection_combo_box = QComboBox()
         self.__sound_selection_combo_box.setCurrentIndex(0)
+        # self.__sound_selection_combo_box.setFixedSize(80, 25)
 
         # labels for channel controls
         self.__lbl_volume = QLabel('Vol')
@@ -123,7 +124,7 @@ class DrumMachineChannel(QWidget):
         #####################################################
         layout.addWidget(self.__name_textbox, 0, 0, 1, 3)
         layout.addWidget(self.__btn_open_file, 1, 0, 1, 1)
-        layout.addWidget(self.__sound_selection_combo_box, 1, 1, 1, 2)
+        layout.addWidget(self.__sound_selection_combo_box, 1, 1, 1, 2, Qt.AlignmentFlag.AlignLeft)
 
         #####################################################
         layout.addWidget(self.__lbl_volume, 2, 0, 1, 1)

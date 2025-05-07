@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget, QGridLayout, QGroupBox, QPushButton
+from PyQt6.QtWidgets import QWidget, QGridLayout, QGroupBox, QPushButton, QSizePolicy
 
 
 class PatternSelect(QWidget):
@@ -16,38 +16,39 @@ class PatternSelect(QWidget):
 
         self.pattern_select_layout = QGridLayout()
         self.group_box_pattern_select = QGroupBox("Pattern")
-        self.group_box_bank = QGroupBox("Bank")
 
         # colors
         self.default_color = "background-color: #3498db; color: white;"
-        self.toggle_on_color = "background-color: #9999ef; color: white;"
+        self.toggle_on_color = "font-weight: 900; background-color: #7373d1; color: white;"
 
         self.default_color_bank = "background-color: #6698db; color: white;"
-        self.toggle_on_color_bank = "background-color: #ff99ef; color: white;"
+        self.toggle_on_color_bank = "font-weight: 900; background-color: #ff99ef; color: white;"
 
         # pattern select buttons
         for i in range(number_of_buttons):
             button = QPushButton(f"{i + 1}")
-            button.setFixedSize(30, 30)
+            button.setFixedSize(40, 30)
             button.setStyleSheet(self.default_color)
             self.__buttons_list.append(button)
-            self.pattern_select_layout.addWidget(button, int(i / 4), i % 4)
+            self.pattern_select_layout.addWidget(button, int(i / 4), i % 4, 1, 1, Qt.AlignmentFlag.AlignCenter)
             self.__buttons_list[0].setStyleSheet(self.toggle_on_color)
 
         for i in range(self.__number_of_banks):
             button = QPushButton(f"{bank_letters[i]}")
-            button.setFixedSize(30, 30)
+            button.setFixedSize(40, 30)
             button.setStyleSheet(self.default_color_bank)
             self.__bank_buttons_list.append(button)
-            self.pattern_select_layout.addWidget(button, 2, i)
+            self.pattern_select_layout.addWidget(button, 2, i, 1, 1, Qt.AlignmentFlag.AlignCenter)
 
         self.__bank_buttons_list[0].setStyleSheet(self.toggle_on_color_bank)
 
         self.__btn_copy = QPushButton('Copy')
+        # self.__btn_copy.setFixedSize(40, 30)
         self.__btn_paste = QPushButton('Paste')
+        # self.__btn_paste.setFixedSize(40, 30)
 
-        self.pattern_select_layout.addWidget(self.__btn_copy, 3, 0, 1, 2)
-        self.pattern_select_layout.addWidget(self.__btn_paste, 3, 2, 1, 2)
+        self.pattern_select_layout.addWidget(self.__btn_copy, 3, 0, 1, 2, Qt.AlignmentFlag.AlignCenter)
+        self.pattern_select_layout.addWidget(self.__btn_paste, 3, 2, 1, 2, Qt.AlignmentFlag.AlignCenter)
 
 
         # Listener to set selected pattern button index and to highlight selected button

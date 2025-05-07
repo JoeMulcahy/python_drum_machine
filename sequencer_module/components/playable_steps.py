@@ -17,10 +17,21 @@ class PlayableSteps(QWidget):
         self.__steps_spin_box.setValue(self.__number_of_steps)
         self.steps_select_layout.addWidget(self.__steps_spin_box, 0, 0)
 
+        self.__set_style()
+
         self.group_box_step_select.setLayout(self.steps_select_layout)
         main_layout = QGridLayout()
         main_layout.addWidget(self.group_box_step_select)
         self.setLayout(main_layout)
+
+    def __set_style(self):
+        self.__steps_spin_box.setStyleSheet("""
+            QSpinBox {
+                font-style: italic;
+                font-size: 24px;       /* Resize text */
+                color: #ff5733;        /* Change text color */
+            }
+        """)
 
     def set_spinbox_range(self, value):
         self.__steps_spin_box.setRange(1, value)
