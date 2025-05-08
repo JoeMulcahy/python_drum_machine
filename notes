@@ -27,7 +27,7 @@ Profile
     -   gui widgets such as dials and labels don't update
     -   all sounds are triggered at once until time resolution is changed,
             suggesting pattern_to_play list is not updated correctly
-    -
+    -   currently loaded samples are not saved
 
 
 ################################################################################################
@@ -40,20 +40,27 @@ Profile
 ################################################################################################
     To Do
 ################################################################################################
+Threading
+    -  create separate threads for
+        - application timer
+        - sound engine
+        - sound engine filter calculations
+        - updating files in channels
+        - channel dial updates
+        - metronome
+        - on pulse()
+        - timing changes
 GUI:
     - move all styling to a separate py file
     -   have a slight spacing every four or third step depending on time resolution
-
-Threading
-    -  Gui freezes
-        - a quick search online indicates some parts of the code will need separate threads :(,
-            this will increase performance and prevent gui freezes
 
 Master Controls:
 -   debug load and save profile
 
 Stepper Module
--   fix indicator lights
+-   grey out unused steps
+-   edit steps to include up to 64 steps
+    - selectable [1-16][17-32][33-48][49-64]
 
 Metronome:
     -   make metronome independent of time resolution

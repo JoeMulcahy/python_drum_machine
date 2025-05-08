@@ -373,22 +373,18 @@ class DrumMachine(QWidget):
             self.__metro_audio_channel.trigger()
 
     def start_engine(self):
+        self.__sequencer_module.stepper.reset_stepper_indicators()
         self.__audio_engine.play()
         self.__app_timer.start_counter()
 
     def stop_engine(self):
         self.__audio_engine.stop()
         self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
-        self.__sequencer_module.stepper.reset_stepper_indicators()
         self.__app_timer.stop_counter()
 
-    # Transport methods
+    # metronome methods
     def __set_metronome_volume(self, value):
         self.__metro_audio_channel.volume = value / 100
-
-    def set_tempo(self, value):
-        self.__app_timer.set_tempo(int(value))
-        self.__metronome.tempo = int(value)
 
     def set_metronome_on_off(self, is_on):
         self.__metronome_on = is_on
@@ -401,10 +397,18 @@ class DrumMachine(QWidget):
         index = meters.index(value)
         self.__metronome.meter = meters[index]
 
+    # change tempo(beats per minutes)
+    def set_tempo(self, value):
+        self.__app_timer.set_tempo(int(value))
+        self.__metronome.tempo = int(value)
+
+    # playable steps
     def __set_playable_steps(self, value):
+        self.__sequencer_module.stepper.reset_stepper_indicators()
         self.__playable_steps = value
         self.__sequencer_module.stepper.number_of_playable_steps = value
 
+    # timing module methods
     def set_time_resolution(self, bpb, meter):
         self.__app_timer.set_timing_resolution(bpb, meter)
 
@@ -439,6 +443,7 @@ class DrumMachine(QWidget):
         delay = random.uniform(0.0, self.__app_timer.interval) * self.__humanise_timing_strength
         self.__humanise_timing = delay
 
+    # pattern select methods
     def __update_bank_index(self, index):
         self.__global_pattern_bank_index = index
         self.__update_current_pattern()
@@ -625,13 +630,13 @@ class DrumMachine(QWidget):
             if self.__channel_solo_list[i]:
                 self.__solo_channels(i)
 
+    # File handling methods
     def __open_files_in_directory(self, index):
         root = tk.Tk()
         root.withdraw()  # Hide main window
 
         folder_path = filedialog.askdirectory(initialdir=r"C:\Users\josep\Desktop\Step Seq\audio",
                                               title="Choose .wav files in directory")
-
         directory = Path(folder_path)
 
         if folder_path:
@@ -743,7 +748,7 @@ class DrumMachine(QWidget):
             self.__set_voice_for_drum_machine_channels(channel_settings[i][2], i)
             print(f'set voice: {channel_settings[i][2]}')
 
-            print('---------pre cannel vol')
+            print('---------pre channel vol')
             self.__drum_machine_channels_list[i].volume_dial.setValue(int(channel_settings[i][3]))
             self.__drum_machine_channels_list[i].volume_value_label.setText(str(channel_settings[i][3]))
             self.__set_channel_volume(i, int(channel_settings[i][3]))
