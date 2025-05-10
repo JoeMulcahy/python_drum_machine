@@ -31,8 +31,8 @@ class Transport(QWidget):
         self.__bpb_spinbox.setRange(1, 12)
         self.__bpb_spinbox.setValue(4)
 
-        self.__meter_spinbox = CustomSpinBox([2, 4, 8, 16])
-        self.__meter_spinbox.setValue(1)
+        self.__beat_type_spinbox = CustomSpinBox([2, 4, 8, 16, 32])
+        self.__beat_type_spinbox.setValue(1)
 
         self.__metronome_volume_dial = QDial()
         self.__metronome_volume_dial.setRange(0, 100)
@@ -62,7 +62,7 @@ class Transport(QWidget):
         metronome_module_layout.addWidget(self.__time_signature_label, 0, 0, 1, 2)
         metronome_module_layout.addWidget(self.__bpb_spinbox, 0, 2, 1, 1, Qt.AlignmentFlag.AlignRight)
         metronome_module_layout.addWidget(self.__time_signature_divider_label, 0, 3, 1, 1, Qt.AlignmentFlag.AlignCenter)
-        metronome_module_layout.addWidget(self.__meter_spinbox, 0, 4, 1, 1, Qt.AlignmentFlag.AlignLeft)
+        metronome_module_layout.addWidget(self.__beat_type_spinbox, 0, 4, 1, 1, Qt.AlignmentFlag.AlignLeft)
 
         metronome_module_layout.addWidget(self.__metronome_checkbox, 1, 0, 1, 2, Qt.AlignmentFlag.AlignLeft)
         metronome_module_layout.addWidget(self.__metronome_volume_dial, 1, 2, 1, 1)
@@ -107,14 +107,14 @@ class Transport(QWidget):
         """)
         self.__bpb_spinbox.setFixedSize(30, 20)
 
-        self.__meter_spinbox.setStyleSheet("""
+        self.__beat_type_spinbox.setStyleSheet("""
                     QAbstractSpinBox::up-button, QAbstractSpinBox::down-button {
                         width: 0;
                         height: 0;
                         border: none;
                     }
                 """)
-        self.__meter_spinbox.setFixedSize(30, 20)
+        self.__beat_type_spinbox.setFixedSize(30, 20)
 
     def set_is_playing(self, value):
         self.__is_playing = value
@@ -149,7 +149,7 @@ class Transport(QWidget):
 
     @property
     def meter_spinbox(self):
-        return self.__meter_spinbox
+        return self.__beat_type_spinbox
 
 
 class CustomSpinBox(QSpinBox):
