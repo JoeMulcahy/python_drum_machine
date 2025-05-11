@@ -64,6 +64,7 @@ class DrumMachine(QWidget):
         self.__steps_banks = 1
 
         # initialise SoundEngine
+        self.__drum_machine_is_playing = False
         self.__audio_engine = SoundEngine()
 
         # initialise audio sample lists
@@ -79,15 +80,16 @@ class DrumMachine(QWidget):
         # initialise timing values and application timer
         self.__tempo = 120
         self.__beats_per_bar = 4
-        self.__beat_type = [2, 4, 8, 16, 32]
-        self.__beat_type_index = 2
+        self.__beat_type = [4, 8, 16]
+        self.__beat_type_index = 0
 
         self.__flam_timing = 0.0
         self.__swing_timing = 0.0
         self.__humanise_timing = 0.0
         self.__humanise_timing_strength = 0.0
 
-        self.__app_timer = ApplicationTimer(self.__tempo, self.__beats_per_bar, self.__beat_type[self.__beat_type_index])
+        self.__app_timer = ApplicationTimer(self.__tempo, self.__beats_per_bar,
+                                            self.__beat_type[self.__beat_type_index])
         self.__app_timer.set_pulse_callback(self.on_pulse)  # init 'pulse' from app_timer
 
         self.__timing_resolution_dict = create_timing_resolution_dict()  # dictionary of [bpb, meter] timings
@@ -95,7 +97,7 @@ class DrumMachine(QWidget):
         self.set_timing_resolution(self.__timing_resolution_index)
 
         # initialise metronome
-        self.__metronome_on = False  # metronome on/off flag
+        self.__metronome_is_playing = False  # metronome on/off flag
         self.__metronome = Metronome(self.__tempo, self.__beats_per_bar, self.__beat_type[self.__beat_type_index])
         self.__metro_audio_channel = AudioChannel(99, self.__metronome.metronome_voice, volume=0.5, pan=0.5)
         self.__audio_engine.add_channel(self.__metro_audio_channel)
@@ -140,7 +142,6 @@ class DrumMachine(QWidget):
 
         # Transport and SequencerModule
         self.__transport = Transport()
-        self.__drum_machine_is_playing = False
         self.__sequencer_module = SequencerModule(self.__number_of_steps)
 
         # number of playable steps
@@ -339,7 +340,6 @@ class DrumMachine(QWidget):
         self.__sequencer_module.stepper.copy_button.clicked.connect(lambda: self.__copy_pattern())
         self.__sequencer_module.stepper.paste_button.clicked.connect(lambda: self.__paste_pattern())
 
-
     ########################################################################
     # Take action upon receiving pulse from app_timer
     ########################################################################
@@ -376,45 +376,49 @@ class DrumMachine(QWidget):
             else:
                 self.__drum_machine_channels_list[i].highlight_channel_number(False)
 
-
     def start_engine(self):
-        self.__drum_machine_is_playing = True
-        self.__sequencer_module.stepper.reset_stepper_indicators()
-        self.__audio_engine.play()
-        self.__app_timer.start_counter()
+        if not self.__drum_machine_is_playing:
+            self.__drum_machine_is_playing = True
+            self.__sequencer_module.stepper.reset_stepper_indicators()
+            self.__audio_engine.play()
+            self.__app_timer.start_counter()
+            self.__metronome.start_metronome()
+            self.__metronome.metronome_voice_signal.connect(self.trigger_metronome_voice)
 
     def stop_engine(self):
-        self.__drum_machine_is_playing = False
-        self.__audio_engine.stop()
-        self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
-        self.__app_timer.stop_counter()
+        if self.__drum_machine_is_playing:
+            self.__drum_machine_is_playing = False
+            self.__audio_engine.stop()
+            self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
+            self.__app_timer.stop_counter()
+            self.__metronome.stop_metronome()
+            self.__metronome.metronome_voice_signal.disconnect()
 
     # metronome methods
     def __set_metronome_volume(self, value):
         self.__metro_audio_channel.volume = value / 100
 
     def set_metronome_on_off(self, is_on):
-        if is_on:
-            print('on')
-            self.__metronome.start_metronome()
-            self.__metronome.metronome_voice_signal.connect(self.trigger_metronome_voice)
-        else:
-            print('off')
-            self.__metronome.stop_metronome()
-            self.__metronome.metronome_voice_signal.disconnect()
+        self.__metronome_is_playing = is_on
 
     def trigger_metronome_voice(self, voice):
-        self.__metro_audio_channel.voice = voice
-        self.__metro_audio_channel.trigger()
+        if self.__metronome_is_playing:
+            print('metreo voice is playing')
+            self.__metro_audio_channel.voice = voice
+            self.__metro_audio_channel.trigger()
 
     def __set_metronome_beats_per_bar(self, value):
         self.__metronome.beats_per_bar = value
+        if self.__drum_machine_is_playing:
+            self.stop_engine()
+            self.start_engine()
 
     def __set_metronome_beat_type(self, index):
-        print(f'beat type index {index}')
         self.__beat_type_index = index
-        print(f'beat type {self.__beat_type[self.__beat_type_index]}')
-        self.__metronome.meter = self.__beat_type[self.__beat_type_index]
+        self.__metronome.beat_type = self.__beat_type[self.__beat_type_index]
+        if self.__drum_machine_is_playing:
+            self.stop_engine()
+            self.start_engine()
 
     # change tempo(beats per minutes)
     def set_tempo(self, value):
@@ -432,6 +436,10 @@ class DrumMachine(QWidget):
         self.__app_timer.set_timing_resolution(bpb, beat_division)
 
     def set_timing_resolution(self, index):
+        if self.__drum_machine_is_playing:
+            self.stop_engine()
+            self.start_engine()
+
         self.__timing_resolution_index = index
         self.set_time_resolution(self.__timing_resolution_dict[
                                      self.__timing_resolution_index][0],
@@ -821,7 +829,7 @@ class DrumMachine(QWidget):
         print(f'beat div loaded')
 
         metronome_on = settings_dict['metronome_on']
-        self.__metronome_on = metronome_on
+        self.__metronome_is_playing = metronome_on
         self.set_metronome_on_off(metronome_on)
         print(f'metro on off loaded')
 
@@ -902,7 +910,7 @@ class DrumMachine(QWidget):
             self.__tempo,
             self.__beats_per_bar,
             self.__beat_type[self.__beat_type_index],
-            self.__metronome_on,
+            self.__metronome_is_playing,
             self.__pattern_manager.bank_dict,
             self.__global_pattern_bank_index,
             self.__global_pattern_index,

@@ -40,6 +40,12 @@ Profile
 ################################################################################################
     To Do
 ################################################################################################
+Metronome:
+    -   make metronome independent of time resolution
+        fix play behavior
+        - fix first metronome voice not sounding
+        - reset metronome and indicators on time resolution change
+
 Threading
     -  create separate threads for
         - application timer
@@ -62,10 +68,7 @@ Stepper Module
 -   edit steps to include up to 64 steps
     - selectable [1-16][17-32][33-48][49-64]
 
-Metronome:
-    -   make metronome independent of time resolution
-        change number of playable beats depending on beat and meter??
-        Change from a timing resolution to beat / meter ??
+
 
 Optimisations:
     - Drum Machine

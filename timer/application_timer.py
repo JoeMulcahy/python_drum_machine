@@ -11,8 +11,8 @@ class ApplicationTimer(threading.Thread):
         self.__is_counting = False
         self.__tempo = tempo
         self.__beats_per_bar = beats_per_bar
-        self.__meter = meter
-        self.__interval = 60 / self.__tempo * (self.__beats_per_bar / self.__meter)
+        self.__beat_type = meter
+        self.__interval = 60 / self.__tempo * (self.__beats_per_bar / self.__beat_type)
 
         self.__pulse_callback = None
 
@@ -75,7 +75,7 @@ class ApplicationTimer(threading.Thread):
 
     @property
     def meter(self):
-        return self.__meter
+        return self.__beat_type
 
     @counter.setter
     def counter(self, value):
@@ -91,11 +91,11 @@ class ApplicationTimer(threading.Thread):
 
     @meter.setter
     def meter(self, value):
-        self.__meter = value
+        self.__beat_type = value
 
     def set_timing_resolution(self, bpb, meter):
         self.__beats_per_bar = bpb
-        self.__meter = meter
+        self.__beat_type = meter
         self.calculate_interval()
 
     def set_tempo(self, value):

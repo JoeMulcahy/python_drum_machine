@@ -31,8 +31,8 @@ class Transport(QWidget):
         self.__bpb_spinbox.setRange(1, 12)
         self.__bpb_spinbox.setValue(4)
 
-        self.__beat_type_spinbox = CustomSpinBox([2, 4, 8, 16, 32])
-        self.__beat_type_spinbox.setValue(1)
+        self.__beat_type_spinbox = CustomSpinBox([4, 8, 16])
+        self.__beat_type_spinbox.setValue(0)
 
         self.__metronome_volume_dial = QDial()
         self.__metronome_volume_dial.setRange(0, 100)
