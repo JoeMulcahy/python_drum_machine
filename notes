@@ -44,6 +44,7 @@ Metronome:
     -   make metronome independent of time resolution
         fix play behavior
         - fix first metronome voice not sounding
+        - simplify the metronome, this app doesn't need all it's features
         - reset metronome and indicators on time resolution change
 
 Threading
