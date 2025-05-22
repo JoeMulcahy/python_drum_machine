@@ -8,7 +8,12 @@ class SimpleEqualisation:
 
     @staticmethod
     def apply_eq(data, gain_db, frequency, q=0.707, sample_rate=44100, eq_type='low_shelf'):
-        """Apply EQ directly without threading"""
+        """eq_types:
+                low_shelf,
+                high_shelf,
+                parametric
+        """
+
         worker = EQWorker()
 
         # Calculate coefficients

@@ -74,7 +74,7 @@ class Transport(QWidget):
         module_layout = QGridLayout()
         module_layout.addWidget(transport_group_box, 0, 0)
         module_layout.addWidget(tempo_group_box, 1, 0)
-        module_layout.addWidget(metronome_group_box, 2, 0)
+        # module_layout.addWidget(metronome_group_box, 2, 0)
 
         self.set_style()  # set widgets style
 

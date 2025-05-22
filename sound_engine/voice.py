@@ -14,9 +14,15 @@ class Voice:
         self.__original_sample_rate = samplerate
         self.__original_voice_length = self.__original_data.shape[0]
         self.__position = 0  # Current playback index
+        self.__end_position = 0 # end of sample
+        self.__sample_start = 0 # where to begin sample playback
+        self.__sample_end = 0   # where to end sample playback
+        self.__sample_start_scaling = 0.0   # used to determine self.__sample_start, 0.0 t0 1.0
+        self.__sample_end_scaling = 0.0  # used to determine self.__sample_end, 0.0 t0 1.0
         self.__active = True
         self._playback_thread = None  # To keep track of the playback thread
         self.__pitch_factor = 0.5  # Default pitch factor (1.0 means no change)
+        self.__stretch_factor = 0.5
 
     def update_data(self, updated_data):
         self.__data = copy.deepcopy(updated_data)
@@ -32,8 +38,8 @@ class Voice:
             return np.zeros((frames, self.__data.shape[1] if self.__data.ndim > 1 else 1),
                             dtype=np.float32)
 
-        end = self.__position + frames
-        chunk = self.__data[self.__position:end]
+        self.__end_position = self.__position + frames
+        chunk = self.__data[self.__position:self.__end_position]
 
         # Ensure chunk is 2D
         if chunk.ndim == 1:
@@ -41,7 +47,7 @@ class Voice:
         elif chunk.ndim > 2:
             chunk = chunk.squeeze(axis=1)
 
-        self.__position = end
+        self.__position = self.__end_position
 
         # Pad with zeros if end of audio
         if len(chunk) < frames:
@@ -52,23 +58,44 @@ class Voice:
 
         return chunk
 
+    def set_voice_start_end_position(self, start, end):
+        self.__sample_start_scaling = start
+        self.__sample_end_scaling = end
+
+        temp_data = self.__original_data
+        data_length = temp_data.shape[0]
+
+        self.__sample_end = int(data_length * (1.0 - end))  # calculate end sample
+        self.__sample_start = int(data_length * start)  # calculate starting sample
+
+        # Handle mono or stereo safely
+        if temp_data.ndim == 1:  # Mono
+            temp_data = temp_data[self.__sample_start:self.__sample_end]
+        elif temp_data.ndim == 2:  # Stereo (or more channels)
+            temp_data = temp_data[self.__sample_start:self.__sample_end, :]
+        else:
+            raise ValueError("Unsupported audio data shape: expected 1D or 2D array.")
+
+        self.__data = temp_data
+        self.reset_position()  # Important to reset playback!
+
     ############################################################################
     ## Alter pitch of voice using resampling
     ############################################################################
-    def set_pitch(self, pitch_factor):
+    def set_pitch(self):
         """Alter the pitch by adjusting the pitch factor."""
-        self.__pitch_factor = pitch_factor * 2
-        self.__resample_audio()
+        ratio = self.__pitch_factor * 2
+        self.__resample_audio(ratio)
 
-    def __resample_audio(self):
-        new_samplerate = self.__original_sample_rate * (1 / self.__pitch_factor)
+    def __resample_audio(self, ratio):
+        new_samplerate = self.__original_sample_rate * (1 / ratio)
         if new_samplerate <= self.__original_sample_rate / 4:
             new_samplerate = self.__original_sample_rate / 4
 
         if new_samplerate >= self.__original_sample_rate * 4:
             new_samplerate = self.__original_sample_rate * 4
 
-        print(f"Resampling audio from {self.__samplerate}Hz to {new_samplerate}Hz.")
+        print(f"Resampling audio from {self.__original_sample_rate}Hz to {new_samplerate}Hz.")
         # Check if self.__data is a numpy array
         if not isinstance(self.__data, np.ndarray):
             raise TypeError(f"Expected self.__data to be a numpy array, but got {type(self.__data)}")
@@ -83,12 +110,26 @@ class Voice:
 
         try:
             # Perform the resampling using librosa
-            self.__data_manipulated = librosa.resample(self.__data, orig_sr=self.__samplerate, target_sr=new_samplerate)
-            self.__samplerate = new_samplerate  # Update the samplerate
+            self.__data_manipulated = librosa.resample(
+                self.__original_data, orig_sr=self.__original_sample_rate, target_sr=new_samplerate
+            )
+            # self.__samplerate = new_samplerate  # Update the samplerate
             self.__data = self.__data_manipulated
         except Exception as e:
             print(f"Error during resampling: {e}")
             raise
+
+    ############################################################################
+    ##  Set voice start and end positions
+    ############################################################################
+    def set_voice_start_and_end_position(self, start, end):
+        if start < end:
+            print(f'start:{start} end:{end}')
+            total_samples = self.__data.shape[0]
+            self.__position = int(start * total_samples)
+            self.__end_position = int(total_samples - (total_samples * end))
+        else:
+            print('start cant be greater than end')
 
     ############################################################################
     ## Alter voice duration
@@ -111,17 +152,18 @@ class Voice:
         self.__data = self.__data_manipulated
         self.reset_position()  # Important to reset playback!
 
-    def set_time_stretch(self, duration_scale):
-        duration_scale = duration_scale * 3  # (optional: clip first)
+    def set_time_stretch(self, stretch_scale):
+        self.__stretch_factor = stretch_scale
+        stretch_scale = stretch_scale * 3  # (optional: clip first)
 
-        if duration_scale <= 0:
+        if stretch_scale <= 0:
             self.__data = np.zeros_like(self.__original_data)
             return
 
         temp_data = self.__original_data.copy()
         current_duration_samples = temp_data.shape[0]
 
-        desired_duration_seconds = duration_scale * (current_duration_samples / self.__samplerate)
+        desired_duration_seconds = stretch_scale * (current_duration_samples / self.__samplerate)
         desired_num_samples = int(desired_duration_seconds * self.__samplerate)
 
         if desired_num_samples <= 0:
@@ -153,7 +195,6 @@ class Voice:
 
         self._playback_thread = threading.Thread(target=self.__play_audio(is_pre))
         self._playback_thread.start()
-        print(f"Started playback of: sound on a new thread.")
 
     def __play_audio(self, is_pre):
         try:
@@ -162,7 +203,7 @@ class Voice:
             else:
                 sd.play(self.__data_manipulated, self.__samplerate)
 
-            # sd.wait()
+            sd.wait()
         except Exception as e:
             print(f"Error during playback of sound: {e}")
         finally:
@@ -170,7 +211,7 @@ class Voice:
 
     def reset_position(self):
         """Reset the playback position to the beginning of the sound."""
-        self.__position = 0
+        self.__position = self.sample_start
         self.__active = True  # Make sure the voice is active when it is reset
 
     @property
@@ -192,3 +233,73 @@ class Voice:
     def reset_voice(self):
         self.__data = self.__original_data
         self.__samplerate = self.__original_sample_rate
+
+    @property
+    def original_voice_data(self):
+        return self.__original_data
+
+    @property
+    def voice_data(self):
+        return self.__data
+
+    @voice_data.setter
+    def voice_data(self, value):
+        self.__data = value
+
+    @property
+    def position(self):
+        return self.__position
+
+    @property
+    def end_position(self):
+        return self.__end_position
+
+    @property
+    def sample_start(self):
+        return self.__sample_start
+
+    @sample_start.setter
+    def sample_start(self, value):
+        self.__sample_start = value
+
+    @property
+    def sample_end(self):
+        return self.__sample_end
+
+    @sample_end.setter
+    def sample_end(self, value):
+        self.__sample_end = value
+
+    @property
+    def sample_start_scaling(self):
+        return self.__sample_start_scaling
+
+    @sample_start_scaling.setter
+    def sample_start_scaling(self, value):
+        self.__sample_start_scaling = value
+
+    @property
+    def sample_end_scaling(self):
+        return self.__sample_end_scaling
+
+    @sample_end_scaling.setter
+    def sample_end_scaling(self, value):
+        self.__sample_end_scaling = value
+
+    @property
+    def pitch_factor(self):
+        return self.__pitch_factor
+
+    @pitch_factor.setter
+    def pitch_factor(self, value):
+        self.__pitch_factor = value
+        self.set_pitch()
+
+    @property
+    def stretch_factor(self):
+        return self.__stretch_factor
+
+    @stretch_factor.setter
+    def stretch_factor(self, value):
+        self.__stretch_factor = value
+        self.set_time_stretch(value)

@@ -1,9 +1,8 @@
 # main_window.py
-
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import *
 
 from drum_machine import DrumMachine
-from signals import DrumMachineSignals
 
 
 class MainWindow(QMainWindow):
@@ -17,6 +16,7 @@ class MainWindow(QMainWindow):
         self.central_widget.setLayout(self.app_layout)
         # self.setFixedSize(1920, 1080)
         self.setCentralWidget(self.central_widget)
+
 
         # Connect the signal from DrumMachine to the slot in MainWindow
         self.drum_machine.restart_requested_signal.connect(self._reinitialize_drum_machine)

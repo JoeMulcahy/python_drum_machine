@@ -101,7 +101,7 @@ class DrumMachine(QWidget):
         # initialise metronome
         self.__metronome_is_playing = False  # metronome on/off flag
         self.__metronome = Metronome(self.__tempo, self.__beats_per_bar, self.__beat_type[self.__beat_type_index])
-        self.__metro_audio_channel = AudioChannel(99, self.__metronome.metronome_voice, volume=0.5, pan=0.5)
+        self.__metro_audio_channel = AudioChannel(99, self.__metronome.metronome_voice, volume=0.5, pan_scaled=0.5)
         self.__audio_engine.add_channel(self.__metro_audio_channel)
 
         # initialise pattern manager
@@ -135,7 +135,7 @@ class DrumMachine(QWidget):
             filepath = self.__audio_sample_dict[i][0]
             filename = self.__audio_sample_dict[i][0].name
             audio_voice = AudioVoice(filepath)  # set sample audio voice
-            audio_channel = AudioChannel(i, audio_voice, volume=0.5, pan=0.5)
+            audio_channel = AudioChannel(i, audio_voice, volume=0.5, pan_scaled=0.5)
             dm_channel.channel_name_text.setText(filename[:filename.find('.')])  # remove extension from file name
             self.__audio_channels_list.append(audio_channel)
             self.__audio_engine.add_channel(audio_channel)
@@ -269,13 +269,13 @@ class DrumMachine(QWidget):
         self.__transport.btn_play.clicked.connect(lambda: self.start_engine())
         self.__transport.btn_stop.clicked.connect(lambda: self.stop_engine())
         self.__transport.tempo_spinbox.valueChanged.connect(lambda value: self.set_tempo(value))
-        self.__transport.metronome_checkbox.clicked.connect(
-            lambda checked: self.set_metronome_on_off(checked)
-        )
-        self.__transport.metronome_volume_dial.valueChanged.connect(lambda val: self.__set_metronome_volume(val))
-        self.__transport.beat_per_bar_spinbox.valueChanged.connect(
-            lambda value: self.__set_metronome_beats_per_bar(value))
-        self.__transport.meter_spinbox.valueChanged.connect(self.__set_metronome_beat_type)
+        # self.__transport.metronome_checkbox.clicked.connect(
+        #     lambda checked: self.set_metronome_on_off(checked)
+        # )
+        # self.__transport.metronome_volume_dial.valueChanged.connect(lambda val: self.__set_metronome_volume(val))
+        # self.__transport.beat_per_bar_spinbox.valueChanged.connect(
+        #     lambda value: self.__set_metronome_beats_per_bar(value))
+        # self.__transport.meter_spinbox.valueChanged.connect(self.__set_metronome_beat_type)
 
         #####################################################################################################
         ########################## Listeners for pattern selection ################################
@@ -584,19 +584,21 @@ class DrumMachine(QWidget):
         self.__audio_channels_list[index].volume = value / 100
 
     def __set_channel_pan(self, index, value):
-        self.__audio_channels_list[index].pan = value / 100
+        value = max(0.01, min(value / 100, 1.0))  # ensure value can't be 0
+        self.__audio_channels_list[index].pan_scaled = value
 
     def __set_voice_length(self, index, value):
         self.__audio_channels_list[index].voice.set_voice_length(value / 100)
 
     def __set_sample_pitch(self, index, value):
-        self.__audio_channels_list[index].voice.set_pitch(value / 100)
+        value = max(0.01, min(value / 100, 1.0))  # ensure value can't be 0
+        self.__audio_channels_list[index].voice.pitch_factor = value
 
     def __set_time_stretch(self, index, value):
         self.__audio_channels_list[index].voice.set_time_stretch(value / 100)
 
     def __set_sample_tone(self, index, value):
-        self.__audio_channels_list[index].set_hsf_gain(value)
+        self.__audio_channels_list[index].high_shelf_eq_gain = value
 
     def __reset_channel(self, index):
         self.__audio_channels_list[index].voice.reset_voice()

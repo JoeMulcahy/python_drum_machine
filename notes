@@ -39,32 +39,24 @@ Profile
 ################################################################################################
     To Do
 ################################################################################################
-Metronome:
-    -   make metronome independent of time resolution
-    -   any changes to time signature, timing module controls will reset metronome and stepper
-
-Threading
-    -  create separate threads for
-        - application timer
-        - sound engine
-        - sound engine filter calculations
-        - updating files in channels
-        - channel dial updates
-        - metronome
-        - on pulse()
-        - timing changes
-GUI:
-    - move all styling to a separate py file
-    -   have a slight spacing every four or third step depending on time resolution
-
-Master Controls:
--   debug load and save profile
 
 Stepper Module
 -   grey out unused steps
 -   edit steps to include up to 64 steps
     - selectable [1-16][17-32][33-48][49-64]
 
+Misc
+    - implement midi
+    - threading for file loading and time stretching
+    - fix gui resizing bug
+    - fix pitch, length and stretch processing order
+
+GUI:
+    - move all styling to a separate py file
+    -   have a slight spacing every four or third step depending on time resolution
+
+Master Controls:
+-   debug load and save profile
 
 
 Optimisations:
