@@ -2,8 +2,7 @@
     Known Bugs and behaviours
 ################################################################################################
 Metronome
--   Adjusting meter crashes application
--   time signature does not correlate with metronome
+- metronome and application timer not in perfect sync
 
 Stepper
 -   play step indicator gets stuck on step buttons when switch channels
@@ -42,10 +41,7 @@ Profile
 ################################################################################################
 Metronome:
     -   make metronome independent of time resolution
-        fix play behavior
-        - fix first metronome voice not sounding
-        - simplify the metronome, this app doesn't need all it's features
-        - reset metronome and indicators on time resolution change
+    -   any changes to time signature, timing module controls will reset metronome and stepper
 
 Threading
     -  create separate threads for

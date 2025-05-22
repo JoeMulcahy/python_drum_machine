@@ -8,7 +8,6 @@ from PyQt6.QtWidgets import (
 )
 
 
-
 class DrumMachineChannel(QWidget):
     def __init__(self, channel_index):
         super().__init__()
@@ -26,7 +25,7 @@ class DrumMachineChannel(QWidget):
 
         # open file button
         self.__btn_open_file = QPushButton()
-        self.__btn_open_file.setIcon(QIcon("images/folder.png"))
+        self.__btn_open_file.setIcon(QIcon("../../images/folder.png"))
 
         # combobox with audio file names
         self.__sound_selection_combo_box = QComboBox()

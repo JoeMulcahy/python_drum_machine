@@ -6,24 +6,23 @@ from pathlib import Path
 from tkinter import filedialog
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QWidget, QGridLayout, QMessageBox, QSizePolicy
 
 import settings
-from drum_machine_channel_gui import DrumMachineChannel
-from global_controls.global_controls import MasterControls
-from signals import DrumMachineSignals
+from gui.drum_machine_channel.drum_machine_channel_gui import DrumMachineChannel
+from gui.global_controls.global_controls_gui import MasterControls
+from gui.sequencer_module.sequencer_module import SequencerModule
+from gui.transport.transport_gui import Transport
 from metronome.metronome import Metronome
 from pattern.pattern_manager import PatternManager
 from persistence.profile import Profile
-from sequencer_module.sequencer_module import SequencerModule
+
 from sound_engine.audio_channel import AudioChannel
 from sound_engine.audio_sample import AudioVoice
 from sound_engine.sound_engine import SoundEngine
 from timer.application_timer import ApplicationTimer
-from transport.transport_gui import Transport
 
-from PyQt6.QtCore import pyqtSignal, QObject
+from PyQt6.QtCore import pyqtSignal
 
 
 def create_timing_resolution_dict():

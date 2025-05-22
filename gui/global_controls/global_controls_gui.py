@@ -52,8 +52,6 @@ class MasterControls(QWidget):
         self.setLayout(main_layout)
 
     def set_style(self):
-        # size_policy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-
         button_style = "QPushButton { font-size: 10px; }"
         for btn in [self.__btn_load_profile, self.__btn_save_profile, self.__btn_unsolo_all, self.__btn_unmute_all,
                     self.__btn_reset_all]:

@@ -16,18 +16,15 @@ class MetronomeWorker(QObject):
         self.beat_type = beat_type
         self.counter = 0
         self.is_running = True
-        self.thread = None
 
     @pyqtSlot()
     def run(self):
-        self.thread = QThread()
         self.pulse_counter = 0  # Counter for the actual beats
-        self.thread.start()
         while self.is_running:
-            interval_per_beat = int((60 / self.worker_tempo) * 1000 / (self.beat_type / 4))
-            self.thread.msleep(interval_per_beat)
-            self.pulse_counter += 1
             self.pulse_signal.emit(self.pulse_counter)
+            interval_per_beat = int((60 / self.worker_tempo) * 1000 / (self.beat_type / 4))
+            QThread.msleep(interval_per_beat)
+            self.pulse_counter += 1
 
     def stop(self):
         self.is_running = False
