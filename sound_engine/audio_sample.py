@@ -1,6 +1,6 @@
 import soundfile as sf
 
-from sound_engine.Voice import Voice
+from sound_engine.voice import Voice
 
 
 class AudioVoice(Voice):

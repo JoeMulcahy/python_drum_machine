@@ -10,18 +10,18 @@ from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QWidget, QGridLayout, QMessageBox, QSizePolicy
 
 import settings
-from drum_machine_channel import DrumMachineChannel
+from drum_machine_channel_gui import DrumMachineChannel
 from global_controls.global_controls import MasterControls
-from gui_refresh_signal import DrumMachineSignals
+from signals import DrumMachineSignals
 from metronome.metronome import Metronome
-from pattern.PatternManger import PatternManager
+from pattern.pattern_manager import PatternManager
 from persistence.profile import Profile
 from sequencer_module.sequencer_module import SequencerModule
-from sound_engine.AudioChannel import AudioChannel
-from sound_engine.AudioVoice import AudioVoice
-from sound_engine.SoundEngine import SoundEngine
+from sound_engine.audio_channel import AudioChannel
+from sound_engine.audio_sample import AudioVoice
+from sound_engine.sound_engine import SoundEngine
 from timer.application_timer import ApplicationTimer
-from transport.transport import Transport
+from transport.transport_gui import Transport
 
 from PyQt6.QtCore import pyqtSignal, QObject
 
@@ -44,11 +44,14 @@ def create_timing_resolution_dict():
 
 
 class DrumMachine(QWidget):
-    restart_requested = pyqtSignal()
+    restart_requested_signal = pyqtSignal()     # used to signal a restart of the application
+    stepper_indicator_lights_signal = pyqtSignal(int)   # used to update the indicator light in the sequencer
+    channel_number_highlight_signal = pyqtSignal(int, bool)  # used to update the blinking of the channel number in
+    # dm channel
 
     def __init__(self):
         super().__init__()
-        self.signals = DrumMachineSignals()
+
         self.__size_policy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
         self.__current_profile = None
@@ -173,7 +176,11 @@ class DrumMachine(QWidget):
         main_layout.addLayout(drum_machine_layout, 0, 0)
         self.setLayout(main_layout)
 
-        # self.__metronome.metronome_voice_signal.connect(lambda voice: self.trigger_metronome_voice(voice))
+        # update step indicator lights upon receiving a signal pulse
+        # self.refresh_stepper_indicator_lights_signal.pulse_signal.connect(self.__sequencer_module.stepper.stepper_indicators_on_play)
+        self.stepper_indicator_lights_signal.connect(
+            self.__sequencer_module.stepper.stepper_indicators_on_play)
+        self.channel_number_highlight_signal.connect(lambda i, is_on: self.__update_channel_number_blink(i, is_on))
 
         #####################################################################################################
         ########################## Listeners for drum machine channel module ################################
@@ -344,9 +351,7 @@ class DrumMachine(QWidget):
     # Take action upon receiving pulse from app_timer
     ########################################################################
     def on_pulse(self, pulse_counter):
-        # self.__sequencer_module.stepper.stepper_indicators_on_play(pulse_counter) ->
-        #   has being moved to main_window
-        self.signals.pulse_signal.emit(pulse_counter)  # SAFE
+        self.stepper_indicator_lights_signal.emit(pulse_counter)  # emit a signal everytime
         self.trigger_audio(pulse_counter)
 
     def trigger_audio(self, count):
@@ -368,13 +373,16 @@ class DrumMachine(QWidget):
 
         for i in range(len(self.__audio_channels_list)):
             if pattern_to_play[i] == 1:
-                self.__drum_machine_channels_list[i].highlight_channel_number(True)
+                self.channel_number_highlight_signal.emit(i, True)
                 if self.__humanise_timing > 0.0 or self.__flam_timing > 0.0 or self.__swing_timing > 0.0:
                     threading.Timer(delay, self.__audio_channels_list[i].trigger).start()
                 else:
                     self.__audio_channels_list[i].trigger()
             else:
-                self.__drum_machine_channels_list[i].highlight_channel_number(False)
+                self.channel_number_highlight_signal.emit(i, False)
+
+    def __update_channel_number_blink(self, i, is_on):
+        self.__drum_machine_channels_list[i].highlight_channel_number(is_on)
 
     def start_engine(self):
         if not self.__drum_machine_is_playing:
@@ -749,7 +757,7 @@ class DrumMachine(QWidget):
         )
 
         if reply == QMessageBox.StandardButton.Yes:
-            self.restart_requested.emit()  # Emit the signal
+            self.restart_requested_signal.emit()  # Emit the signal
         else:
             print("User canceled restart.")
 

@@ -1,9 +1,9 @@
 import numpy as np
 
-from sound_engine.synth_waves.SynthWaveform import SynthWaveform
+from sound_engine.synth_waves.base_waveform import BaseWaveform
 
 
-class NoiseWave(SynthWaveform):
+class NoiseWave(BaseWaveform):
     def __init__(self, volume, duration, samplerate=44100):
         num_samples = int(samplerate * duration)
         wave = volume * (2 * np.random.rand(num_samples) - 1)

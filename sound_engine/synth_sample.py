@@ -1,5 +1,5 @@
 from app_enums.wave_form_enum import WaveForm
-from sound_engine.Voice import Voice
+from sound_engine.voice import Voice
 from sound_engine.synth_waves import NoiseWave, SinWave, SawtoothWave, SquareWave, PulseWave, TriangleWave
 import copy
 

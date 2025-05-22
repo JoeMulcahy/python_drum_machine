@@ -3,7 +3,7 @@ import threading
 import numpy as np
 import sounddevice as sd
 
-from sound_engine import AudioChannel
+from sound_engine.audio_channel import AudioChannel
 
 
 class SoundEngine:

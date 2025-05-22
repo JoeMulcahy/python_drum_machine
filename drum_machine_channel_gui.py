@@ -8,9 +8,6 @@ from PyQt6.QtWidgets import (
 )
 
 
-# TODO create a name field that allows the user to name a channel, default name is name of audio file selected
-# TODO switch between .wav and digital waveform mode. Will require 2 channel types and channel super class
-
 
 class DrumMachineChannel(QWidget):
     def __init__(self, channel_index):

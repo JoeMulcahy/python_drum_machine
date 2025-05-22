@@ -3,13 +3,13 @@ from scipy.signal import sosfiltfilt, butter
 import math
 from scipy.signal import sosfiltfilt, sosfilt
 
-from sound_engine import Voice
+from sound_engine import voice
 
 
 class AudioChannel:
-    def __init__(self, channel_id, voice: Voice, volume=1.0, pan=0.0):
+    def __init__(self, channel_id, sample, volume=1.0, pan=0.0):
         self.__id = channel_id
-        self.__voice = voice
+        self.__voice = sample
         self.__volume = volume  # 0.0 to 1.0
         self.__pan = pan  # -1.0 (L) to 1.0 (R)
         self.is_playing = False  # Add is_playing attribute

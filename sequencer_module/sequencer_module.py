@@ -1,10 +1,10 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout, QGroupBox, QVBoxLayout
 
-from sequencer_module.components.playable_steps import PlayableSteps
-from sequencer_module.components.pattern_select import PatternSelect
-from sequencer_module.components.stepper import Stepper
-from sequencer_module.components.beat_timing import TimingSelector
+from sequencer_module.components.playable_steps_gui import PlayableSteps
+from sequencer_module.components.pattern_select_gui import PatternSelect
+from sequencer_module.components.stepper_gui import Stepper
+from sequencer_module.components.beat_timing_gui import TimingSelector
 
 
 class SequencerModule(QWidget):

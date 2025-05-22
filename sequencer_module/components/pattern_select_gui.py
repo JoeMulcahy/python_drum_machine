@@ -43,13 +43,10 @@ class PatternSelect(QWidget):
         self.__bank_buttons_list[0].setStyleSheet(self.toggle_on_color_bank)
 
         self.__btn_copy = QPushButton('Copy')
-        # self.__btn_copy.setFixedSize(40, 30)
         self.__btn_paste = QPushButton('Paste')
-        # self.__btn_paste.setFixedSize(40, 30)
 
         self.pattern_select_layout.addWidget(self.__btn_copy, 3, 0, 1, 2, Qt.AlignmentFlag.AlignCenter)
         self.pattern_select_layout.addWidget(self.__btn_paste, 3, 2, 1, 2, Qt.AlignmentFlag.AlignCenter)
-
 
         # Listener to set selected pattern button index and to highlight selected button
         for btn in self.__buttons_list:
@@ -124,5 +121,3 @@ class PatternSelect(QWidget):
             self.__bank_buttons_list[x].setStyleSheet(self.default_color_bank)
             if self.__selected_bank_index == index:
                 self.__bank_buttons_list[index].setStyleSheet(self.toggle_on_color_bank)
-
-

@@ -2,11 +2,12 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QWidget, QGridLayout, QPushButton, QGroupBox, QLabel, QComboBox, QSpinBox, QSizePolicy
 
+from signals import DrumMachineSignals
+
 
 class Stepper(QWidget):
     def __init__(self, stepper_id, number_of_steps):
         super().__init__()
-
         self.__size_policy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
         self.__stepper_id = stepper_id

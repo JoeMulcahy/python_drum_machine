@@ -1,7 +1,7 @@
 from PyQt6.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
 
 from app_enums.wave_form_enum import WaveForm
-from sound_engine.SynthVoice import SynthVoice
+from sound_engine.synth_sample import SynthVoice
 
 
 class MetronomeWorker(QObject):
