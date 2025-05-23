@@ -1,13 +1,13 @@
 ################################################################################################
     Known Bugs and behaviours
 ################################################################################################
-Metronome
-- metronome and application timer not in perfect sync
+
 
 Stepper
 -   play step indicator gets stuck on step buttons when switch channels
 -   indicator lights in stepper remain red when changing number of playable steps
         while the drum machine is running
+_   invert bug: inverting a copied pattern will apply itself to the source channel
 
 GUI
 -   Gui elements keep resizing

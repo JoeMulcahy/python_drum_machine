@@ -12,7 +12,7 @@ import settings
 from gui.drum_machine_channel.drum_machine_channel_gui import DrumMachineChannel
 from gui.global_controls.global_controls_gui import MasterControls
 from gui.sequencer_module.sequencer_module import SequencerModule
-from gui.transport.transport_gui import Transport
+from gui.transport.transport_tempo_gui import Transport
 from metronome.metronome import Metronome
 from pattern.pattern_manager import PatternManager
 from persistence.profile import Profile
