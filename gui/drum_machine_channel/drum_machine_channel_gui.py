@@ -168,16 +168,12 @@ class DrumMachineChannel(QWidget):
         self.__lbl_tone_text.mouseDoubleClickEvent = lambda event: self.__dial_tone.setValue(50)
 
     def set_styling(self):
-        # layout size policy
-        fixed_size_policy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        horizontal_stretch_policy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-
         # Set size for buttons in channel
         for btn in [self.__btn_solo, self.__btn_mute, self.__btn_reset, self.__btn_open_file,
                     self.__btn_post_preview_sound, self.__btn_preview_sound, self.__select_channel_button]:
             btn.setFixedSize(25, 25)
             btn.setStyleSheet(self.__default_button_color)
-            btn.setSizePolicy(fixed_size_policy)
+            btn.setSizePolicy(settings.FIXED_SIZE_POLICY)
 
             if btn == self.__btn_reset:
                 btn.setStyleSheet(self.__reset_button_color)
@@ -188,19 +184,19 @@ class DrumMachineChannel(QWidget):
         # label style
         label_style = "QLabel { font-size: 8px; font-weight: bold; color: #aaaaaa; }"
         for label in self.findChildren(QWidget):
-            label.setSizePolicy(fixed_size_policy)
+            label.setSizePolicy(settings.FIXED_SIZE_POLICY)
             if isinstance(label, QLabel):
                 label.setStyleSheet(label_style)
                 label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # channel number label
         self.__lbl_channel_number.setStyleSheet(self.__channel_number_style)
-        self.__lbl_channel_number.setSizePolicy(fixed_size_policy)
+        self.__lbl_channel_number.setSizePolicy(settings.FIXED_SIZE_POLICY)
 
         # LineEdit style
         textbox_style = "QLineEdit { font-size: 10px; color: #aaaaaa; font-weight: bold; }"
         self.__name_textbox.setStyleSheet(textbox_style)
-        self.__name_textbox.setSizePolicy(horizontal_stretch_policy)
+        self.__name_textbox.setSizePolicy(settings.HORIZONTAL_STRETCH_POLICY)
 
         # Set default dial values
         for dial in [self.__dial_pitch, self.__dial_pan, self.__dial_volume, self.__dial_length, self.__dial_duration,
@@ -211,7 +207,7 @@ class DrumMachineChannel(QWidget):
             dial.setFixedSize(35, 35)
             dial.setNotchesVisible(True)
             dial.setWrapping(False)
-            dial.setSizePolicy(fixed_size_policy)
+            dial.setSizePolicy(settings.FIXED_SIZE_POLICY)
 
             if dial == self.__dial_length:
                 dial.setValue(100)

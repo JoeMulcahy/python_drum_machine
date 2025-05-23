@@ -1,9 +1,24 @@
 # Directories
+from PyQt6.QtWidgets import QSizePolicy
+
 ROOT_DIRECTORY = "C:\\Users\\josep\\Desktop"
 PROFILE_DIRECTORY = "C:\\Users\\josep\\Desktop\\Step Seq\\profiles"
 IMAGES_DIRECTORY = "C:\\Users\\josep\\Desktop\\Step Seq\\images"
 
 # Styling
+
+FIXED_SIZE_POLICY = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+EXPAND_SIZE_POLICY = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+HORIZONTAL_STRETCH_POLICY = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+VERTICAL_STRETCH_POLICY = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
+
+# Module styling - styling common to all modules
+TEXT_STYLE_1 = """
+QLabel { 
+    font-size: 12px; 
+    font-weight: bold
+    }
+"""
 
 # Drum Machine Channel Styling
 CHANNEL_DEFAULT_STYLE = """ 
@@ -64,3 +79,29 @@ QLabel {
     color: #cc2216; 
     }
 """
+
+# Tempo module styling
+TEMPO_SPINBOX_STYLE = """
+QSpinBox {
+    font-size: 24px;       
+    color: #ff5733;        
+    }
+"""
+
+# Metronome module styling
+BEATS_PER_BAR_SPINBOX_STYLING = """
+QAbstractSpinBox::up-button, QAbstractSpinBox::down-button {
+    width: 0;
+    height: 0;
+    border: none;
+    }
+"""
+
+BEAT_TYPE_SPINBOX_STYLING = """
+QAbstractSpinBox::up-button, QAbstractSpinBox::down-button {
+    width: 0;
+    height: 0;
+    border: none;
+    }
+"""
+
