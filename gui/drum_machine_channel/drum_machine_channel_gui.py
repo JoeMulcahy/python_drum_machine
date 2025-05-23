@@ -40,12 +40,12 @@ class DrumMachineChannel(QWidget):
         self.__lbl_preview = QLabel('Preview')
 
         # labels for channel control amounts
-        self.__lbl_volume_text = QLabel("50%")
-        self.__lbl_pan_text = QLabel("50%")
-        self.__lbl_pitch_text = QLabel("50%")
-        self.__lbl_length_text = QLabel("50%")
-        self.__lbl_duration_text = QLabel('50%')
-        self.__lbl_tone_text = QLabel('50%')
+        self.__lbl_volume_text = QLabel("50")
+        self.__lbl_pan_text = QLabel("50")
+        self.__lbl_pitch_text = QLabel("50")
+        self.__lbl_length_text = QLabel("100%")
+        self.__lbl_duration_text = QLabel('50')
+        self.__lbl_tone_text = QLabel('50')
 
         # channel controls
         self.__dial_volume = QDial()
@@ -147,17 +147,17 @@ class DrumMachineChannel(QWidget):
 
         # Listeners - change labels to match values of dials
         self.__dial_volume.valueChanged \
-            .connect(lambda: self.__lbl_volume_text.setText(str(self.__dial_volume.value()) + "%"))
+            .connect(lambda: self.__lbl_volume_text.setText(str(self.__dial_volume.value())))
         self.__dial_pan.valueChanged \
-            .connect(lambda: self.__lbl_pan_text.setText(str(self.__dial_pan.value()) + "%"))
+            .connect(lambda: self.__lbl_pan_text.setText(str(self.__dial_pan.value())))
         self.__dial_pitch.valueChanged \
-            .connect(lambda: self.__lbl_pitch_text.setText(str(self.__dial_pitch.value()) + "%"))
+            .connect(lambda: self.__lbl_pitch_text.setText(str(self.__dial_pitch.value())))
         self.__dial_length.valueChanged \
             .connect(lambda: self.__lbl_length_text.setText(str(self.__dial_length.value()) + "%"))
         self.__dial_duration.valueChanged \
-            .connect(lambda: self.__lbl_duration_text.setText(str(self.__dial_duration.value()) + "%"))
+            .connect(lambda: self.__lbl_duration_text.setText(str(self.__dial_duration.value())))
         self.__dial_tone.valueChanged \
-            .connect(lambda: self.__lbl_tone_text.setText(str(self.__dial_tone.value()) + "%"))
+            .connect(lambda: self.__lbl_tone_text.setText(str(self.__dial_tone.value())))
 
         # Listeners - Reset dial value on lbl_text double-click
         self.__lbl_volume_text.mouseDoubleClickEvent = lambda event: self.__dial_volume.setValue(50)

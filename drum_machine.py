@@ -13,8 +13,8 @@ import settings
 from gui.drum_machine_channel.drum_machine_channel_gui import DrumMachineChannel
 from gui.global_controls.global_controls_gui import MasterControls
 from gui.sequencer_module.sequencer_module import SequencerModule
-from gui.transport.tempo_gui import TempoGui
-from gui.transport.transport_gui import TransportGui
+from gui.controls.tempo_gui import TempoGui
+from gui.controls.transport_gui import TransportGui
 from metronome.metronome import Metronome
 from pattern.pattern_manager import PatternManager
 from persistence.profile import Profile
@@ -44,6 +44,7 @@ def create_timing_resolution_dict():
 class DrumMachine(QWidget):
     restart_requested_signal = pyqtSignal()     # used to signal a restart of the application
     stepper_indicator_lights_signal = pyqtSignal(int)   # used to update the indicator light in the sequencer
+    stepper_indicator_lights_reset_signal = pyqtSignal()
     channel_number_highlight_signal = pyqtSignal(int, bool)  # used to update the blinking of the channel number
 
     def __init__(self):
@@ -157,7 +158,7 @@ class DrumMachine(QWidget):
         # create default profile
         self.__create_profile()
 
-        # add transport and sequencerModule to layout controls layout
+        # add controls and sequencerModule to layout controls layout
         controls_layout = QGridLayout()
         controls_layout.setSpacing(1)
         controls_layout.setContentsMargins(5, 5, 5, 5)
@@ -172,7 +173,7 @@ class DrumMachine(QWidget):
 
         # add channel and control layouts to drum_machine_layout layout
         drum_machine_layout.addLayout(channels_layout, 0, 0, 2, 1)  # drum machine channels
-        drum_machine_layout.addLayout(controls_layout, 2, 0, 3, 1)  # transport, sequencer module
+        drum_machine_layout.addLayout(controls_layout, 2, 0, 3, 1)  # controls, sequencer module
 
         # add drum machine layout to main layout
         main_layout = QGridLayout()
@@ -183,6 +184,7 @@ class DrumMachine(QWidget):
         self.stepper_indicator_lights_signal.connect(
             self.__sequencer_module.stepper.stepper_indicators_on_play)
         self.channel_number_highlight_signal.connect(lambda i, is_on: self.__update_channel_number_blink(i, is_on))
+        self.stepper_indicator_lights_reset_signal.connect(self.__sequencer_module.stepper.reset_stepper_indicators)
 
         #####################################################################################################
         ########################## Listeners for drum machine channel module ################################
@@ -265,7 +267,7 @@ class DrumMachine(QWidget):
             btn.released.connect(lambda dmc_i=dmc_index: self.__open_files_in_directory(dmc_i))
 
         #####################################################################################################
-        ########################## Listeners for Transport module ###########################################
+        ########################## Listeners for DM Controls ###########################################
         #####################################################################################################
 
         # Listeners for Transport module
@@ -397,12 +399,14 @@ class DrumMachine(QWidget):
 
     def stop_engine(self):
         if self.__drum_machine_is_playing:
+            self.__app_timer.stop_counter()
             self.__drum_machine_is_playing = False
             self.__audio_engine.stop()
             self.__sequencer_module.stepper.current_stepper_buttons_selected(self.__current_pattern)
-            self.__app_timer.stop_counter()
             self.__metronome.stop_metronome()
             self.__metronome.metronome_voice_signal.disconnect()
+            self.stepper_indicator_lights_reset_signal.emit()
+
 
     # metronome methods
     def __set_metronome_volume(self, value):
@@ -437,9 +441,10 @@ class DrumMachine(QWidget):
 
     # playable steps
     def __set_playable_steps(self, value):
-        self.__sequencer_module.stepper.reset_stepper_indicators()
         self.__playable_steps = value
         self.__sequencer_module.stepper.number_of_playable_steps = value
+        self.__sequencer_module.stepper.reset_stepper_indicators()
+        self.stepper_indicator_lights_reset_signal.emit()
 
     # timing module methods
     def set_time_resolution(self, bpb, beat_division):
@@ -537,7 +542,7 @@ class DrumMachine(QWidget):
         self.__update_current_pattern()
 
     def __invert_pattern(self):
-        temp_pattern = PatternManager.invert_pattern(self.__current_pattern)
+        temp_pattern = PatternManager.invert_pattern(self.__current_pattern.copy())
         self.__pattern_manager.bank_dict[self.__global_pattern_bank_index][self.__global_pattern_index][
             self.__channel_pattern_index] = temp_pattern
         self.__update_current_pattern()
