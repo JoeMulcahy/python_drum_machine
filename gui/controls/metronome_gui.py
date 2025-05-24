@@ -49,7 +49,7 @@ class MetronomeGui(QWidget):
         self.setLayout(module_layout)
 
     def set_style(self):
-        self.__metronome_label.setStyleSheet(settings.TEXT_STYLE_1)
+        self.__metronome_label.setStyleSheet(settings.LABEL_STYLE_1)
 
         self.__metronome_volume_dial.setFixedSize(50, 50)
         self.__metronome_checkbox.setFixedSize(70, 70)

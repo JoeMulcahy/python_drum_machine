@@ -1,8 +1,9 @@
 from PyQt6.QtWidgets import QWidget, QGridLayout, QGroupBox, QLabel, QDial
 
-
 #   TimingSelector
 #   - Selects a timing value which represents the number of beats in a bar
+import settings
+
 
 class TimingSelector(QWidget):
     def __init__(self):
@@ -31,6 +32,7 @@ class TimingSelector(QWidget):
 
         for dial in [self.__flam_dial, self.__swing_dial, self.__humanise_dial]:
             dial.setFixedSize(35, 35)
+            dial.setSizePolicy(settings.FIXED_SIZE_POLICY)
             dial.setRange(0, 100)
             dial.setValue(0)
             dial.setNotchesVisible(True)
@@ -39,9 +41,8 @@ class TimingSelector(QWidget):
         self.__lbl_swing = QLabel('Swing')
         self.__lbl_humanise = QLabel('Humanise')
 
-        label_style = "QLabel { font-size: 8px; font-weight: bold}"
         for lbl in [self.__lbl_flam, self.__lbl_swing, self.__lbl_humanise]:
-            lbl.setStyleSheet(label_style)
+            lbl.setStyleSheet(settings.LABEL_STYLE_2)
 
         self.timing_select_layout.addWidget(self.timing_select_dial, 0, 0, 1, 2)
         self.timing_select_layout.addWidget(self.timing_select_label, 0, 2, 1, 1)

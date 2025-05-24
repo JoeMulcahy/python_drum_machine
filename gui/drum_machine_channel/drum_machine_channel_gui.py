@@ -137,7 +137,7 @@ class DrumMachineChannel(QWidget):
 
         # button colors
         self.__reset_button_color = settings.RESET_BUTTON_STYLE
-        self.__default_button_color = settings.DEFAULT_BUTTON_STYLE
+        self.__default_button_color = settings.BUTTON_STYLE_1
         self.__solo_button_color_on = settings.SOLO_BUTTON_ON_STYLE
         self.__mute_button_color_on = settings.MUTE_BUTTON_ON_STYLE
 

@@ -13,10 +13,64 @@ HORIZONTAL_STRETCH_POLICY = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolic
 VERTICAL_STRETCH_POLICY = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
 
 # Module styling - styling common to all modules
-TEXT_STYLE_1 = """
+LABEL_STYLE_1 = """
 QLabel { 
     font-size: 12px; 
     font-weight: bold
+    }
+"""
+
+LABEL_STYLE_2 = """
+QLabel { 
+    font-size: 8px; 
+    font-weight: bold}
+    }
+"""
+
+BUTTON_STYLE_1 = """
+QPushButton {
+    font-size: 9px;  
+    font-weight: bold; 
+    background-color: #3d282c; 
+    color: white;
+    }
+"""
+
+BUTTON_STYLE_2 = """
+QPushButton {
+    font-size: 9px;  
+    font-weight: bold; 
+    background-color: #172e1d;
+    color: white;
+    }
+"""
+
+GROUPBOX_STYLE_1 = """
+    QGroupBox {
+        font-weight: bold;
+        border: 2px solid gray;
+        border-radius: 3px;
+        margin-top: 1ex; 
+    }
+    
+    QGroupBox::title {
+        subcontrol-origin: margin;
+        left: 10px;
+        padding: 0 5px 0 5px;
+    }
+"""
+
+GROUPBOX_STYLE_2 = """
+QGroupBox { 
+    background-color: #23224a; 
+    border: 1px solid gray;
+    }
+"""
+
+GROUPBOX_STYLE_3 = """
+QGroupBox { 
+    background-color: #23224a; 
+    border: 1px solid gray;
     }
 """
 
@@ -33,14 +87,7 @@ QGroupBox {
     border: 1px solid gray;
     }
 """
-DEFAULT_BUTTON_STYLE = """
-QPushButton {
-    font-size: 9px;  
-    font-weight: bold; 
-    background-color: #2e2726; 
-    color: white;
-    }
-"""
+
 RESET_BUTTON_STYLE = """
 QPushButton {
     font-size: 9px;  
@@ -104,4 +151,91 @@ QAbstractSpinBox::up-button, QAbstractSpinBox::down-button {
     border: none;
     }
 """
+
+# Pattern Select Module styling
+PATTERN_BUTTON_DEFAULT_STYLING = """
+QPushButton { 
+    background-color: #3498db; 
+    color: white; 
+    }
+"""
+
+PATTERN_BUTTON_ON_STYLING = """
+QPushButton { 
+    font-weight: 900;
+    background-color: #7373d1;
+    color: white; 
+    }
+"""
+
+BANK_BUTTON_DEFAULT_STYLING = """
+QPushButton { 
+    background-color: #6698db;
+    color: white; 
+    }
+"""
+
+BANK_BUTTON_ON_STYLING = """
+QPushButton { 
+    font-weight: 900;
+    background-color: #ff99ef;
+    color: white; 
+    }
+"""
+
+# Stepper Module Styling
+STEPPER_BUTTON_DEFAULT_STYLING = """
+QPushButton { 
+    background-color: #3498db; 
+    color: white; 
+    }
+"""
+
+STEPPER_BUTTON_ON_STYLING = """
+QPushButton { 
+    background-color: #ef9912; 
+    color: white; 
+    }
+"""
+
+STEPPER_BUTTON_PLAY_STYLING = """
+QPushButton { 
+    background-color: #12ff12; 
+    color: white; 
+    }
+"""
+
+STEPPER_INDICATOR_DEFAULT_STYLING = """
+QLabel {
+    font-size: 40px; 
+    color: #12ff12;
+    }
+"""
+
+STEPPER_INDICATOR_ON_STYLING = """
+QLabel {
+    font-size: 40px; 
+    color: #ff1212;
+    }
+"""
+
+STEPPER_INDICATOR_ALTERNATIVE_STYLING = """
+QLabel {
+    font-size: 40px; 
+    color: #ffff12;
+    }
+"""
+
+STEP_FREQUENCY_SPINBOX_STYLING = """
+QAbstractSpinBox::up-button, QAbstractSpinBox::down-button {
+    width: 0;
+    height: 0;
+    border: none;
+    }
+"""
+
+
+
+
+
 

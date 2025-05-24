@@ -1,6 +1,8 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout, QGroupBox, QLabel, QSpinBox
 
+import settings
+
 
 class PlayableSteps(QWidget):
     def __init__(self, number_of_steps):
@@ -15,7 +17,7 @@ class PlayableSteps(QWidget):
         # step spin box
         self.__steps_spin_box.setRange(1, self.__number_of_steps)
         self.__steps_spin_box.setValue(self.__number_of_steps)
-        self.steps_select_layout.addWidget(self.__steps_spin_box, 0, 0)
+        self.steps_select_layout.addWidget(self.__steps_spin_box, 0, 0, 1, 1, Qt.AlignmentFlag.AlignTop)
 
         self.__set_style()
 
@@ -25,13 +27,7 @@ class PlayableSteps(QWidget):
         self.setLayout(main_layout)
 
     def __set_style(self):
-        self.__steps_spin_box.setStyleSheet("""
-            QSpinBox {
-                font-style: italic;
-                font-size: 24px;       /* Resize text */
-                color: #ff5733;        /* Change text color */
-            }
-        """)
+        self.__steps_spin_box.setStyleSheet(settings.TEMPO_SPINBOX_STYLE)
 
     def set_spinbox_range(self, value):
         self.__steps_spin_box.setRange(1, value)

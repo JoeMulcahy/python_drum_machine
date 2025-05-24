@@ -3,14 +3,8 @@
 ################################################################################################
 
 
-Stepper
--   play step indicator gets stuck on step buttons when switch channels
--   indicator lights in stepper remain red when changing number of playable steps
-        while the drum machine is running - FIXED
-
 GUI
 -   Gui elements keep resizing
--   glitch in stepper. It looks like it resizing when indicators light are in action
 
 Drum Machine channel
 -   Altering voice using pitch, length, stretch

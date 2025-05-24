@@ -2,37 +2,44 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout, QLabel, QDial, QPushButton, QBoxLayout, QVBoxLayout, QGroupBox, \
     QSizePolicy
 
+import settings
+
 
 class MasterControls(QWidget):
     def __init__(self):
         super().__init__()
         main_layout = QGridLayout()
 
+        # Unsolo, Unmute, Reset application global controls
         globals_controls_groupbox = QGroupBox("Global Controls")
         global_controls_layout = QGridLayout()
+
         self.__lbl_reset_mute_solo = QLabel("Reset")
         self.__btn_unmute_all = QPushButton("M")
         self.__btn_unsolo_all = QPushButton("S")
         self.__btn_reset_all = QPushButton('All')
+
         global_controls_layout.addWidget(self.__lbl_reset_mute_solo, 0, 0, 1, 1, Qt.AlignmentFlag.AlignLeft)
         global_controls_layout.addWidget(self.__btn_unsolo_all, 0, 1, 1, 1)
         global_controls_layout.addWidget(self.__btn_unmute_all, 0, 2, 1, 1)
         global_controls_layout.addWidget(self.__btn_reset_all, 0, 3, 1, 1)
         globals_controls_groupbox.setLayout(global_controls_layout)
 
+        # Master Volume
         master_volume_groupbox = QGroupBox("Master Volume")
         master_volume_layout = QGridLayout()
-        # self.__lbl__volume = QLabel("Master Volume")
+
         self.__volume_dial = QDial()
         self.__volume_dial.setFixedSize(70, 70)
         self.__volume_dial.setRange(0, 100)
         self.__volume_dial.setValue(50)
         self.__volume_dial.setWrapping(False)
         self.__volume_dial.setNotchesVisible(True)
-        # master_volume_layout.addWidget(self.__lbl__volume, 2, 0, 1, 1, Qt.AlignmentFlag.AlignLeft)
+
         master_volume_layout.addWidget(self.__volume_dial, 0, 0, 1, 2, Qt.AlignmentFlag.AlignHCenter)
         master_volume_groupbox.setLayout(master_volume_layout)
 
+        # Profile
         profile_groupbox = QGroupBox("Profile")
         profile_layout = QGridLayout()
         self.__lbl__profile = QLabel("Profile")
@@ -52,19 +59,17 @@ class MasterControls(QWidget):
         self.setLayout(main_layout)
 
     def set_style(self):
-        button_style = "QPushButton { font-size: 10px; }"
         for btn in [self.__btn_load_profile, self.__btn_save_profile, self.__btn_unsolo_all, self.__btn_unmute_all,
                     self.__btn_reset_all]:
             btn.setFixedSize(30, 30)
-            # btn.setSizePolicy(size_policy)
-            btn.setStyleSheet(button_style)
+            btn.setSizePolicy(settings.FIXED_SIZE_POLICY)
+            btn.setStyleSheet(settings.BUTTON_STYLE_2)
 
-        reset_btn_style = "QPushButton { color: #ff3333}"
-        self.__btn_reset_all.setStyleSheet(reset_btn_style)
+        self.__btn_reset_all.setStyleSheet(settings.RESET_BUTTON_STYLE)
 
-        label_style = "QLabel { font-size: 12px; font-weight: bold; }"
         for lbl in [self.__lbl__profile, self.__lbl_reset_mute_solo]:
-            lbl.setStyleSheet(label_style)
+            lbl.setStyleSheet(settings.LABEL_STYLE_1)
+            lbl.setSizePolicy(settings.FIXED_SIZE_POLICY)
 
     @property
     def volume_dial(self):

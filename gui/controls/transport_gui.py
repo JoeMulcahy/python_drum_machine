@@ -15,6 +15,8 @@ class TransportGui(QWidget):
         self.__btn_stop = QPushButton("Stop")
 
         transport_group_box = QGroupBox(f"Transport")
+        transport_group_box.setStyleSheet(settings.GROUPBOX_STYLE_1)
+        transport_group_box.setSizePolicy(settings.FIXED_SIZE_POLICY)
         transport_module_layout = QGridLayout()
 
         transport_module_layout.setSpacing(20)
@@ -27,12 +29,16 @@ class TransportGui(QWidget):
         module_layout = QGridLayout()
 
         module_layout.addWidget(transport_group_box)
+        module_layout.setSpacing(5)
+        module_layout.setContentsMargins(5, 10, 5, 5)
+
         self.setLayout(module_layout)
 
     def set_style(self):
         for btn in [self.__btn_play, self.__btn_stop]:
             btn.setFixedSize(100, 50)
             btn.setSizePolicy(settings.FIXED_SIZE_POLICY)
+            btn.setStyleSheet(settings.BUTTON_STYLE_2)
 
     def set_is_playing(self, value):
         self.__is_playing = value
