@@ -31,18 +31,9 @@ Profile
 
 Stepper Module
 -   grey out unused steps
--   edit steps to include up to 64 steps
-    - selectable [1-16][17-32][33-48][49-64]
-
-Implementation
-    - increase size of local pattern from 16 to 64
-    - depending on number of steps in stepper, current visible patterns will update to show current stepper patten of 16
-    - will need to update number of indicator lights
-    - will need to update step numbers from 16 to 64
-    - display step numbers from 16 to 64 according to steps_index
-    - on playable steps module, these are considerations
-        - changing number of steps in combobox will be reflected in step index buttons
-        - changing index will alter combobox?
+-   Change pattern copy, paste, random pattern behaviour
+    - These apply across all 64 steps. Need an option to apply across visible 16 steps
+-   Create a follow option that update stepper banks
 
 Misc
     - implement midi

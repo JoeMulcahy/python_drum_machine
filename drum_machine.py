@@ -62,6 +62,8 @@ class DrumMachine(QWidget):
         self.__channel_mute_list = [False for i in range(self.__number_of_drum_machine_channels)]
         self.__current_selected_drum_machine_channel_index = 0
 
+        self.__step_follow = False
+
         self.__steps_banks = 1
 
         # initialise SoundEngine
@@ -151,6 +153,9 @@ class DrumMachine(QWidget):
 
         # number of playable steps
         self.__playable_steps = self.__sequencer_module.playable_steps_module.current_number_of_playable_steps
+
+        # step follow
+        self.__sequencer_module.stepper.step_follow = True
 
         # select first channel as default
         self.__update_select_channel(self.__current_selected_drum_machine_channel_index)

@@ -7,12 +7,14 @@ from signals import DrumMachineSignals
 
 
 class Stepper(QWidget):
-    def __init__(self, stepper_id, number_of_steps):
+    def __init__(self, stepper_id, number_of_steps, step_follow=False):
         super().__init__()
 
         self.__stepper_id = stepper_id
         self.__current_stepper_buttons_selected = [0 for x in range(number_of_steps)]
         self.__number_of_steps = number_of_steps    # number of total stepper buttons
+        self.__step_follow = step_follow
+
         self.__number_of_steps_playable = 16
         self.__step_indicator_list = list()  # list of stepper indicator (above stepper buttons)
         self.__stepper_buttons_list = list()
@@ -170,8 +172,19 @@ class Stepper(QWidget):
 
     def stepper_indicators_on_play(self, counter):
         counter = counter % self.__number_of_steps_playable
+        print(f"{counter}")
         self.__step_indicator_list[counter - 1].setStyleSheet(settings.STEPPER_INDICATOR_DEFAULT_STYLING)
         self.__step_indicator_list[counter].setStyleSheet(settings.STEPPER_INDICATOR_ON_STYLING)
+
+        if self.__step_follow:
+            if counter == 0:
+                self.update_steps_range(0)
+            elif counter == 16:
+                self.update_steps_range(1)
+            elif counter == 32:
+                self.update_steps_range(2)
+            elif counter == 48:
+                self.update_steps_range(3)
 
     def reset_stepper_indicators(self):
         for indicator in self.__step_indicator_list:
@@ -232,3 +245,11 @@ class Stepper(QWidget):
     @property
     def step_freq_spinbox(self):
         return self.__spin_step_freq
+
+    @property
+    def step_follow(self):
+        return self.__step_follow
+
+    @step_follow.setter
+    def step_follow(self, value):
+        self.__step_follow = value
