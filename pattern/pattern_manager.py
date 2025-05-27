@@ -138,7 +138,7 @@ class PatternManager:
         return patterns
 
     @staticmethod
-    def generate_random_pattern(pattern_length=16):
+    def generate_random_pattern(pattern_length=64):
         return [choice([0, 1]) for _ in range(pattern_length)]
 
     @property

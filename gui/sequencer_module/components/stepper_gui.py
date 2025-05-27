@@ -14,6 +14,7 @@ class Stepper(QWidget):
         self.__current_stepper_buttons_selected = [0 for x in range(number_of_steps)]
         self.__number_of_steps = number_of_steps    # number of total stepper buttons
         self.__step_follow = step_follow
+        self.__highlight_step_button = False
 
         self.__number_of_steps_playable = 16
         self.__step_indicator_list = list()  # list of stepper indicator (above stepper buttons)
@@ -25,30 +26,50 @@ class Stepper(QWidget):
         self.stepper_controls_layout = QGridLayout()
         self.stepper_layout = QGridLayout()
 
-        # labels
-        self.__lbl_shift = QLabel('Shift')
-        self.__lbl_generate_pattern = QLabel("Generate")
 
-        # stepper controls
+
+
+        # step follow
+        self.__lbl_step_follow = QLabel("Follow")
+        self.__btn_step_follow = QPushButton()
+        self.__step_follow_layout = QGridLayout()
+        self.__step_follow_layout.addWidget(self.__lbl_step_follow, 0, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
+        self.__step_follow_layout.addWidget(self.__btn_step_follow, 0, 1, 1, 1, Qt.AlignmentFlag.AlignLeft)
+
+        # stepper pattern controls
+        self.__lbl_shift = QLabel('Shift')
         self.__btn_shift_left = QPushButton()
         self.__btn_shift_right = QPushButton()
         self.__btn_clear_pattern = QPushButton("clear")
         self.__btn_invert_pattern = QPushButton("invert")
+        self.__stepper_pattern_control_layout = QGridLayout()
+        self.__stepper_pattern_control_layout.addWidget(self.__lbl_shift, 0, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
+        self.__stepper_pattern_control_layout.addWidget(self.__btn_shift_left, 0, 1, 1, 1)
+        self.__stepper_pattern_control_layout.addWidget(self.__btn_shift_right, 0, 2, 1, 1)
+        self.__stepper_pattern_control_layout.addWidget(self.__btn_clear_pattern, 0, 3, 1, 1)
+        self.__stepper_pattern_control_layout.addWidget(self.__btn_invert_pattern, 0, 4, 1, 1)
 
+        # stepper pattern generate
+        self.__lbl_generate_pattern = QLabel("Generate")
         self.__btn_generate_pattern = QPushButton()
         self.__spin_step_freq = QSpinBox()
         self.__spin_step_freq.setRange(1, int(self.__number_of_steps - 1))
         self.__spin_step_freq.setValue(4)
-
         self.__btn_generate_random = QPushButton()
+        self.__stepper_pattern_generate_layout = QGridLayout()
+        self.__stepper_pattern_generate_layout.addWidget(self.__lbl_generate_pattern, 0, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
+        self.__stepper_pattern_generate_layout.addWidget(self.__btn_generate_pattern, 0, 1, 1, 1)
+        self.__stepper_pattern_generate_layout.addWidget(self.__spin_step_freq, 0, 2, 1, 1)
+        self.__stepper_pattern_generate_layout.addWidget(self.__btn_generate_random, 0, 3, 1, 1)
 
+        # copy and paste
         self.__btn_copy_pattern = QPushButton("Copy")
         self.__btn_paste_pattern = QPushButton("Paste")
+        self.__copy_paste_layout = QGridLayout()
+        self.__copy_paste_layout.addWidget(self.__btn_copy_pattern, 0, 0, 1, 1)
+        self.__copy_paste_layout.addWidget(self.__btn_paste_pattern, 0, 1, 1, 1)
 
-        self.__btn_shift_left.setIcon(QIcon("images/left-chevron.png"))
-        self.__btn_shift_right.setIcon(QIcon("images/right-chevron.png"))
-        self.__btn_generate_random.setIcon(QIcon("images/dices.png"))
-
+        # stepper pattern buttons
         for i in range(self.__number_of_steps):
             step_indicator = QLabel(f".")
             step_indicator.setStyleSheet(settings.STEPPER_INDICATOR_DEFAULT_STYLING)
@@ -68,19 +89,11 @@ class Stepper(QWidget):
             self.stepper_layout.addWidget(self.__stepper_buttons_list[i], 1, int(i), alignment=Qt.AlignmentFlag.AlignBottom)
             self.stepper_layout.addWidget(self.__step_number_list[i], 2, int(i), alignment=Qt.AlignmentFlag.AlignHCenter)
 
-        self.stepper_controls_layout.addWidget(self.__lbl_shift, 0, 0, 1, 1)
-        self.stepper_controls_layout.addWidget(self.__btn_shift_left, 0, 1, 1, 1)
-        self.stepper_controls_layout.addWidget(self.__btn_shift_right, 0, 2, 1, 1)
-        self.stepper_controls_layout.addWidget(self.__btn_clear_pattern, 0, 3, 1, 1)
-        self.stepper_controls_layout.addWidget(self.__btn_invert_pattern, 0, 4, 1, 1)
-
-        self.stepper_controls_layout.addWidget(self.__lbl_generate_pattern, 0, 6, 1, 1)
-        self.stepper_controls_layout.addWidget(self.__btn_generate_pattern, 0, 7, 1, 1)
-        self.stepper_controls_layout.addWidget(self.__spin_step_freq, 0, 8, 1, 1)
-        self.stepper_controls_layout.addWidget(self.__btn_generate_random, 0, 9, 1, 1)
-
-        self.stepper_controls_layout.addWidget(self.__btn_copy_pattern, 0, 11, 1, 1)
-        self.stepper_controls_layout.addWidget(self.__btn_paste_pattern, 0, 12, 1, 1)
+        self.stepper_controls_layout.addLayout(self.__step_follow_layout, 0, 0, 1, 1, Qt.AlignmentFlag.AlignLeft)
+        self.stepper_controls_layout.addLayout(self.__stepper_pattern_control_layout, 0, 1, 1, 1, Qt.AlignmentFlag.AlignLeft)
+        self.stepper_controls_layout.addLayout(self.__stepper_pattern_generate_layout, 0, 2, 1, 1, Qt.AlignmentFlag.AlignLeft)
+        self.stepper_controls_layout.addLayout(self.__copy_paste_layout, 0, 3, 1, 1, Qt.AlignmentFlag.AlignLeft)
+        self.stepper_controls_layout.setContentsMargins(10, 1, 1, 1)
 
         self.module_layout = QGridLayout()
         self.module_layout.addLayout(self.stepper_controls_layout, 0, 0, 1, 1)
@@ -92,6 +105,9 @@ class Stepper(QWidget):
         for btn in self.__stepper_buttons_list:
             btn.clicked.connect(lambda checked, b=btn: self.__button_toggle(b.property("id")))
 
+        self.__btn_step_follow.clicked.connect(self.__step_follow_button_highlight)
+
+        # style widgets
         self.__set_style()
 
         self.group_box_stepper.setLayout(self.module_layout)
@@ -118,18 +134,35 @@ class Stepper(QWidget):
                 self.__step_number_list[step_index + i].show()
 
     def __set_style(self):
+        self.__btn_shift_left.setIcon(QIcon("images/left-chevron.png"))
+        self.__btn_shift_right.setIcon(QIcon("images/right-chevron.png"))
+        self.__btn_generate_random.setIcon(QIcon("images/dices.png"))
+
         self.__lbl_shift.setStyleSheet(settings.LABEL_STYLE_1)
+        self.__lbl_step_follow.setStyleSheet(settings.LABEL_STYLE_1)
+        self.__lbl_generate_pattern.setStyleSheet(settings.LABEL_STYLE_1)
 
         for btn in [
             self.__btn_shift_left, self.__btn_shift_right, self.__btn_clear_pattern, self.__btn_invert_pattern,
-            self.__btn_generate_pattern, self.__btn_generate_random, self.__btn_copy_pattern, self.__btn_paste_pattern
+            self.__btn_generate_pattern, self.__btn_generate_random, self.__btn_copy_pattern, self.__btn_paste_pattern,
+            self.__btn_step_follow
         ]:
             btn.setFixedSize(40, 20)
             btn.setSizePolicy(settings.FIXED_SIZE_POLICY)
             btn.setStyleSheet(settings.BUTTON_STYLE_1)
 
+        self.__btn_step_follow.setFixedSize(20, 20)
+
         self.__spin_step_freq.setStyleSheet(settings.STEP_FREQUENCY_SPINBOX_STYLING)
         self.__spin_step_freq.setFixedSize(40, 20)
+
+    def __step_follow_button_highlight(self, value):
+        if self.__highlight_step_button:
+            self.__highlight_step_button = False
+            self.__btn_step_follow.setStyleSheet(settings.BUTTON_STYLE_1)
+        else:
+            self.__highlight_step_button = True
+            self.__btn_step_follow.setStyleSheet(settings.SOLO_BUTTON_ON_STYLE)
 
     def __button_toggle(self, btn_id):
         self.__update_stepper_buttons_list(int(btn_id))
@@ -253,3 +286,7 @@ class Stepper(QWidget):
     @step_follow.setter
     def step_follow(self, value):
         self.__step_follow = value
+
+    @property
+    def step_follow_button(self):
+        return self.__btn_step_follow
