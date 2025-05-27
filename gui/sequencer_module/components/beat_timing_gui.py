@@ -11,6 +11,7 @@ class TimingSelector(QWidget):
         self.__current_index = 4
 
         self.group_box_time_resolution_select = QGroupBox("Timing")
+        self.group_box_time_resolution_select.setStyleSheet(settings.GROUPBOX_STYLE_1)
         self.timing_select_layout = QGridLayout()
         self.timing_select_layout.setSpacing(5)
 

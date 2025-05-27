@@ -18,6 +18,7 @@ class PatternSelect(QWidget):
 
         self.pattern_select_layout = QGridLayout()
         self.group_box_pattern_select = QGroupBox("Pattern")
+        self.group_box_pattern_select.setStyleSheet(settings.GROUPBOX_STYLE_1)
 
         # pattern select buttons
         for i in range(number_of_buttons):

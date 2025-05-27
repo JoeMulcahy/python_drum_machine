@@ -20,6 +20,7 @@ class SequencerModule(QWidget):
         stepper_module_layout = QGridLayout()
         group_box_stepper_module = QGroupBox("Sequencer")
         group_box_stepper_module.setSizePolicy(settings.FIXED_SIZE_POLICY)
+        group_box_stepper_module.setStyleSheet(settings.GROUPBOX_STYLE_1)
 
         stepper_module_layout.addWidget(self.__pattern_select, 0, 0, alignment=Qt.AlignmentFlag.AlignHCenter)
         stepper_module_layout.addWidget(self.__playable_steps_module, 0, 1, alignment=Qt.AlignmentFlag.AlignHCenter)

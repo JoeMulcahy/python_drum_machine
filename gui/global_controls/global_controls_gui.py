@@ -12,6 +12,7 @@ class MasterControls(QWidget):
 
         # Unsolo, Unmute, Reset application global controls
         globals_controls_groupbox = QGroupBox("Global Controls")
+        globals_controls_groupbox.setStyleSheet(settings.GROUPBOX_STYLE_1)
         global_controls_layout = QGridLayout()
 
         self.__lbl_reset_mute_solo = QLabel("Reset")
@@ -27,6 +28,7 @@ class MasterControls(QWidget):
 
         # Master Volume
         master_volume_groupbox = QGroupBox("Master Volume")
+        master_volume_groupbox.setStyleSheet(settings.GROUPBOX_STYLE_1)
         master_volume_layout = QGridLayout()
 
         self.__volume_dial = QDial()
@@ -41,6 +43,8 @@ class MasterControls(QWidget):
 
         # Profile
         profile_groupbox = QGroupBox("Profile")
+        profile_groupbox.setStyleSheet(settings.GROUPBOX_STYLE_1)
+
         profile_layout = QGridLayout()
         self.__lbl__profile = QLabel("Profile")
         self.__btn_load_profile = QPushButton("Load")

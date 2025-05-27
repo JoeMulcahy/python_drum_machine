@@ -16,6 +16,7 @@ class PlayableSteps(QWidget):
         self.__playable_steps_index = 0
 
         self.group_box_step_select = QGroupBox("Steps")
+        self.group_box_step_select.setStyleSheet(settings.GROUPBOX_STYLE_1)
         self.steps_select_layout = QGridLayout()
 
         # step spin box
