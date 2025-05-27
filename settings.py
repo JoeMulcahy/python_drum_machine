@@ -1,9 +1,9 @@
 # Directories
 from PyQt6.QtWidgets import QSizePolicy
 
-ROOT_DIRECTORY = "C:\\Users\\josep\\Desktop"
-PROFILE_DIRECTORY = "C:\\Users\\josep\\Desktop\\Step Seq\\profiles"
-IMAGES_DIRECTORY = "C:\\Users\\josep\\Desktop\\Step Seq\\images"
+ROOT_DIRECTORY = "C:\\Users\\josep\\Desktop\\Python Programming"
+PROFILE_DIRECTORY = "C:\\Users\\josep\\Desktop\\Python Programming\\Step Seq\\profiles"
+IMAGES_DIRECTORY = "C:\\Users\\josep\\Desktop\\Python Programming\\Step Seq\\images"
 
 # Styling
 
@@ -72,6 +72,12 @@ QGroupBox {
     background-color: #23224a; 
     border: 1px solid gray;
     }
+"""
+
+CHECKBOX_STYLE_1 = """
+QCheckBox {
+    border: 1px solid gray;
+}
 """
 
 # Drum Machine Channel Styling

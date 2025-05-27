@@ -114,12 +114,12 @@ class PatternSelect(QWidget):
 
     def __update_pattern_select_buttons_visually(self, index):
         for x in range(self.__number_of_button):
-            self.__buttons_list[x].setStyleSheet(self.default_color)
+            self.__buttons_list[x].setStyleSheet(settings.PATTERN_BUTTON_DEFAULT_STYLING)
             if self.__selected_button_index == index:
-                self.__buttons_list[index].setStyleSheet(self.toggle_on_color)
+                self.__buttons_list[index].setStyleSheet(settings.PATTERN_BUTTON_ON_STYLING)
 
     def __update_bank_select_buttons_visually(self, index):
         for x in range(self.__number_of_banks):
-            self.__bank_buttons_list[x].setStyleSheet(self.default_color_bank)
+            self.__bank_buttons_list[x].setStyleSheet(settings.BANK_BUTTON_DEFAULT_STYLING)
             if self.__selected_bank_index == index:
-                self.__bank_buttons_list[index].setStyleSheet(self.toggle_on_color_bank)
+                self.__bank_buttons_list[index].setStyleSheet(settings.BANK_BUTTON_ON_STYLING)

@@ -16,9 +16,6 @@ class DrumMachineChannel(QWidget):
 
         self.__channel_id = channel_index
 
-        # groupbox
-        self.__group_box = QGroupBox()
-
         # name text box
         self.__name_textbox = QLineEdit()
 
@@ -75,7 +72,8 @@ class DrumMachineChannel(QWidget):
         self.__select_channel_button.setProperty("id", channel_index)  # channel identifier
 
         layout = QGridLayout()
-        layout.setSpacing(2)
+        layout.setSpacing(1)
+        layout.setContentsMargins(1, 1, 1, 1)
 
         #####################################################
         layout.addWidget(self.__name_textbox, 0, 0, 1, 3), Qt.AlignmentFlag.AlignHCenter
@@ -121,6 +119,11 @@ class DrumMachineChannel(QWidget):
         #######################################################
         layout.addWidget(self.__lbl_channel_number, 10, 0, 1, 1, Qt.AlignmentFlag.AlignHCenter)
         layout.addWidget(self.__select_channel_button, 10, 1, 1, 2, Qt.AlignmentFlag.AlignHCenter)
+
+        # groupbox
+        self.__group_box = QGroupBox()
+        self.__group_box.setSizePolicy(settings.FIXED_SIZE_POLICY)
+        self.__group_box.setFixedSize(120, 300)
 
         self.__group_box.setLayout(layout)
 

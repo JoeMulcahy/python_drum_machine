@@ -46,13 +46,15 @@ class DrumMachine(QWidget):
     stepper_indicator_lights_signal = pyqtSignal(int)   # used to update the indicator light in the sequencer
     stepper_indicator_lights_reset_signal = pyqtSignal()
     channel_number_highlight_signal = pyqtSignal(int, bool)  # used to update the blinking of the channel number
+    stepper_button_bank_signal = pyqtSignal(int)    # used to update the bank of stepper buttons to display i.e. 1-16, 17-32
 
     def __init__(self):
         super().__init__()
 
         self.__current_profile = None
 
-        self.__number_of_steps = 16  # initial number of steps in stepper
+        self.__number_of_steps = 64  # initial number of steps in stepper
+        self.__current_stepper_index = 0  # index of step numbers visible [1-16][17-32][33-48][49-64]
         self.__number_of_drum_machine_channels = 10  # number of channels for the drum machine
 
         self.__drum_machine_channels_list = list()  # list of channel modules
@@ -117,8 +119,9 @@ class DrumMachine(QWidget):
 
         # layout for the step sequencer's audio channels
         channels_layout = QGridLayout()
-        channels_layout.setSpacing(1)
-        channels_layout.setContentsMargins(5, 10, 5, 10)
+        # channels_layout.setSpacing(1)
+        # channels_layout.setContentsMargins(5, 10, 5, 10)
+
 
         # initialise audio channels, 1 for each drum machine channel. Add each to engine
         # add drum_machine_channels to channels layout
@@ -162,7 +165,6 @@ class DrumMachine(QWidget):
         controls_layout = QGridLayout()
         controls_layout.setSpacing(1)
         controls_layout.setContentsMargins(5, 5, 5, 5)
-        # controls_layout.addWidget(self.__transport, 0, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
         controls_layout.addWidget(self.__transport_gui, 0, 0, 1, 1, Qt.AlignmentFlag.AlignTop)
         controls_layout.addWidget(self.__tempo_gui, 0, 0, 1, 1, Qt.AlignmentFlag.AlignBottom)
         controls_layout.addWidget(self.__sequencer_module, 0, 1, 5, 4, Qt.AlignmentFlag.AlignTop)
@@ -179,12 +181,15 @@ class DrumMachine(QWidget):
         main_layout = QGridLayout()
         main_layout.addLayout(drum_machine_layout, 0, 0)
         self.setLayout(main_layout)
+        self.setSizePolicy(settings.FIXED_SIZE_POLICY)
 
         # update step indicator lights upon receiving a signal pulse
         self.stepper_indicator_lights_signal.connect(
             self.__sequencer_module.stepper.stepper_indicators_on_play)
         self.channel_number_highlight_signal.connect(lambda i, is_on: self.__update_channel_number_blink(i, is_on))
         self.stepper_indicator_lights_reset_signal.connect(self.__sequencer_module.stepper.reset_stepper_indicators)
+
+        self.stepper_button_bank_signal.connect(self.__sequencer_module.stepper.update_steps_range)
 
         #####################################################################################################
         ########################## Listeners for drum machine channel module ################################
@@ -311,6 +316,34 @@ class DrumMachine(QWidget):
             lambda val: self.__set_playable_steps(val)
         )
 
+        self.__sequencer_module.playable_steps_module.steps_button_1_16.clicked.connect(
+            lambda: self.__update_steps_index(0)
+        )
+        self.__sequencer_module.playable_steps_module.steps_button_17_32.clicked.connect(
+            lambda: self.__update_steps_index(1)
+        )
+        self.__sequencer_module.playable_steps_module.steps_button_33_48.clicked.connect(
+            lambda: self.__update_steps_index(2)
+        )
+        self.__sequencer_module.playable_steps_module.steps_button_49_64.clicked.connect(
+            lambda: self.__update_steps_index(3)
+        )
+
+        self.__sequencer_module.playable_steps_module.steps_label_1_16.mouseDoubleClickEvent = \
+            lambda event: self.__update_playable_steps_combo_and_stepper(0)
+
+        self.__sequencer_module.playable_steps_module.steps_label_17_32.mouseDoubleClickEvent = \
+            lambda event: self.__update_playable_steps_combo_and_stepper(1)
+
+        self.__sequencer_module.playable_steps_module.steps_label_33_48.mouseDoubleClickEvent = \
+            lambda event: self.__update_playable_steps_combo_and_stepper(2)
+
+        self.__sequencer_module.playable_steps_module.steps_label_49_64.mouseDoubleClickEvent = \
+            lambda event: self.__update_playable_steps_combo_and_stepper(3)
+
+
+
+
         #####################################################################################################
         ########################## Listeners for Timings module ##########################################
         #####################################################################################################
@@ -384,6 +417,15 @@ class DrumMachine(QWidget):
                     self.__audio_channels_list[i].trigger()
             else:
                 self.channel_number_highlight_signal.emit(i, False)
+
+    def __update_steps_index(self, index):
+        self.stepper_button_bank_signal.emit(index)
+        self.__current_stepper_index = index
+        # self.__sequencer_module.stepper.update_steps_range(index)
+
+    def __update_playable_steps_combo_and_stepper(self, index):
+        print(f'playable steps {index * 16 + 16}')
+        self.__sequencer_module.playable_steps_module.update_max_playable_steps(index * 16 + 16)
 
     def __update_channel_number_blink(self, i, is_on):
         self.__drum_machine_channels_list[i].highlight_channel_number(is_on)

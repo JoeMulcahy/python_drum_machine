@@ -11,13 +11,16 @@ class Stepper(QWidget):
         super().__init__()
 
         self.__stepper_id = stepper_id
-        self.__stepper_buttons_list = list()
         self.__current_stepper_buttons_selected = [0 for x in range(number_of_steps)]
-        self.__number_of_steps = number_of_steps
-        self.__number_of_steps_playable = self.__number_of_steps
+        self.__number_of_steps = number_of_steps    # number of total stepper buttons
+        self.__number_of_steps_playable = 16
         self.__step_indicator_list = list()  # list of stepper indicator (above stepper buttons)
+        self.__stepper_buttons_list = list()
+        self.__step_number_list = list()
+        self.__current_stepper_index = 99
 
         self.group_box_stepper = QGroupBox("Stepper")
+        self.stepper_controls_layout = QGridLayout()
         self.stepper_layout = QGridLayout()
 
         # labels
@@ -44,20 +47,6 @@ class Stepper(QWidget):
         self.__btn_shift_right.setIcon(QIcon("images/right-chevron.png"))
         self.__btn_generate_random.setIcon(QIcon("images/dices.png"))
 
-        self.stepper_layout.addWidget(self.__lbl_shift, 0, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight)
-        self.stepper_layout.addWidget(self.__btn_shift_left, 0, 1, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
-        self.stepper_layout.addWidget(self.__btn_shift_right, 0, 2, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
-        self.stepper_layout.addWidget(self.__btn_clear_pattern, 0, 3, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
-        self.stepper_layout.addWidget(self.__btn_invert_pattern, 0, 4, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
-
-        self.stepper_layout.addWidget(self.__lbl_generate_pattern, 0, 6, 1, 1, alignment=Qt.AlignmentFlag.AlignRight)
-        self.stepper_layout.addWidget(self.__btn_generate_pattern, 0, 7, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
-        self.stepper_layout.addWidget(self.__spin_step_freq, 0, 8, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
-        self.stepper_layout.addWidget(self.__btn_generate_random, 0, 9, 1, 1, alignment=Qt.AlignmentFlag.AlignRight)
-
-        self.stepper_layout.addWidget(self.__btn_copy_pattern, 0, 11, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
-        self.stepper_layout.addWidget(self.__btn_paste_pattern, 0, 12, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
-
         for i in range(self.__number_of_steps):
             step_indicator = QLabel(f".")
             step_indicator.setStyleSheet(settings.STEPPER_INDICATOR_DEFAULT_STYLING)
@@ -69,12 +58,33 @@ class Stepper(QWidget):
             button.setProperty("id", i)
             button.setFixedSize(50, 50)
             button.setStyleSheet(settings.STEPPER_BUTTON_DEFAULT_STYLING)  # set color
-
             label = QLabel(f"{i + 1}")
             self.__stepper_buttons_list.append(button)
-            self.stepper_layout.addWidget(step_indicator, 1, int(i), alignment=Qt.AlignmentFlag.AlignHCenter)
-            self.stepper_layout.addWidget(button, 2, int(i), alignment=Qt.AlignmentFlag.AlignBottom)
-            self.stepper_layout.addWidget(label, 3, int(i), alignment=Qt.AlignmentFlag.AlignHCenter)
+            self.__step_number_list.append(label)
+
+            self.stepper_layout.addWidget(self.__step_indicator_list[i], 0, int(i), alignment=Qt.AlignmentFlag.AlignHCenter)
+            self.stepper_layout.addWidget(self.__stepper_buttons_list[i], 1, int(i), alignment=Qt.AlignmentFlag.AlignBottom)
+            self.stepper_layout.addWidget(self.__step_number_list[i], 2, int(i), alignment=Qt.AlignmentFlag.AlignHCenter)
+
+        self.stepper_controls_layout.addWidget(self.__lbl_shift, 0, 0, 1, 1)
+        self.stepper_controls_layout.addWidget(self.__btn_shift_left, 0, 1, 1, 1)
+        self.stepper_controls_layout.addWidget(self.__btn_shift_right, 0, 2, 1, 1)
+        self.stepper_controls_layout.addWidget(self.__btn_clear_pattern, 0, 3, 1, 1)
+        self.stepper_controls_layout.addWidget(self.__btn_invert_pattern, 0, 4, 1, 1)
+
+        self.stepper_controls_layout.addWidget(self.__lbl_generate_pattern, 0, 6, 1, 1)
+        self.stepper_controls_layout.addWidget(self.__btn_generate_pattern, 0, 7, 1, 1)
+        self.stepper_controls_layout.addWidget(self.__spin_step_freq, 0, 8, 1, 1)
+        self.stepper_controls_layout.addWidget(self.__btn_generate_random, 0, 9, 1, 1)
+
+        self.stepper_controls_layout.addWidget(self.__btn_copy_pattern, 0, 11, 1, 1)
+        self.stepper_controls_layout.addWidget(self.__btn_paste_pattern, 0, 12, 1, 1)
+
+        self.module_layout = QGridLayout()
+        self.module_layout.addLayout(self.stepper_controls_layout, 0, 0, 1, 1)
+        self.module_layout.addLayout(self.stepper_layout, 1, 0, 1, 1)
+
+        self.update_steps_range(0)  # display stepper buttons 1 - 16
 
         # Listeners
         for btn in self.__stepper_buttons_list:
@@ -82,12 +92,28 @@ class Stepper(QWidget):
 
         self.__set_style()
 
-        self.group_box_stepper.setLayout(self.stepper_layout)
+        self.group_box_stepper.setLayout(self.module_layout)
         self.group_box_stepper.setSizePolicy(settings.FIXED_SIZE_POLICY)
 
         main_layout = QGridLayout()
         main_layout.addWidget(self.group_box_stepper)
         self.setLayout(main_layout)
+
+    def update_steps_range(self, index):
+        if self.__current_stepper_index != index:
+            self.__current_stepper_index = index
+
+            step_index = index * 16
+
+            for i in range(0, 64):
+                self.__stepper_buttons_list[i].hide()
+                self.__step_indicator_list[i].hide()
+                self.__step_number_list[i].hide()
+
+            for i in range(0, 16):
+                self.__stepper_buttons_list[step_index + i].show()
+                self.__step_indicator_list[step_index + i].show()
+                self.__step_number_list[step_index + i].show()
 
     def __set_style(self):
         self.__lbl_shift.setStyleSheet(settings.LABEL_STYLE_1)
